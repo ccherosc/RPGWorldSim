@@ -1,0 +1,30 @@
+{
+  "name": "ai-rpg-sim",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic autonomous medieval world simulation.",
+  "engines": { "node": ">=20.11.0" },
+  "workspaces": [
+    "packages/shared",
+    "packages/sim-core",
+    "apps/simulator"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "sim": "tsx apps/simulator/src/cli.ts",
+    "verify": "tsx apps/simulator/src/cli.ts verify",
+    "check": "npm run typecheck && npm run test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.18.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.9.0",
+    "vitest": "^5.0.1"
+  },
+  "dependencies": {
+    "zod": "^3.25.76"
+  }
+}

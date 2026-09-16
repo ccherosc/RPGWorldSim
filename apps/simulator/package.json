@@ -1,0 +1,13 @@
+{
+  "name": "@rpgsim/simulator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless command-line driver for the simulation kernel.",
+  "main": "./src/cli.ts",
+  "exports": { ".": "./src/index.ts", "./*": "./src/*" },
+  "dependencies": {
+    "@rpgsim/shared": "*",
+    "@rpgsim/sim-core": "*"
+  }
+}

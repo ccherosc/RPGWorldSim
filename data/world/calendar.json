@@ -1,0 +1,27 @@
+{
+  "id": "world-zero-standard",
+  "epochYear": 1200,
+  "months": [
+    { "name": "Deepfrost", "days": 30, "season": "winter" },
+    { "name": "Thawmoon", "days": 30, "season": "winter" },
+    { "name": "Seedtide", "days": 30, "season": "spring" },
+    { "name": "Blossom", "days": 30, "season": "spring" },
+    { "name": "Greenreach", "days": 30, "season": "spring" },
+    { "name": "Highsun", "days": 30, "season": "summer" },
+    { "name": "Haymoon", "days": 30, "season": "summer" },
+    { "name": "Goldfall", "days": 30, "season": "summer" },
+    { "name": "Harvestide", "days": 30, "season": "autumn" },
+    { "name": "Emberfall", "days": 30, "season": "autumn" },
+    { "name": "Dimming", "days": 30, "season": "autumn" },
+    { "name": "Frostwane", "days": 30, "season": "winter" }
+  ],
+  "weekdayNames": [
+    "Sunsday",
+    "Moonsday",
+    "Tilsday",
+    "Midweek",
+    "Thundsday",
+    "Faersday",
+    "Restday"
+  ]
+}

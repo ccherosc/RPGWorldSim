@@ -1,0 +1,12 @@
+{
+  "name": "@rpgsim/sim-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": { ".": "./src/index.ts", "./*": "./src/*" },
+  "dependencies": {
+    "@rpgsim/shared": "*",
+    "zod": "^3.25.76"
+  }
+}
