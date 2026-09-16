@@ -128,8 +128,10 @@ code that works and code that works reproducibly.
 | [docs/NPC_MODEL.md](docs/NPC_MODEL.md) | Traits, needs, memory, decisions |
 | [docs/WORLD_ZERO_SPEC.md](docs/WORLD_ZERO_SPEC.md) | The first village |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Phases 0 through 11 |
+| [docs/CHRONICLE.md](docs/CHRONICLE.md) | The long-term goal: a newspaper written from inside the world |
 | [docs/DETERMINISM.md](docs/DETERMINISM.md) | How reproducibility is achieved and enforced |
 | [docs/PHASE_0.md](docs/PHASE_0.md) | Phase 0 implementation record and technical debt |
+| [docs/PHASE_1.md](docs/PHASE_1.md) | Phase 1 plan: the village, its people, and how they move |
 
 ## Contributing
 
