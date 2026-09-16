@@ -8,6 +8,7 @@ export default defineConfig({
     alias: {
       '@rpgsim/shared': r('./packages/shared/src/index.ts'),
       '@rpgsim/sim-core': r('./packages/sim-core/src/index.ts'),
+      '@rpgsim/world': r('./packages/world/src/index.ts'),
     },
   },
   test: {

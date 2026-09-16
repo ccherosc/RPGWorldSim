@@ -29,7 +29,9 @@
       "@rpgsim/shared": ["packages/shared/src/index.ts"],
       "@rpgsim/shared/*": ["packages/shared/src/*"],
       "@rpgsim/sim-core": ["packages/sim-core/src/index.ts"],
-      "@rpgsim/sim-core/*": ["packages/sim-core/src/*"]
+      "@rpgsim/sim-core/*": ["packages/sim-core/src/*"],
+      "@rpgsim/world": ["packages/world/src/index.ts"],
+      "@rpgsim/world/*": ["packages/world/src/*"]
     }
   }
 }

@@ -43,7 +43,7 @@ the event stream reads like a description of a village rather than a log.
 Each slice lands complete — types, events, invariants, tests, save module —
 before the next begins.
 
-### Slice 1: `packages/world` — space
+### Slice 1: `packages/world` — space — **done**
 
 A graph of named locations with travel costs on the edges, per
 [WORLD_MODEL.md](WORLD_MODEL.md) ("use a graph or lightweight coordinate model
@@ -64,6 +64,19 @@ finding it on day 300 is much worse than refusing to start.
 **Failure cases.** Entering a location that is full, or that access rules
 forbid; travelling along an edge that does not exist; being placed in a
 location that does not exist.
+
+**Landed as.** `location.ts` (validated, frozen value types), `map.ts` (the
+graph, occupancy, entry rules, deterministic Dijkstra), `invariants.ts` (the
+five above), `save.ts` (`installWorld`, save module `world` v1). 73 tests.
+
+**Deviation from the plan above: `Location` has no `connections` field.**
+Adjacency lives only in the graph. A location that carried its own edge list
+could disagree with the location on the other end of an edge, and "every edge
+is symmetric" would then be a rule the invariant enforces after the fact rather
+than a property the data structure cannot violate. `WorldMap.connect` writes
+both directions in one call, so the symmetric invariant is a net under a bad
+save file, not a repair for ordinary code. The coordinate stayed; it is
+decoration and worldgen input, and routing still never reads it.
 
 ### Slice 2: `packages/world` — movement
 
@@ -126,9 +139,16 @@ outside a dwelling. Exclusive activities do not overlap (testing rule: Time).
 
 ### Slice 6: World Zero generation and the CLI
 
-A `data/world/village.json` describing Ashford-or-whatever: locations, edges,
+A `data/world/village.json` describing the settlement: locations, edges,
 buildings, and the population parameters. Worldgen reads it, validates it
 through the existing loader, and builds the world from `RngStream.Worldgen`.
+
+**The village is deliberately unnamed for now.** It ships as `world-zero` in
+data, with a `name` field that any later rename touches and nothing else —
+naming it is a decision to make once the place has some character, and keeping
+the name in exactly one data field is what keeps that cheap. The register is
+settled even if the name is not: English medieval, matching the spec's own
+`Edric Hale` and the calendar's `Harvestide` and `Emberfall`.
 
 `npm run sim -- run` switches from the probe world to the village. The probe
 world stays exactly where it is, as the kernel's harness.
@@ -181,7 +201,20 @@ Where a later phase would consult memory, Phase 1 consults nothing and acts on
 habit alone. This keeps Prime Directive 5 un-violated by omission rather than
 by accident.
 
-## 5. Risks
+## 5. What comes immediately after
+
+Not Phase 2. Once the village runs for seven days, the next thing built is the
+crudest possible day-in-review generated from the real event stream — see
+[CHRONICLE.md](CHRONICLE.md).
+
+The reason is feedback, not features. A generated paper is the fastest way to
+find out whether a simulated day is interesting to *read*, which is the actual
+question this project is asking. If the day reads as thin, that is much cheaper
+to learn before hunger, work, money and relationships are layered on top of it —
+and a paper generated from a bare skeleton of a village sets the baseline
+against which every later system can be judged.
+
+## 6. Risks
 
 - **Worldgen becoming a content project.** Thirty buildings and a hundred names
   is a lot of typing that feels like progress. The village file should be as

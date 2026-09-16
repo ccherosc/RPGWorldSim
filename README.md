@@ -78,7 +78,7 @@ apps/
 packages/
   shared/        primitives: assert, heap, canonical JSON, hashing, safe math
   sim-core/      the kernel: clock, calendar, RNG, scheduler, events, save
-  world/         locations, buildings, terrain, objects   (Phase 1)
+  world/         locations, buildings, routes, occupancy
   npc/           traits, needs, decisions, memory, goals   (Phase 1-5)
   society/       households, relationships, law, religion  (Phase 5-6)
   economy/       labor, production, markets, currency      (Phase 3)
@@ -91,8 +91,10 @@ docs/            architecture and design documents
 .claude/rules/   rules that apply to code in this repository
 ```
 
-Directories without a `package.json` are placeholders and are not yet npm
-workspace members; each has a README describing what it will own.
+Directories marked with a phase have no `package.json` yet: they are
+placeholders, not npm workspace members, and each has a README describing what
+it will own. The unmarked ones — `shared`, `sim-core`, `world` and
+`apps/simulator` — are live workspaces.
 
 ## The rules that shape everything
 

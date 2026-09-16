@@ -9,6 +9,7 @@
   "workspaces": [
     "packages/shared",
     "packages/sim-core",
+    "packages/world",
     "apps/simulator"
   ],
   "scripts": {
