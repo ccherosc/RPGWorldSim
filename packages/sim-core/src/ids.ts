@@ -48,7 +48,32 @@ export type EntityKindName = (typeof EntityKind)[keyof typeof EntityKind] | (str
 const ID_SEPARATOR = ':';
 const KIND_PATTERN = /^[a-z][a-z0-9_]*$/;
 
+/**
+ * The index portion, matched strictly rather than handed to `Number`.
+ *
+ * `Number` is far too permissive to parse an identifier with: `Number('')` is
+ * `0`, `Number(' 5 ')` is `5`, `Number('0x10')` is `16` and `Number('1e3')` is
+ * `1000`. Every one of those would make a malformed id silently resolve to a
+ * real — and wrong — entity, which is the exact failure this module exists to
+ * prevent. Leading zeros are rejected too, so an entity has exactly one
+ * spelling and ids can be compared as strings.
+ */
+const INDEX_PATTERN = /^(0|[1-9][0-9]*)$/;
+
+function parseIndex(raw: string, id: string): number {
+  assert(INDEX_PATTERN.test(raw), 'malformed entity id', { id });
+  const index = Number(raw);
+  assert(Number.isSafeInteger(index), 'entity index is not a safe integer', { id });
+  return index;
+}
+
 export function makeEntityId(kind: EntityKindName, index: number): EntityId {
+  // The typeof check is not redundant with the pattern test below. `RegExp.test`
+  // coerces its argument to a string, so `test(undefined)` tests the *string*
+  // "undefined", which is valid lower_snake_case. Without this, a kind that
+  // arrives undefined at runtime — from a data file, a save, or a mistyped
+  // constant — silently creates an `undefined:0` id rather than failing.
+  assert(typeof kind === 'string', 'entity kind must be a string', { kind });
   assert(KIND_PATTERN.test(kind), 'entity kind must be lower_snake_case', { kind });
   assert(Number.isSafeInteger(index) && index >= 0, 'entity index must be a non-negative integer', {
     index,
@@ -65,9 +90,7 @@ export function entityKindOf(id: EntityId): string {
 export function entityIndexOf(id: EntityId): number {
   const separator = id.indexOf(ID_SEPARATOR);
   assert(separator > 0, 'malformed entity id', { id });
-  const index = Number(id.slice(separator + 1));
-  assert(Number.isSafeInteger(index) && index >= 0, 'malformed entity id', { id });
-  return index;
+  return parseIndex(id.slice(separator + 1), id);
 }
 
 export function isEntityId(value: unknown): value is EntityId {
@@ -75,8 +98,9 @@ export function isEntityId(value: unknown): value is EntityId {
   const separator = value.indexOf(ID_SEPARATOR);
   if (separator <= 0) return false;
   if (!KIND_PATTERN.test(value.slice(0, separator))) return false;
-  const index = Number(value.slice(separator + 1));
-  return Number.isSafeInteger(index) && index >= 0;
+  const raw = value.slice(separator + 1);
+  if (!INDEX_PATTERN.test(raw)) return false;
+  return Number.isSafeInteger(Number(raw));
 }
 
 /**
