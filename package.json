@@ -2,6 +2,7 @@
   "name": "ai-rpg-sim",
   "version": "0.0.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "description": "Deterministic autonomous medieval world simulation.",
   "engines": { "node": ">=20.11.0" },

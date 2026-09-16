@@ -167,14 +167,15 @@ that ran it.** A generated day is a pure function of the world and the seed.
 | Needs | Phase |
 | --- | --- |
 | Narratable events, names, durable history | 1–2 |
-| A crude daily summary from real events | after 2 |
+| A crude daily summary from real events | immediately after 1 |
 | Classifieds worth reading | 3 |
 | Continuing stories (feuds, debt spirals) | 5–6 |
 | First-person posts with honest provenance | 5 |
 | LLM prose polish over structured posts | 9 |
 
 The earliest useful version is a plain daily summary generated from the event
-store — worth building as soon as there is a village, because it is the fastest
-way to find out whether the simulated day is interesting. If the automatically
-generated paper is boring, the simulation is boring, and no amount of prose
-quality will fix that. That feedback is worth having early.
+store, and it is built **as soon as there is a village** — before Phase 2, not
+after it. It is the fastest way to find out whether the simulated day is
+interesting. If the automatically generated paper is boring, the simulation is
+boring, and no amount of prose quality will fix that. That feedback is worth
+having while the world is still small enough to change cheaply.
