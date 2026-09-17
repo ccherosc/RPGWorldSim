@@ -1,10 +1,28 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { RngStream, Simulation, dateTimeToTick } from '@rpgsim/sim-core';
+import {
+  EntityKind,
+  Rng,
+  RngStream,
+  Simulation,
+  dateTimeToTick,
+  makeEntityId,
+  minutes,
+} from '@rpgsim/sim-core';
+import {
+  Access,
+  LocationType,
+  installTravel,
+  installWorld,
+  makeLocation,
+} from '@rpgsim/world';
 import { canonicalStringify } from '@rpgsim/shared';
 import { makeNameBook } from '../src/names.ts';
 import { installPeople } from '../src/save.ts';
+import { makePerson } from '../src/person.ts';
+import { installRest } from '../src/rest.ts';
+import { generateRoutine } from '../src/routine.ts';
 import { TRAIT_NAMES } from '../src/traits.ts';
 
 /**
@@ -158,5 +176,129 @@ describe('golden: generation', () => {
         '"curiosity":63,"empathy":61,"generosity":35,"honesty":47,"impulsiveness":40,' +
         '"religiosity":23,"sociability":49,"stubbornness":22,"workEthic":33}}]}',
     );
+  });
+});
+
+const COT = makeEntityId(EntityKind.Location, 0);
+const MILL = makeEntityId(EntityKind.Location, 1);
+
+/** A cottage and a mill twenty minutes apart, so the walk home is visible. */
+function hamlet(sim: Simulation) {
+  const map = installWorld(sim);
+  map.addLocation(
+    makeLocation({
+      id: COT,
+      name: 'Hale Cottage',
+      type: LocationType.Dwelling,
+      coordinate: { x: 0, y: 0 },
+      capacity: 8,
+      access: Access.Public,
+    }),
+  );
+  map.addLocation(
+    makeLocation({
+      id: MILL,
+      name: 'The Mill',
+      type: LocationType.Workshop,
+      coordinate: { x: 20, y: 0 },
+      capacity: 8,
+    }),
+  );
+  map.connect(COT, MILL, minutes(20));
+  const travel = installTravel(sim, map);
+  const people = installPeople(sim);
+  const rest = installRest(sim, people.population, map, travel);
+  for (let i = 0; i < 3; i++) {
+    people.add(
+      makePerson({
+        id: makeEntityId(EntityKind.Npc, i),
+        givenName: 'Edric',
+        familyName: 'Hale',
+        sex: 'male',
+        culture: 'valefolk',
+        birth: { year: 1200 - (10 + i * 20), month: 3, day: 4 },
+        home: COT,
+      }),
+    );
+    map.place(makeEntityId(EntityKind.Npc, i), COT);
+    rest.begin(makeEntityId(EntityKind.Npc, i), { dayDestination: MILL });
+  }
+  return { map, travel, people, rest };
+}
+
+describe('golden: the daily cycle', () => {
+  it('rolls the same four habits it has always rolled', () => {
+    // Straight off a bare stream, so this pins `generateRoutine` itself rather
+    // than whatever `begin` happens to feed it. One villager per band, and two
+    // of the four carry a role, because the role shift is arithmetic on the
+    // draw rather than a draw of its own: swapping those two lines would leave
+    // the draw count untouched and every apprentice in the world rising an hour
+    // late.
+    const rng = Rng.forStream(SEED, RngStream.Routines);
+    const habits = [{ age: 9 }, { age: 19, role: 'apprentice' }, { age: 34, role: 'head' }, { age: 71 }].map(
+      (who) => generateRoutine(rng, who),
+    );
+
+    expect(habits).toEqual([
+      { rise: 20863, bed: 73989 },
+      { rise: 16144, bed: 75635 },
+      { rise: 15764, bed: 77769 },
+      { rise: 19386, bed: 73801 },
+    ]);
+
+    // Two draws apiece, rise then bed. A third draw here — a role rolled
+    // instead of added, say — shifts everybody generated afterwards.
+    expect(rng.draws).toBe(8);
+  });
+
+  it('opens the cycle on the habit hour exactly, undrifted', () => {
+    const sim = new Simulation({ seed: SEED, startTick: MIDYEAR });
+    const { rest } = hamlet(sim);
+
+    // Three villagers, six draws: the founding transition is scheduled from the
+    // habit's own hour with no jitter drawn. Bedtime drifts by up to twenty
+    // minutes every evening after this, but a drifted *founding* bedtime can
+    // land behind the clock and cost the villager a whole day, so the first one
+    // is deliberately exact — and being exact is the same as spending no draw.
+    expect(sim.random(RngStream.Routines).draws).toBe(6);
+    expect(sim.random(RngStream.NpcDecisions).draws).toBe(0);
+
+    // `nextAt` is `MIDYEAR + rise` to the tick for all three.
+    for (const id of [0, 1, 2]) {
+      const record = rest.require(makeEntityId(EntityKind.Npc, id));
+      expect(record.nextAt).toBe(MIDYEAR + record.routine.rise);
+    }
+  });
+
+  it('writes the same rest block it has always written', () => {
+    const sim = new Simulation({ seed: SEED, startTick: MIDYEAR });
+    hamlet(sim);
+
+    // Whole-block equality. The pending scheduled-event handle is in here on
+    // purpose: a save that drops it reloads to a matching hash and then leaves
+    // three villagers asleep for good, which no round-trip comparison of the
+    // save against itself can see.
+    expect(canonicalStringify(sim.save().modules['rest'] ?? null)).toBe(
+      '{"data":{"resting":[' +
+        '{"asleep":true,"dayDestination":"location:1","headingHome":false,"next":1,' +
+        '"nextAt":16782463,"nextKind":"rise","npc":"npc:0","routine":{"bed":73989,"rise":20863}},' +
+        '{"asleep":true,"dayDestination":"location:1","headingHome":false,"next":2,' +
+        '"nextAt":16778644,"nextKind":"rise","npc":"npc:1","routine":{"bed":73835,"rise":17044}},' +
+        '{"asleep":true,"dayDestination":"location:1","headingHome":false,"next":3,' +
+        '"nextAt":16778264,"nextKind":"rise","npc":"npc:2","routine":{"bed":77769,"rise":16664}}' +
+        ']},"version":1}',
+    );
+  });
+
+  it('replays two days to the same world hash', () => {
+    const sim = new Simulation({ seed: SEED, startTick: MIDYEAR });
+    hamlet(sim);
+    sim.runFor(2 * 86_400);
+
+    // The whole point of directive 3, pinned to a number. Two days of waking,
+    // walking to the mill, walking home and going to bed, with every jitter
+    // draw and every scheduled handle folded in. A change to draw order
+    // anywhere in the cycle moves this even when nothing visible changes.
+    expect(sim.hash()).toBe('1cce10c6afbff3ca');
   });
 });

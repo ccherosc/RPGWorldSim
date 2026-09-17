@@ -20,6 +20,8 @@ export const RngStream = {
   NpcGeneration: 'npc_generation',
   /** Household composition: family shape, sibling counts, apprentice placement. */
   Households: 'households',
+  /** Rise and bed times: the habit each person is handed once, for life. */
+  Routines: 'routines',
   /** Weather and seasonal variation. */
   Weather: 'weather',
   /** Births, fertility, aging, natural death. */

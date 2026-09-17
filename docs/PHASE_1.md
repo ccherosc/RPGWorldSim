@@ -275,7 +275,7 @@ swapping two draws (`M13`) and drawing names without regard to the house
 (`M18`) — and both died against the golden roster and hash rather than against
 any behavioural test, which is the whole reason that file exists.
 
-### Slice 5: `packages/npc` — the daily cycle
+### Slice 5: `packages/npc` — the daily cycle — **done**
 
 Sleep and waking, as habit rather than decision. Each NPC has a rise time and a
 bed time varying by age and household role, drawn once from
@@ -290,6 +290,75 @@ of the code should expect that.
 
 **Invariants.** Nobody sleeps two nights without waking. Nobody is asleep
 outside a dwelling. Exclusive activities do not overlap (testing rule: Time).
+
+**Two structural decisions taken before writing it.** Recorded here rather than
+in the landed note, because the Source of Truth rule asks that the design
+document change before the architecture does.
+
+*`@rpgsim/npc` gains a dependency on `@rpgsim/world`.* Nightfall cannot send
+somebody home without knowing where they are standing and how long the walk
+takes. Directive 7 makes that a real dependency rather than a convenience, and
+Phase 4's utility scoring will need the map, the buildings and the routes far
+more heavily than this slice does. The alternative — a narrow "send them home"
+callback handed in by the app — would keep the package graph thinner by making
+one method's worth of indirection permanent, and would be undone in slice 6
+anyway. The graph stays acyclic: `world` knows nothing of `npc`, and `society`
+sits above both.
+
+*The once-per-person draw moves to its own stream.* The sketch above says
+`RngStream.NpcGeneration`, and determinism rule 6 says a new subsystem gets a
+new name rather than reusing one. Sharing the stream would mean that retuning a
+bed time shifts every trait rolled afterwards. So the habit is drawn from
+`RngStream.Routines`, and the per-day jitter from `RngStream.NpcDecisions` as
+sketched.
+
+**Landed as.** `routine.ts` (the `Routine` value, the age-band table, the role
+shifts, and the clock arithmetic) and `rest.ts` (`RestSystem`, four events,
+three invariants, and the `rest` save module), wired by `installRest`. 47 tests
+— 40 behavioural and 7 golden — checked against twenty-nine deliberate
+mutations; all twenty-nine die.
+
+*Exactly one pending transition per person, always.* This is the design, and
+everything odd-looking in `rest.ts` follows from it. A villager holding none
+stops for good, silently, while the world keeps hashing correctly around them;
+a villager holding two wakes twice. So tonight's bedtime is scheduled before
+the morning journey out rather than after it, and anybody who has to walk home
+is handed *tomorrow night's* bedtime as a standing fallback before the first
+step — the walk is asynchronous, and without the fallback the whole journey is
+spent holding a transition that has already fired. `npc.rest-has-a-next-change`
+checks it, and the tests audit the entire population after every scheduled
+event rather than at the end of a run, because every interesting failure here
+is transient by nature.
+
+*Bedtime is a decision to go home, not an arrival.* Sleep happens in the
+arrival handler, a walk later. Somebody already travelling is interrupted
+rather than redirected, because `TravelSystem` runs one journey at a time and
+can only stop people at real places. Somebody with no route home stays awake,
+says so in `npc.could-not-rest`, and tries again tomorrow night — falling
+asleep in a field would satisfy the invariant "nobody sleeps two nights without
+waking" while violating directive 7, which is why the sleeper invariant is
+written against location rather than against elapsed time.
+
+*The founding transition spends no jitter draw.* `begin` schedules the habit's
+stated hour exactly. A drifted first bedtime can land behind the clock, and the
+villager loses a day before the cycle catches up. Every transition after it
+drifts normally. `test/golden.test.ts` pins this by pinning the draw count, not
+just the times.
+
+**Two behaviour changes outside the slice's own files.** Recorded here because
+the Source of Truth rule asks for it.
+
+*`packages/world/src/travel.ts` now clears a finished journey before announcing
+it.* `arrive()` emitted `travel.arrived` and then deleted the journey record.
+Two consequences, both latent until this slice had a listener: a handler asking
+`isTravelling` during the arrival got `true`, so the walk home was refused as
+`already-travelling`; and a handler that *started* a new journey on arrival had
+it deleted by the line below the emit, leaving a traveller with a pending
+arrival and no record of where they were going. The daily cycle does exactly
+that when bedtime catches somebody out of doors. The event now states a fact
+that is already true when it is stated.
+
+*`RngStream` gains `Routines`.* As set out above, per determinism rule 6.
 
 ### Slice 6: World Zero generation and the CLI
 
@@ -322,7 +391,9 @@ why this is not optional.
 | `world.generated` | Worldgen completes; carries the seed and the counts |
 | `npc.born` | An NPC is created (at worldgen, with a backdated birth date) |
 | `npc.woke` | An NPC wakes |
-| `npc.slept` | An NPC goes to sleep |
+| `npc.turning-in` | Bedtime has come and an NPC sets off home |
+| `npc.went-to-bed` | An NPC reaches their own bed and sleeps |
+| `npc.could-not-rest` | Bedtime came and there was no way home; they stay up |
 | `travel.departed` | A traveller leaves a location for a destination |
 | `travel.arrived` | A traveller reaches a destination |
 | `travel.blocked` | A move is refused — full, forbidden, or no route |
@@ -330,7 +401,11 @@ why this is not optional.
 
 `travel.blocked` exists because a refused action is as informative as a
 successful one, both for debugging and for the `WHY?` view, which must be able
-to explain "constraints that prevented other actions".
+to explain "constraints that prevented other actions". `npc.could-not-rest` is
+the same idea one layer up: the sketch above had a single `npc.slept`, and
+splitting it into a departure (`npc.turning-in`) and an arrival
+(`npc.went-to-bed`) is what makes the walk home visible in the chronicle
+instead of a villager teleporting into bed.
 
 ## 4. Decisions taken in advance
 

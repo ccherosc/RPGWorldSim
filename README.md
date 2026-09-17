@@ -7,12 +7,13 @@ own, with a player who exists inside the world rather than at the centre of it.
 The simulation is headless first. The observer UI and any graphics come later,
 and only once the world is interesting as a stream of text.
 
-**Current status: Phase 0 complete, Phase 1 in progress (slices 1-4 of 6).**
+**Current status: Phase 0 complete, Phase 1 in progress (slices 1-5 of 6).**
 The kernel — time, randomness, scheduling, events, identity, persistence —
 exists and is proven deterministic ([docs/PHASE_0.md](docs/PHASE_0.md)). On top
 of it the village now has space, movement that takes time, people with names,
-ages and personalities, and households that make them a village rather than a
-crowd. Still to come in Phase 1: a daily cycle of sleeping and waking, and
+ages and personalities, households that make them a village rather than a
+crowd, and a daily cycle: everybody wakes at their own hour, goes where the day
+takes them, and walks home to bed at nightfall. Still to come in Phase 1:
 worldgen that builds World Zero from `data/`. See [docs/PHASE_1.md](docs/PHASE_1.md).
 
 ## Quick start

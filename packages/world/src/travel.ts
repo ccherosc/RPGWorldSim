@@ -306,6 +306,15 @@ export class TravelSystem {
     const destination = journey.path[journey.path.length - 1] as EntityId;
     const final = journey.leg >= journey.path.length - 2;
 
+    // Off the road *before* the arrival is announced, so that a listener asking
+    // `isTravelling` during the event gets the answer the event just stated.
+    // Announcing first also made the journey table writable from inside the
+    // emit: a listener that started a new journey on arrival had it deleted by
+    // the line below, leaving a traveller with a pending arrival and no record
+    // of where they were going. The daily cycle does exactly that when bedtime
+    // catches somebody out of doors.
+    if (final) this.journeys.delete(traveller);
+
     this.sim.emit({
       type: 'travel.arrived',
       actors: [traveller],
@@ -313,10 +322,7 @@ export class TravelSystem {
       data: { traveller, at, from, final, destination, travelled: this.sim.tick - journey.startedAt },
     });
 
-    if (final) {
-      this.journeys.delete(traveller);
-      return;
-    }
+    if (final) return;
 
     this.departLeg(traveller, journey.path, journey.leg + 1, journey.startedAt, journey.totalCost);
   }
