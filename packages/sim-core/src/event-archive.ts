@@ -220,7 +220,7 @@ export class EventArchive implements EventSink {
    *
    * The hash is the evidence the launch freeze checks: a rebuild that produces
    * a different hash for a published day has rewritten history, and
-   * `docs/CHRONICLE_V1.md` slice 6 fails the build rather than publishing it.
+   * `docs/CHRONICLE_V1.md` slice 7 fails the build rather than publishing it.
    */
   sealDay(dayIndex: number, hash: string | null = null): void {
     assertInt(dayIndex, 'day index must be an integer');

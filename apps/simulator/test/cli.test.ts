@@ -200,7 +200,7 @@ describe('main', () => {
    * The durable history, end to end.
    *
    * The manifest's per-day hash is the evidence the launch freeze is checked
-   * against (docs/CHRONICLE_V1.md slice 6), so the thing worth proving here is
+   * against (docs/CHRONICLE_V1.md slice 7), so the thing worth proving here is
    * that the hash filed against the last day is the hash the run actually
    * finished on -- not merely that some hash was written.
    */

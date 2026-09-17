@@ -44,7 +44,10 @@ Planned in [CHRONICLE_V1.md](CHRONICLE_V1.md); the destination is
 [CHRONICLE.md](CHRONICLE.md).
 
 Deliverables:
-- durable event history on disk
+- durable event history on disk — generated and discarded, because the seed
+  rebuilds it
+- the annals: the permanent record, plain text — who has ever lived, and one
+  line per event that mattered
 - `packages/chronicle` — read model, newsworthiness, templates
 - villager posts, limited to what their author was present for
 - a daily Towne Publication
@@ -55,6 +58,7 @@ Exit criteria:
 - a public link shows today's village and an archive back to day one
 - every sentence traces to an event id
 - the same seed rebuilds the same site byte for byte
+- the day archive can be deleted and rebuilt, and the annals come back identical
 
 ## Phase 2 — Survival
 

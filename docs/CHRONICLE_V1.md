@@ -19,7 +19,10 @@ nobody can read is not a feedback loop.
 
 ### In
 
-- A durable event history on disk, one file per simulated day.
+- A durable event history on disk, one file per simulated day — generated, read
+  and thrown away, because the seed can rebuild it.
+- **The annals**: the permanent record, plain text, small enough to commit — who
+  has ever lived, and one line for every event that mattered.
 - `packages/chronicle`: a read model over that history, a newsworthiness score,
   and templates.
 - Four to six first-person villager posts a day, each limited to what its author
@@ -42,7 +45,7 @@ on it.
 
 **Memory and provenance.** CHRONICLE.md is explicit that a real post is written
 from an NPC's memory with its provenance intact, and that is Phase 5. v1 uses a
-**presence proxy** in its place — see slice 3 — and says so in the paper itself
+**presence proxy** in its place — see slice 4 — and says so in the paper itself
 rather than pretending otherwise.
 
 **Weather.** The weather system exists only in the probe world. The village has
@@ -91,13 +94,42 @@ or a bug fix should be allowed to change what day four was. Once the link is
 given to other people, a line is drawn: everything already published is
 permanent.
 
-That decision is enforced mechanically rather than by discipline. See slice 5:
+That decision is enforced mechanically rather than by discipline. See slice 6:
 the manifest records a state hash per published day, and once `frozenThrough` is
 set, a build that reproduces a frozen day differently **fails**. A change to
 simulation code that would rewrite published history becomes a red build, not a
 silent retcon.
 
 ### The technical ones
+
+**The permanent record is the annals; the day archive is a cache.** The world
+is deterministic, so `seed + days` reproduces every event exactly. That makes
+the ~80 MB a simulated year of JSONL costs a rebuildable artefact rather than a
+record, and it is treated as one: generated, read, gitignored, discarded. What
+is kept forever is the part no seed can reproduce — a judgement about what
+mattered — and as plain text that is one or two megabytes a year. Slice 3 is
+where this is built, and the test that makes it safe is the one that deletes the
+archive, rebuilds it, and gets byte-identical annals back.
+
+**Plain text, tab-separated, not JSON and not a database.** The annals are meant
+to be opened and read, and `git diff` over a year is how a change in the
+village's character gets noticed at all. JSONL repeats every key name on every
+line for no reader's benefit; SQLite is not text and does not diff. The cost is
+that the format has no schema enforcing it, which is why the reader parses
+strictly and the writer is the only thing allowed to touch the file.
+
+**The simulation never reads the annals.** Determinism rule 4 — a world whose
+villagers behaved according to a file on disk would be a world that behaved
+differently after somebody deleted the file. Memory that changes behaviour lives
+in simulation state, is saved in the envelope, and is hashed like everything
+else; the annals are an **export** of the world's history, never an input to it.
+The arrow points one way, and a layering test will keep it pointing that way.
+
+**Significance is a number in data, not a branch in code.** Which events reach
+the annals is `data/world/significance.json`: a weight per event type and a
+threshold. Directive 10. The alternative is a `switch` that grows a case every
+time somebody has an opinion about what is interesting, in a file nobody
+reviews as a whole.
 
 **The archive is one file per simulated day, written whole.** The unit the
 chronicle reads is a day; the unit the site publishes is a day. A day file is
@@ -162,7 +194,7 @@ read. Phase 3 gives it an author.
 
 ## 3. Slices
 
-Six slices. Each is independently testable and leaves the repository in a state
+Seven slices. Each is independently testable and leaves the repository in a state
 where `npm run check` and `npm run verify` pass.
 
 ### Slice 1: durable event history — **built**
@@ -208,7 +240,7 @@ design and not only the code:
 - **The manifest carries `complete`.** It is rewritten as each day lands, so an
   interrupted run leaves a readable partial archive — which is the point — but
   that also means "there is a manifest" does not mean "the run finished". Only
-  `close()` sets `complete`, and slice 6 refuses to publish an archive without it.
+  `close()` sets `complete`, and slice 7 refuses to publish an archive without it.
 - **`sealDay` accepts a day that has already rolled shut on its own.**
   `runUntil(t)` is inclusive of `t`, so a driver that runs to the first tick of
   tomorrow hands the archive an event belonging to tomorrow before it can seal
@@ -251,7 +283,112 @@ Tests: each new event carries actors, a location where one is meaningful, and
 `causes` where a cause exists; a village of 86 people emits 86 `npc.born`; the
 day-one paper contains no founding event.
 
-### Slice 3: `packages/chronicle` — the read model and the score
+### Slice 3: the annals — the village's memory
+
+The durable archive from slice 1 is exact, machine-readable and far too big to
+be a record. At the measured rate — 1,250 events a day for 86 villagers — a
+simulated year is roughly 80 MB of JSONL. Nobody reads that, `git` should not
+carry it, and "what happened in Wodenshill a few years ago" is the wrong
+question to ask of it.
+
+The thing that makes this cheap is already true and was not being used: **the
+seed is the history.** Given the seed and a day count the simulation reproduces
+every event byte for byte. So the day archive is a **cache**, not a record. It
+can be deleted and rebuilt. What cannot be rebuilt is a judgement about what
+mattered — and that, kept as plain text, is small.
+
+So the permanent record is two kinds of file, and nothing else.
+
+**`<root>/people.txt`** — one line per person who has ever existed, written once
+and never rewritten:
+
+```
+# slug  name  sex  born  household
+hargrave    Agnes Hargrave    f  1147-02-11  fletcher-house
+hargrave-2  Agnes Hargrave    f  1201-08-30  hargrave-house
+tomlin      Rob Tomlin        m  1142-10-03  tomlin-house
+```
+
+Only birth facts live here, because only birth facts never change. A death, a
+move, a marriage are all *events* and belong in the annals; putting them in a
+column would mean rewriting a line, and a line that can be rewritten is a line
+that can be quietly rewritten. Who is alive on a given day is derived: in
+`people.txt`, with no death in the annals before that day.
+
+Slugs are stable and deterministic, derived from the surname with a numeric
+suffix when taken, in entity-id order — so a second Agnes Hargrave is
+`hargrave-2` and never displaces the first.
+
+**`<root>/annals/<year>.txt`** — one line per notable event, one file per
+simulated year, appended in order and never reordered:
+
+```
+# date  time  event  who  detail  id
+1203-07-14  06:12  drought.began     -          third dry month        #41902
+1203-09-02  11:40  harvest.failed    village    barley at 18% of normal  #44518
+1203-11-20  04:55  death.hunger      tomlin     age 71                 #48231
+```
+
+Tab-separated, six columns, `-` where a column is empty. No braces, no repeated
+key names, no quoting rules to get wrong. The trailing id is the event id in the
+day archive, so every line traces back to the exact event that produced it —
+which is the "every sentence traces to an event id" bar in section 1, met at the
+memory layer rather than only at the page.
+
+**What keeps it small is a filter, and the filter is data.** `data/world/
+significance.json` gives each event type a weight and sets the threshold a line
+must clear to be written. Most of the 1,250 daily events are mechanics — woke,
+walked, ate — and are worth nothing. Births, deaths, arrivals, departures,
+household changes and failures clear it. Prime Directive 10 puts the numbers in
+data; the alternative is a `switch` that grows a case every time somebody has an
+opinion about what is interesting.
+
+Rough sizes, from the measured event rate:
+
+| | per simulated year |
+| --- | --- |
+| Day archive, JSONL | ~80 MB |
+| Annals, filtered at the proposed threshold | ~1–2 MB |
+
+A thirty-year village is therefore under 50 MB of text, and the day archive
+stops being committed at all: it is generated, read, and thrown away.
+
+New in `packages/chronicle` — created by this slice, extended by the next:
+
+- `annals.ts` — `distil(day, cast, weights)` turns one archived day into annal
+  lines. A pure function of its inputs: no clock, no filesystem, no randomness.
+- `people.ts` — slug allocation and the people file.
+- `annals-store.ts` — the only thing that touches the disk. Appends; refuses to
+  rewrite a line it did not just write.
+
+**This slice changes no simulation state.** No new save module, no new field, no
+new event — so every golden hash in the project stays valid. It reads what
+slice 2 already emits and writes text. That is the whole reason it is safe to
+do now.
+
+Tests:
+
+- Distilling a day twice produces byte-identical lines.
+- Appending day *n+1* leaves the bytes of day *n* untouched — compared as a file
+  prefix, not by re-parsing.
+- A routine event never reaches the annals; a birth always does; and moving the
+  weight in `significance.json` changes what is written with no code change.
+- A person's line is written once. A second distillation of the same day adds
+  nothing.
+- Every annal line's id resolves to an event in the archived day it names.
+- **Delete the entire day archive, rebuild it from the seed, re-distil, and get
+  byte-identical annals.** This is the test that proves the ledger is a cache,
+  and it is the one that would make throwing the archive away safe.
+
+Deferred, with a trigger rather than a vague "later": **collapsing old years.**
+Once a year file passes about 2 MB, it is rewritten once at a higher threshold
+and marked frozen, so a decade-old year costs a few hundred lines instead of
+tens of thousands. The mechanism is the same filter with a second number, so
+nothing new has to be invented; it is not built now because the village is
+eleven days old and a collapse pass with nothing to collapse cannot be tested
+against anything real.
+
+### Slice 4: `packages/chronicle` — the read model and the score
 
 New package. Depends on `sim-core` read-only and on the archive. Never imported
 by `sim-core`.
@@ -277,7 +414,7 @@ template's wording does not change any score; the same day scores identically on
 two runs; rotation actually rotates over thirty days (no villager posts on more
 than a stated fraction of them); an unknown id throws rather than rendering.
 
-### Slice 4: villager posts — depth
+### Slice 5: villager posts — depth
 
 Four to six first-person posts a day.
 
@@ -304,7 +441,7 @@ qualifying events is not generated rather than padded; the same day generates
 identical posts twice; a golden hash pinned on one day's posts for the
 `world-zero` seed.
 
-### Slice 5: the Towne Publication — breadth
+### Slice 6: the Towne Publication — breadth
 
 One page a day. Sections, each omitted when empty:
 
@@ -323,7 +460,7 @@ recomputed by the test independently; a day with no public events produces a
 paper with the review section absent, not an empty heading; the paper never
 names an entity absent from the cast.
 
-### Slice 6: `apps/press` and the public link
+### Slice 7: `apps/press` and the public link
 
 `apps/press` turns chronicle output into a static site. It is an app, not a
 package, because the simulator must not acquire a dependency on HTML.
@@ -367,7 +504,7 @@ manual dispatch:
 
 Regenerating the whole history on every publish is the simple choice and it
 keeps the repository free of generated state. It is also linear in the age of
-the world, so the first thing slice 6 measures is how long a year takes. If it
+the world, so the first thing slice 7 measures is how long a year takes. If it
 grows uncomfortable, the fallback is to commit the archive and the save and run
 only the new day — the manifest already makes that safe, because a committed day
 hash proves the resumed world matches the regenerated one. That fallback is not
@@ -396,6 +533,11 @@ New invariants and checks, in the spirit of sim-core rule 11:
    author's presence test.
 5. Once `frozenThrough` is set, the state hash of every day at or before it is
    fixed. A build that computes a different one fails.
+6. Every annal line's id resolves to an event in the archived day it names. A
+   line that cannot be traced is not a memory, it is an assertion.
+7. The annals are append-only. Distilling a day again appends nothing and
+   changes no byte already written. The one exception is the collapse pass,
+   which rewrites a whole year once and records that it did.
 
 ## 5. Failure cases, and what each does
 
@@ -408,6 +550,9 @@ New invariants and checks, in the spirit of sim-core rule 11:
 | No qualifying events for a chosen villager | Choose no post; never pad |
 | A section has nothing real to report | Omit the section; the colophon explains |
 | A frozen day reproduces differently | Fail the build; do not publish |
+| An annal line names an event the day does not contain | Throw; the memory is wrong, not the archive |
+| A distilled day is already in the annals | Append nothing; succeed silently |
+| An event type has no weight in `significance.json` | Throw, naming the type; never default it to zero |
 | The simulation fails `npm run check` | Do not publish |
 
 ## 6. Risks
@@ -417,7 +562,7 @@ New invariants and checks, in the spirit of sim-core rule 11:
   now: it sets the baseline every later system is judged against. The risk is
   reacting to it by adding invention to the chronicle instead of depth to the
   simulation. The governing rule exists to make that reaction impossible.
-- **Rebuild time grows with the archive.** Measured in slice 6; the fallback is
+- **Rebuild time grows with the archive.** Measured in slice 7; the fallback is
   written down above so it does not have to be invented under pressure.
 - **The presence proxy quietly becomes permanent.** It is a compromise with a
   named expiry: Phase 5 replaces it with memory and provenance. It is stated in
@@ -428,7 +573,19 @@ New invariants and checks, in the spirit of sim-core rule 11:
 
 ## 7. What comes immediately after
 
-Phase 2 — survival — which is the first system that gives a villager something
+**Memory that changes behaviour.** Slice 3 gives the village a record of what
+mattered; it does not yet give Agnes Hargrave a reason to act on it. The next
+step is a small, capped, saved set of marks per villager — `(day, what, who,
+weight)`, fading with time, evicted by weight — formed by an `npc.remembered`
+event so that no villager can know something they did not live through
+(Directive 5, and "no knowledge without provenance"). Behaviour then comes from
+a mark shifting a need's threshold, never from a script: she stockpiles because
+scarcity moved what "enough" means to her, which is Directive 9. It is held back
+to its own slice because it changes how every villager acts and therefore resets
+every golden hash in the project, and because the record it reads has to exist
+first.
+
+Then Phase 2 — survival — which is the first system that gives a villager something
 to want and therefore gives the paper something to report. The order was set by
 [PHASE_1.md](PHASE_1.md) section 5 and has not changed: build the reader first,
 so every later system arrives with a way to tell whether it made the world more
