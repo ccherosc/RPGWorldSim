@@ -43,6 +43,12 @@ the event stream reads like a description of a village rather than a log.
 Each slice lands complete — types, events, invariants, tests, save module —
 before the next begins.
 
+A slice that adds a package also runs `npm install` and commits the updated
+`package-lock.json`. Nothing local notices a stale lock, because module
+resolution goes through tsconfig paths and vitest aliases rather than
+`node_modules`; CI's `npm ci` refuses to install at all, so the first sign is a
+red build that has nothing to do with the code.
+
 ### Slice 1: `packages/world` — space — **done**
 
 A graph of named locations with travel costs on the edges, per
