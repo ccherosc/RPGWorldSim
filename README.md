@@ -7,9 +7,13 @@ own, with a player who exists inside the world rather than at the centre of it.
 The simulation is headless first. The observer UI and any graphics come later,
 and only once the world is interesting as a stream of text.
 
-**Current status: Phase 0 (Constitution) complete.** The kernel — time,
-randomness, scheduling, events, identity, persistence — exists and is proven
-deterministic. There is no village yet. See [docs/PHASE_0.md](docs/PHASE_0.md).
+**Current status: Phase 0 complete, Phase 1 in progress (slices 1-3 of 6).**
+The kernel — time, randomness, scheduling, events, identity, persistence —
+exists and is proven deterministic ([docs/PHASE_0.md](docs/PHASE_0.md)). On top
+of it the village now has space, movement that takes time, and people with
+names, ages and personalities. Still to come in Phase 1: households, a daily
+cycle of sleeping and waking, and worldgen that builds World Zero from
+`data/`. See [docs/PHASE_1.md](docs/PHASE_1.md).
 
 ## Quick start
 
@@ -79,7 +83,7 @@ packages/
   shared/        primitives: assert, heap, canonical JSON, hashing, safe math
   sim-core/      the kernel: clock, calendar, RNG, scheduler, events, save
   world/         locations, buildings, routes, occupancy
-  npc/           traits, needs, decisions, memory, goals   (Phase 1-5)
+  npc/           identity now; needs, decisions, memory later
   society/       households, relationships, law, religion  (Phase 5-6)
   economy/       labor, production, markets, currency      (Phase 3)
   ecology/       crops, animals, seasons                   (Phase 7)
@@ -93,7 +97,7 @@ docs/            architecture and design documents
 
 Directories marked with a phase have no `package.json` yet: they are
 placeholders, not npm workspace members, and each has a README describing what
-it will own. The unmarked ones — `shared`, `sim-core`, `world` and
+it will own. The unmarked ones — `shared`, `sim-core`, `world`, `npc` and
 `apps/simulator` — are live workspaces.
 
 ## The rules that shape everything

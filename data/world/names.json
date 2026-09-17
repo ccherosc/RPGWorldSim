@@ -1,0 +1,33 @@
+{
+  "culture": "valefolk",
+  "note": "Given names and family names for World Zero. Family names are mostly occupational or locational, the way English surnames actually formed, so a village roster reads as a village rather than a fantasy party. Order is significant: it is an input to generation, so reordering this file changes the world a seed produces.",
+  "given": {
+    "male": [
+      "Aldric", "Alwin", "Anselm", "Bartholomew", "Bennet", "Cedric", "Colin",
+      "Cuthbert", "Drogo", "Edmund", "Edric", "Elias", "Everard", "Gilbert",
+      "Godwin", "Hamon", "Harold", "Hugh", "Jocelin", "Leofric", "Martin",
+      "Nicholas", "Osbert", "Oswin", "Peter", "Ralph", "Randal", "Reynold",
+      "Robert", "Roger", "Simon", "Stephen", "Thomas", "Thurstan", "Walter",
+      "Warin", "Wilfrid", "William", "Wymond", "Yves"
+    ],
+    "female": [
+      "Adela", "Agnes", "Alice", "Amice", "Avice", "Beatrice", "Cecily",
+      "Christina", "Clarice", "Constance", "Dionisia", "Edith", "Eleanor",
+      "Elena", "Emma", "Felice", "Gunnora", "Hawise", "Helewise", "Ida",
+      "Isabel", "Joan", "Juliana", "Katherine", "Lettice", "Margery",
+      "Matilda", "Maud", "Millicent", "Muriel", "Nesta", "Petronilla",
+      "Rohese", "Rosamund", "Sabina", "Sybil", "Thomasine", "Wilmot",
+      "Winifred", "Ysabel"
+    ]
+  },
+  "family": [
+    "Alder", "Ashdown", "Baker", "Barrow", "Blackthorn", "Brewer", "Bridger",
+    "Carter", "Chandler", "Clay", "Combe", "Cooper", "Downes", "Dyer",
+    "Falconer", "Fletcher", "Ford", "Fuller", "Gaunt", "Glover", "Hale",
+    "Harrow", "Hayward", "Hollis", "Larkin", "Longmead", "Marsh", "Mercer",
+    "Milburn", "Miller", "Netherby", "Orchard", "Pike", "Plowright", "Quarry",
+    "Rushton", "Salter", "Sawyer", "Shepherd", "Slade", "Smith", "Stonewell",
+    "Tanner", "Thatcher", "Underhill", "Vane", "Wainwright", "Webb",
+    "Wheeler", "Woodrow"
+  ]
+}

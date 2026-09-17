@@ -124,7 +124,7 @@ loads before `world` and cannot compare a journey against a map that is still
 empty. `SaveModule` gained an optional `verify()`, run in a second pass once
 every block in the envelope has loaded. Cross-module save checks go there.
 
-### Slice 3: `packages/npc` — identity
+### Slice 3: `packages/npc` — identity — **done**
 
 People, with names. Generated from `RngStream.NpcGeneration`: given name,
 family name, sex, birth date (hence age), birthplace, and a first slice of
@@ -137,6 +137,46 @@ Names come from `data/world/names.json` so the culture is data, not code
 
 **Invariants.** Age is consistent with birth date and the current tick. Every
 trait is within its declared range. Every NPC has a home and a household.
+
+**Landed as.** `traits.ts` (twelve traits), `names.ts` (the name book),
+`person.ts` (the frozen record), `generate.ts` (the roll), `population.ts` (the
+register), `people.ts` (`PeopleSystem` and four events), `invariants.ts`, and
+the `npc` save module. 62 tests, checked against fifteen deliberate mutations;
+all fifteen die.
+
+**Three departures from the sketch above.**
+
+*A birth date is a calendar date, not a tick.* Most villagers on day one were
+born before tick 0, and a tick cannot say so without either going negative or
+moving the epoch back a century and making every other date harder to read. So
+`birth` is `{ year, month, day }` and age is integer year arithmetic, with the
+one adjustment that matters: somebody whose birthday has not come round yet this
+year was born a year earlier than the subtraction suggests. Getting that wrong
+gives a village where everyone ages on the same day — wrong, and almost
+invisible.
+
+*Twelve traits, not ten, and each one earns its place.* The rule was that a
+trait ships in Phase 1 only if some Phase 1 or Phase 2 behaviour will visibly
+read it. A trait nobody consults is a number that can drift, save wrong, and
+never be noticed. The rest of [NPC_MODEL.md](NPC_MODEL.md)'s catalogue arrives
+with the systems that read it. Their distribution is one default in code rather
+than twelve invented per-trait skews; the skews are balance, so directive 10
+puts them in `data/world/village.json` in slice 6.
+
+*"Every NPC has a home and a household" moves to slice 4.* Households do not
+exist yet, so the check has nothing to compare against. It is a cross-package
+invariant, and `npc` sorts before `society`, so it belongs in that slice's
+`verify()` rather than here.
+
+**What the mutation sweep caught.** Two mutations survived the whole suite:
+swapping the given-name and family-name draws, and rolling traits in declaration
+order instead of sorted order. Both change every villager in every world, and
+both passed — because the suite only ever compared two runs to each other,
+and a reordering shifts both runs together. `packages/npc/test/golden.test.ts`
+pins the actual people now. A third survivor was the documented promise that
+fixing a field skips its draw rather than drawing and discarding it; that is
+what will let slice 4 give a household a shared surname without shifting
+everybody generated afterwards, and it now has a draw-count test.
 
 ### Slice 4: `packages/society` — households
 

@@ -10,6 +10,7 @@
     "packages/shared",
     "packages/sim-core",
     "packages/world",
+    "packages/npc",
     "apps/simulator"
   ],
   "scripts": {

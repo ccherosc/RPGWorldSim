@@ -31,7 +31,9 @@
       "@rpgsim/sim-core": ["packages/sim-core/src/index.ts"],
       "@rpgsim/sim-core/*": ["packages/sim-core/src/*"],
       "@rpgsim/world": ["packages/world/src/index.ts"],
-      "@rpgsim/world/*": ["packages/world/src/*"]
+      "@rpgsim/world/*": ["packages/world/src/*"],
+      "@rpgsim/npc": ["packages/npc/src/index.ts"],
+      "@rpgsim/npc/*": ["packages/npc/src/*"]
     }
   }
 }

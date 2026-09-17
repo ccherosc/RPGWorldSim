@@ -30,6 +30,7 @@ const SIMULATION_SOURCES = [
   join('packages', 'shared', 'src'),
   join('packages', 'sim-core', 'src'),
   join('packages', 'world', 'src'),
+  join('packages', 'npc', 'src'),
   join('apps', 'simulator', 'src'),
 ];
 
@@ -156,7 +157,11 @@ describe('determinism guard', () => {
 describe('layering', () => {
   it('keeps the simulation packages free of UI, framework and platform dependencies', () => {
     const forbidden = /from\s+'(react|react-dom|pixi\.js|vite|express|@rpgsim\/(observer|ai))/;
-    for (const root of [join('packages', 'sim-core', 'src'), join('packages', 'world', 'src')]) {
+    for (const root of [
+      join('packages', 'sim-core', 'src'),
+      join('packages', 'world', 'src'),
+      join('packages', 'npc', 'src'),
+    ]) {
       for (const file of collectSourceFiles(root)) {
         expect(forbidden.test(readFileSync(file, 'utf8')), relative(REPO_ROOT, file)).toBe(false);
       }
@@ -176,6 +181,7 @@ describe('layering', () => {
       ...collectSourceFiles(join('packages', 'sim-core', 'src')),
       ...collectSourceFiles(join('packages', 'shared', 'src')),
       ...collectSourceFiles(join('packages', 'world', 'src')),
+      ...collectSourceFiles(join('packages', 'npc', 'src')),
     ]) {
       const text = readFileSync(file, 'utf8');
       for (const match of text.matchAll(relativeImport)) {
