@@ -59,10 +59,10 @@ export type HouseholdTemplate = z.infer<typeof HouseholdTemplateSchema>;
  * come out at 80-120 people, with most of the village in a family and enough
  * exceptions that "a household" does not mean one thing.
  *
- * These are balance values, so directive 10 says they belong in data. Slice 6
- * reads them from `data/world/village.json`; this constant is the default for
- * tests and for a world built without one, on the pattern of
- * `DEFAULT_AGE_BANDS` and `DEFAULT_CALENDAR`.
+ * These are balance values, so directive 10 says they belong in data, and since
+ * slice 6 the village reads its own templates from `data/world/village.json`.
+ * This constant is the default for tests and for a world built without one, on
+ * the pattern of `DEFAULT_AGE_BANDS` and `DEFAULT_CALENDAR`.
  */
 export const DEFAULT_HOUSEHOLD_TEMPLATES: readonly HouseholdTemplate[] = Object.freeze([
   Object.freeze({

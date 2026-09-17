@@ -7,7 +7,10 @@
   "main": "./src/cli.ts",
   "exports": { ".": "./src/index.ts", "./*": "./src/*" },
   "dependencies": {
+    "@rpgsim/npc": "*",
     "@rpgsim/shared": "*",
-    "@rpgsim/sim-core": "*"
+    "@rpgsim/sim-core": "*",
+    "@rpgsim/society": "*",
+    "@rpgsim/world": "*"
   }
 }

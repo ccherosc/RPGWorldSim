@@ -1,39 +1,53 @@
 import { pathToFileURL } from 'node:url';
 import { JsonFileSaveStore, TICKS_PER_DAY, formatTimestamp } from '@rpgsim/sim-core';
-import { loadCalendar } from './data.ts';
-import { type ProbeWorld, attachProbeWorld, createProbeWorld } from './probe-world.ts';
-import { verifyDeterminism } from './verify.ts';
+import { loadCalendar, loadNames, loadVillage } from './data.ts';
+import { probeWorldFactory } from './probe-world.ts';
+import { villageWorldFactory } from './village-world.ts';
+import { type SimWorld, type WorldFactory, verifyDeterminism } from './verify.ts';
 
 /**
- * Headless driver for the Phase 0 kernel.
+ * Headless driver for the simulation.
  *
  * The observer UI (Phase 2+) will be a separate app; this one exists so the
  * simulation can be exercised, saved, resumed and verified with nothing but a
  * terminal, which CLAUDE.md requires of every system before any UI exists.
+ *
+ * Every command goes through a `WorldFactory`, so `--world` is the only thing
+ * that differs between running the village and running the Phase 0 probe
+ * harness. Reading the data files is this file's job and nobody else's: a world
+ * that read its own config would be a world whose history depended on the state
+ * of the filesystem (determinism rule 4).
  */
 
-const USAGE = `AI RPG Simulator - Phase 0 kernel driver
+const USAGE = `AI RPG Simulator - headless driver
 
 Usage:
-  npm run sim -- run     [options]   Run the Phase 0 probe world
+  npm run sim -- run     [options]   Build a world and run it
   npm run sim -- resume  [options]   Load a save and keep running
-  npm run sim -- verify  [options]   Run the Phase 0 determinism checks
+  npm run sim -- verify  [options]   Run the determinism checks
   npm run sim -- help                Show this message
 
 Options:
+  --world <name>    "village" (default) or "probe"
   --seed <string>   World seed (default: "world-zero")
   --days <n>        Simulated days to run (default: 30)
-  --probes <n>      Number of probe agents (default: 12)
+  --probes <n>      Number of probe agents, --world probe only (default: 12)
   --dir <path>      Save directory (default: "./saves")
   --key <name>      Save slot name (default: "autosave")
   --save            Write a save when the run finishes
   --every <n>       Print a status line every n simulated days (default: 5, 0 = off)
 
-The "probe world" is a Phase 0 test harness, not the World Zero village.
-It has no economy, needs, knowledge or spatial model by design.
+"village" is World Zero, built from data/world/village.json.
+"probe" is the Phase 0 kernel harness: no economy, needs, knowledge or spatial
+model by design. It is kept because it exercises cancellation and colliding
+priorities that the village does not yet reach.
 `;
 
+const WORLDS = ['village', 'probe'] as const;
+type WorldName = (typeof WORLDS)[number];
+
 interface Options {
+  world: WorldName;
   seed: string;
   days: number;
   probes: number;
@@ -45,6 +59,7 @@ interface Options {
 
 export function parseArgs(argv: readonly string[]): { command: string; options: Options } {
   const options: Options = {
+    world: 'village',
     seed: 'world-zero',
     days: 30,
     probes: 12,
@@ -59,6 +74,10 @@ export function parseArgs(argv: readonly string[]): { command: string; options: 
     const flag = argv[i] as string;
     const value = argv[i + 1];
     switch (flag) {
+      case '--world':
+        options.world = requireWorld(flag, value);
+        i++;
+        break;
       case '--seed':
         options.seed = requireValue(flag, value);
         i++;
@@ -98,6 +117,14 @@ function requireValue(flag: string, value: string | undefined): string {
   return value;
 }
 
+function requireWorld(flag: string, value: string | undefined): WorldName {
+  const name = requireValue(flag, value);
+  if (!(WORLDS as readonly string[]).includes(name)) {
+    throw new Error(`${flag} must be one of: ${WORLDS.join(', ')}`);
+  }
+  return name as WorldName;
+}
+
 function requireNumber(flag: string, value: string | undefined): number {
   const parsed = Number(requireValue(flag, value));
   if (!Number.isInteger(parsed) || parsed < 0) {
@@ -106,7 +133,22 @@ function requireNumber(flag: string, value: string | undefined): number {
   return parsed;
 }
 
-function runWorld(world: ProbeWorld, options: Options, startDay: number): void {
+/**
+ * Build the factory the chosen command will use.
+ *
+ * This is where the data files are read, once per command. The probe world has
+ * nothing to read beyond the calendar; the village reads its layout and its
+ * name book too.
+ */
+function worldFactory(options: Options): WorldFactory {
+  const calendar = loadCalendar();
+  if (options.world === 'probe') {
+    return probeWorldFactory({ probes: options.probes, calendar });
+  }
+  return villageWorldFactory({ config: loadVillage(), names: loadNames(), calendar });
+}
+
+function runWorld(world: SimWorld, options: Options, startDay: number): void {
   const endDay = startDay + options.days;
   for (let day = startDay + 1; day <= endDay; day++) {
     world.sim.runUntil(day * TICKS_PER_DAY);
@@ -128,20 +170,16 @@ function runWorld(world: ProbeWorld, options: Options, startDay: number): void {
 }
 
 function commandRun(options: Options): void {
-  const calendar = loadCalendar();
-  console.log(
-    `seed "${options.seed}", ${options.probes} probes, ${options.days} days, calendar "${calendar.id}"\n`,
-  );
-  runWorld(createProbeWorld({ seed: options.seed, probes: options.probes, calendar }), options, 0);
+  const factory = worldFactory(options);
+  const world = factory.create(options.seed);
+  console.log(`${factory.label}, seed "${options.seed}", ${options.days} days\n`);
+  console.log(`  ${world.summary()}`);
+  runWorld(world, options, Math.floor(world.sim.tick / TICKS_PER_DAY));
 }
 
 function commandResume(options: Options): void {
   const store = new JsonFileSaveStore(options.dir);
-  const world = attachProbeWorld({
-    seed: options.seed,
-    probes: options.probes,
-    calendar: loadCalendar(),
-  });
+  const world = worldFactory(options).attach(options.seed);
   world.sim.loadFrom(store, options.key);
 
   const startDay = Math.floor(world.sim.tick / TICKS_PER_DAY);
@@ -153,12 +191,9 @@ function commandVerify(options: Options): number {
   const report = verifyDeterminism({
     seed: options.seed,
     days: options.days,
-    probes: options.probes,
-    calendar: loadCalendar(),
+    world: worldFactory(options),
   });
-  console.log(
-    `determinism check: seed "${report.seed}", ${report.probes} probes, ${report.days} days\n`,
-  );
+  console.log(`determinism check: ${report.world}, seed "${report.seed}", ${report.days} days\n`);
   for (const check of report.checks) {
     console.log(`  ${check.passed ? 'PASS' : 'FAIL'}  ${check.name}: ${check.detail}`);
   }

@@ -48,10 +48,12 @@ export type LocationTypeName = (typeof LocationType)[keyof typeof LocationType] 
  *
  * `public` is anywhere a villager may walk into unchallenged. `private` is
  * somewhere only named people may enter — a cottage, a locked storehouse — and
- * the names are on the location's `permitted` list. Phase 1 has no households
- * to populate that list with, so private places start empty and slice 4 fills
- * them in; until then a private location simply refuses everyone, which is the
- * honest answer rather than a convenient one.
+ * the names are on the location's `permitted` list. A private place with an
+ * empty list refuses everyone, which is the honest answer rather than a
+ * convenient one, and it is also how every cottage begins: worldgen has to lay
+ * the village out before it can generate the families who fill it, so the house
+ * is built first and rewritten with its residents named once they exist. See
+ * `withLocation` and `WorldMap.replaceLocation`.
  */
 export const Access = {
   Public: 'public',
@@ -187,6 +189,39 @@ function sortedIds(ids: readonly EntityId[], what: string): EntityId[] {
     });
   }
   return sorted;
+}
+
+/**
+ * Build a new place from an old one. Values are never edited in place.
+ *
+ * A private location's `permitted` list is the reason this exists. A cottage is
+ * built before anybody lives in it -- worldgen has to lay out the village
+ * before it can generate the families that fill it -- so the list starts empty,
+ * and an empty list on a private place refuses everybody, which is the honest
+ * answer and a useless one to stop at. Once the household exists, the place is
+ * rebuilt with its residents named.
+ */
+export function withLocation(
+  location: Location,
+  changes: Partial<Omit<LocationInit, 'id'>>,
+): Location {
+  return makeLocation({ ...location, ...changes });
+}
+
+/**
+ * Build a new building from an old one. Values are never edited in place.
+ *
+ * `location` is deliberately not omitted from the accepted changes, even though
+ * `WorldMap.replaceBuilding` refuses one: a caller who wants to express "the
+ * smithy, but somewhere else" should be able to write it and be told no by the
+ * map, rather than have the type quietly make the mistake unsayable. The map is
+ * where the rule lives, because the map is what would be left inconsistent.
+ */
+export function withBuilding(
+  building: Building,
+  changes: Partial<Omit<BuildingInit, 'id'>>,
+): Building {
+  return makeBuilding({ ...building, ...changes });
 }
 
 export interface LocationInit {

@@ -1,7 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { canonicalStringify } from '@rpgsim/shared';
 import { type EntityId, EntityKind, makeEntityId } from '@rpgsim/sim-core';
-import { Access, LocationType, makeBuilding, makeLocation } from '../src/location.ts';
+import {
+  Access,
+  LocationType,
+  makeBuilding,
+  makeLocation,
+  withBuilding,
+  withLocation,
+} from '../src/location.ts';
 import { EntryRefusal, WorldMap, compareFrontier } from '../src/map.ts';
 
 /**
@@ -570,5 +577,109 @@ describe('snapshots', () => {
       ],
     };
     expect(() => new WorldMap().restore(WorldMap.fromJson(twice))).toThrow(/already placed/);
+  });
+});
+
+/**
+ * Rewriting a place or a building that is already on the map.
+ *
+ * Worldgen needs this: a cottage is laid out before the family that lives in it
+ * is generated, so the house has to learn its owner, its residents and who may
+ * walk in afterwards. The risk is that "afterwards" becomes a door through
+ * which anything can be changed, including the two things the rest of the map
+ * has already been built against — where a place stands, and how many people
+ * fit in it.
+ */
+describe('replacing a place or a building', () => {
+  it('takes a rewritten place and keeps the map consistent', () => {
+    const map = village();
+    const before = map.location(COTTAGE);
+    map.replaceLocation(withLocation(before, { name: 'Hale Cottage', permitted: [npc(2), npc(5)] }));
+
+    expect(map.location(COTTAGE).name).toBe('Hale Cottage');
+    expect(map.location(COTTAGE).permitted).toEqual(['npc:2', 'npc:5']);
+    // Rewriting a place must not disturb the roads that lead to it.
+    expect(map.travelCost(STREET, COTTAGE)).toBe(30);
+    expect(map.findRoute(SQUARE, COTTAGE)?.cost).toBe(90);
+  });
+
+  it('opens a private house to the family that moves into it', () => {
+    const map = village();
+    const check = map.canEnter(npc(7), COTTAGE);
+    expect(check.allowed === false && check.reason).toBe(EntryRefusal.Forbidden);
+    map.replaceLocation(withLocation(map.location(COTTAGE), { permitted: [npc(7)] }));
+    expect(map.canEnter(npc(7), COTTAGE).allowed).toBe(true);
+  });
+
+  it('refuses to move a place, because the roads were costed against where it stands', () => {
+    const map = village();
+    const moved = makeLocation({ ...map.location(COTTAGE), coordinate: { x: 999, y: 999 } });
+    expect(() => map.replaceLocation(moved)).toThrow(/cannot move/);
+    expect(map.location(COTTAGE).coordinate).toEqual({ x: 55, y: 20 });
+  });
+
+  it('refuses to shrink a place below the people already inside it', () => {
+    const map = village();
+    const shrink = (capacity: number | null) =>
+      map.replaceLocation(withLocation(map.location(COTTAGE), { capacity }));
+
+    map.place(npc(1), COTTAGE);
+    map.place(npc(2), COTTAGE);
+    expect(() => shrink(1)).toThrow(/below the people already in it/);
+    expect(() => shrink(2)).not.toThrow();
+    expect(() => shrink(null)).not.toThrow();
+
+    // A reservation is a place held for somebody walking towards it, so it
+    // counts: shrinking underneath it would let the map accept a traveller it
+    // then has to turn away on arrival.
+    map.replaceLocation(withLocation(map.location(COTTAGE), { permitted: [npc(2), npc(3)] }));
+    map.reserve(npc(3), COTTAGE);
+    expect(() => shrink(2)).toThrow(/below the people already in it/);
+    expect(map.location(COTTAGE).capacity).toBeNull();
+  });
+
+  it('refuses to replace a place that was never added', () => {
+    const map = village();
+    const stranger = makeLocation({
+      id: loc(99),
+      name: 'Nowhere',
+      type: LocationType.Street,
+      coordinate: { x: 0, y: 0 },
+    });
+    expect(() => map.replaceLocation(stranger)).toThrow(/no location with this id/);
+    expect(map.hasLocation(loc(99))).toBe(false);
+  });
+
+  it('takes a rewritten building but refuses to move its interior', () => {
+    const map = village();
+    map.addBuilding(
+      makeBuilding({ id: building(1), name: 'A cottage', type: 'cottage', location: COTTAGE }),
+    );
+
+    map.replaceBuilding(
+      withBuilding(map.building(building(1)), {
+        name: 'Hale Cottage',
+        owner: npc(1),
+        residents: [npc(1), npc(2)],
+      }),
+    );
+    expect(map.building(building(1)).name).toBe('Hale Cottage');
+    expect(map.building(building(1)).residents).toEqual(['npc:1', 'npc:2']);
+
+    // The interior is what every household's `dwelling` points at. Moving it
+    // would leave those pointers aimed at a room the building no longer owns.
+    expect(() =>
+      map.replaceBuilding(withBuilding(map.building(building(1)), { location: TAVERN })),
+    ).toThrow();
+    expect(map.building(building(1)).location).toBe(COTTAGE);
+  });
+
+  it('refuses to replace a building that was never added', () => {
+    const map = village();
+    expect(() =>
+      map.replaceBuilding(
+        makeBuilding({ id: building(9), name: 'Ghost', type: 'barn', location: FIELD }),
+      ),
+    ).toThrow(/no building with this id/);
   });
 });

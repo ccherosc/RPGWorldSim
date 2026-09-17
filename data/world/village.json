@@ -1,0 +1,89 @@
+{
+  "name": "Wodenshill",
+  "note": "World Zero: one village. Places are named by slug; the simulation allocates the entity ids, so nothing in this file can renumber an existing world. Every list is an array and its order is significant — it is an input to generation, so reordering one changes the village a seed produces. Travel costs and routine hours are in seconds, because a tick is a second.",
+  "start": { "year": 1200, "month": 4, "day": 1 },
+
+  "places": [
+    { "slug": "green", "name": "The Green", "type": "square", "coordinate": { "x": 0, "y": 0 }, "access": "public" },
+    { "slug": "church-lane", "name": "Church Lane", "type": "street", "coordinate": { "x": -60, "y": 40 }, "access": "public" },
+    { "slug": "mill-lane", "name": "Mill Lane", "type": "street", "coordinate": { "x": 80, "y": -20 }, "access": "public" },
+    { "slug": "bridge-row", "name": "Bridge Row", "type": "street", "coordinate": { "x": -20, "y": -80 }, "access": "public" },
+    { "slug": "north-road", "name": "The North Road", "type": "road", "coordinate": { "x": 0, "y": 200 }, "access": "public" },
+    { "slug": "north-gate", "name": "The North Gate", "type": "boundary", "coordinate": { "x": 0, "y": 400 }, "access": "public" },
+
+    { "slug": "church", "name": "St Ealdwin's", "type": "church", "coordinate": { "x": -70, "y": 60 }, "capacity": 90, "access": "public" },
+    { "slug": "mill", "name": "The Mill", "type": "workshop", "coordinate": { "x": 120, "y": -30 }, "capacity": 8 },
+    { "slug": "smithy", "name": "The Smithy", "type": "workshop", "coordinate": { "x": 30, "y": 20 }, "capacity": 6 },
+    { "slug": "tavern", "name": "The Ploughshare", "type": "tavern", "coordinate": { "x": 10, "y": -20 }, "capacity": 30, "access": "public" },
+
+    { "slug": "common-field", "name": "The Common Field", "type": "field", "coordinate": { "x": 150, "y": 120 }, "access": "public" },
+    { "slug": "pasture", "name": "The Low Pasture", "type": "pasture", "coordinate": { "x": -150, "y": -60 }, "access": "public" },
+    { "slug": "wood", "name": "Oakhanger Wood", "type": "woodland", "coordinate": { "x": -200, "y": 150 }, "access": "public" },
+    { "slug": "mill-stream", "name": "The Mill Stream", "type": "water", "coordinate": { "x": 100, "y": -90 }, "access": "public" }
+  ],
+
+  "roads": [
+    { "from": "green", "to": "church-lane", "cost": 120 },
+    { "from": "green", "to": "mill-lane", "cost": 180 },
+    { "from": "green", "to": "bridge-row", "cost": 150 },
+    { "from": "green", "to": "north-road", "cost": 240 },
+    { "from": "green", "to": "smithy", "cost": 60 },
+    { "from": "green", "to": "tavern", "cost": 45 },
+    { "from": "north-road", "to": "north-gate", "cost": 600 },
+    { "from": "church-lane", "to": "church", "cost": 60 },
+    { "from": "church-lane", "to": "wood", "cost": 420 },
+    { "from": "mill-lane", "to": "mill", "cost": 90 },
+    { "from": "mill-lane", "to": "mill-stream", "cost": 120 },
+    { "from": "mill-lane", "to": "common-field", "cost": 300 },
+    { "from": "bridge-row", "to": "pasture", "cost": 260 }
+  ],
+
+  "structures": [
+    { "slug": "church", "name": "St Ealdwin's", "type": "church", "place": "church", "condition": 78 },
+    { "slug": "mill", "name": "The Mill", "type": "mill", "place": "mill", "condition": 71 },
+    { "slug": "smithy", "name": "The Smithy", "type": "smithy", "place": "smithy", "condition": 66 },
+    { "slug": "tavern", "name": "The Ploughshare", "type": "tavern", "place": "tavern", "condition": 62 }
+  ],
+
+  "dwellings": {
+    "count": 24,
+    "lanes": ["church-lane", "mill-lane", "bridge-row"],
+    "type": "cottage",
+    "walkFromLane": 45,
+    "capacity": 8,
+    "condition": { "min": 48, "max": 92 },
+    "spacing": 12
+  },
+
+  "population": {
+    "households": 24,
+    "traits": { "mean": 50, "stdDev": 18 },
+
+    "templates": [
+      { "name": "family", "weight": 36, "headAge": { "min": 25, "max": 52 }, "spouse": true, "children": { "min": 1, "max": 5 }, "residentParentChance": 0.18, "apprenticeChance": 0.18 },
+      { "name": "young-couple", "weight": 10, "headAge": { "min": 18, "max": 27 }, "spouse": true, "children": { "min": 0, "max": 1 }, "residentParentChance": 0.1, "apprenticeChance": 0.04 },
+      { "name": "widowed-parent", "weight": 14, "headAge": { "min": 30, "max": 58 }, "spouse": false, "children": { "min": 1, "max": 4 }, "residentParentChance": 0.08, "apprenticeChance": 0.1 },
+      { "name": "single-adult", "weight": 16, "headAge": { "min": 18, "max": 45 }, "spouse": false, "children": { "min": 0, "max": 0 }, "residentParentChance": 0.08, "apprenticeChance": 0.02 },
+      { "name": "elder-couple", "weight": 11, "headAge": { "min": 55, "max": 76 }, "spouse": true, "children": { "min": 0, "max": 1 }, "residentParentChance": 0, "apprenticeChance": 0.08 },
+      { "name": "elder-alone", "weight": 7, "headAge": { "min": 58, "max": 82 }, "spouse": false, "children": { "min": 0, "max": 0 }, "residentParentChance": 0, "apprenticeChance": 0.04 }
+    ],
+
+    "routineBands": [
+      { "name": "child", "maxAge": 13, "rise": { "min": 19800, "max": 25200 }, "bed": { "min": 72000, "max": 75600 } },
+      { "name": "youth", "maxAge": 24, "rise": { "min": 17100, "max": 21600 }, "bed": { "min": 75600, "max": 81000 } },
+      { "name": "adult", "maxAge": 59, "rise": { "min": 16200, "max": 20700 }, "bed": { "min": 73800, "max": 79200 } },
+      { "name": "elder", "maxAge": null, "rise": { "min": 14400, "max": 19800 }, "bed": { "min": 70200, "max": 75600 } }
+    ],
+
+    "roleShifts": [
+      { "role": "apprentice", "shift": -1800 },
+      { "role": "head", "shift": -900 },
+      { "role": "spouse", "shift": -900 },
+      { "role": "child", "shift": 0 },
+      { "role": "parent", "shift": 0 },
+      { "role": "dependent", "shift": 900 }
+    ],
+
+    "dayDestinations": ["green", "common-field", "pasture", "mill", "smithy", "wood"]
+  }
+}

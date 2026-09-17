@@ -29,6 +29,7 @@ describe('parseArgs', () => {
     const { command, options } = parseArgs(['run']);
     expect(command).toBe('run');
     expect(options).toEqual({
+      world: 'village',
       seed: 'world-zero',
       days: 30,
       probes: 12,
@@ -71,6 +72,16 @@ describe('parseArgs', () => {
     expect(parseArgs([]).command).toBe('help');
   });
 
+  it('reads the world name, and only a name it knows', () => {
+    // The default is the village on purpose: the thing somebody types
+    // `npm run sim -- run` to see is the world the project is about, not the
+    // Phase 0 harness. `probe` has to be asked for.
+    expect(parseArgs(['run']).options.world).toBe('village');
+    expect(parseArgs(['run', '--world', 'probe']).options.world).toBe('probe');
+    expect(() => parseArgs(['run', '--world', 'hamlet'])).toThrow(/must be one of/);
+    expect(() => parseArgs(['run', '--world'])).toThrow(/requires a value/);
+  });
+
   it('rejects bad input rather than guessing', () => {
     expect(() => parseArgs(['run', '--nope'])).toThrow(/Unknown option/);
     expect(() => parseArgs(['run', '--seed'])).toThrow(/requires a value/);
@@ -97,7 +108,7 @@ describe('main', () => {
 
   it('prints usage and succeeds for help', () => {
     expect(main(['help'])).toBe(0);
-    expect(captured.lines.join('\n')).toContain('Phase 0 kernel driver');
+    expect(captured.lines.join('\n')).toContain('headless driver');
   });
 
   it('fails with a usage message for an unknown command', () => {
@@ -110,12 +121,25 @@ describe('main', () => {
   });
 
   it('runs a world and reports a state hash', () => {
-    expect(main(['run', '--seed', 'cli-seed', '--days', '2', '--probes', '3'])).toBe(0);
+    expect(
+      main(['run', '--world', 'probe', '--seed', 'cli-seed', '--days', '2', '--probes', '3']),
+    ).toBe(0);
     expect(captured.lines.join('\n')).toMatch(/state hash:\s+[0-9a-f]{16}/);
   });
 
   it('runs, saves and resumes to the same state as an uninterrupted run', () => {
-    const args = ['--seed', 'cli-seed', '--probes', '4', '--dir', directory, '--every', '0'];
+    const args = [
+      '--world',
+      'probe',
+      '--seed',
+      'cli-seed',
+      '--probes',
+      '4',
+      '--dir',
+      directory,
+      '--every',
+      '0',
+    ];
 
     expect(main(['run', ...args, '--days', '6'])).toBe(0);
     const straightThrough = hashFrom(captured.lines);
@@ -129,10 +153,35 @@ describe('main', () => {
   });
 
   it('reports determinism verification and exits zero when it passes', () => {
-    expect(main(['verify', '--seed', 'cli-seed', '--days', '4', '--probes', '3'])).toBe(0);
+    expect(
+      main(['verify', '--world', 'probe', '--seed', 'cli-seed', '--days', '4', '--probes', '3']),
+    ).toBe(0);
     const output = captured.lines.join('\n');
     expect(output).toContain('All determinism checks passed.');
     expect(output).not.toContain('FAIL');
+  });
+
+  /**
+   * The village, end to end, through the same door a person uses.
+   *
+   * Short on purpose -- two days of eighty-six villagers is enough to prove the
+   * data files load, the world builds, the invariants hold and a save round-
+   * trips. What the village *does* over a longer run is `verify`'s job, and
+   * village.test.ts runs it.
+   */
+  it('builds, saves and resumes the village from its data files', () => {
+    const args = ['--seed', 'cli-seed', '--dir', directory, '--every', '0'];
+
+    expect(main(['run', ...args, '--days', '2'])).toBe(0);
+    const straightThrough = hashFrom(captured.lines);
+    expect(captured.lines.join('\n')).toMatch(/people=\d+ +households=\d+/);
+
+    captured.lines.length = 0;
+    expect(main(['run', ...args, '--days', '1', '--save', '--key', 'village'])).toBe(0);
+
+    captured.lines.length = 0;
+    expect(main(['resume', ...args, '--days', '1', '--key', 'village'])).toBe(0);
+    expect(hashFrom(captured.lines)).toBe(straightThrough);
   });
 });
 

@@ -7,14 +7,21 @@ own, with a player who exists inside the world rather than at the centre of it.
 The simulation is headless first. The observer UI and any graphics come later,
 and only once the world is interesting as a stream of text.
 
-**Current status: Phase 0 complete, Phase 1 in progress (slices 1-5 of 6).**
-The kernel — time, randomness, scheduling, events, identity, persistence —
-exists and is proven deterministic ([docs/PHASE_0.md](docs/PHASE_0.md)). On top
-of it the village now has space, movement that takes time, people with names,
-ages and personalities, households that make them a village rather than a
-crowd, and a daily cycle: everybody wakes at their own hour, goes where the day
-takes them, and walks home to bed at nightfall. Still to come in Phase 1:
-worldgen that builds World Zero from `data/`. See [docs/PHASE_1.md](docs/PHASE_1.md).
+**Current status: Phases 0 and 1 complete.** The kernel — time, randomness,
+scheduling, events, identity, persistence — exists and is proven deterministic
+([docs/PHASE_0.md](docs/PHASE_0.md)). On top of it stands World Zero: a village
+of 86 people in 24 households across 38 places, built from
+`data/world/village.json`, with space, movement that takes time, people who
+have names, ages and personalities, and a daily cycle — everybody wakes at
+their own hour, goes where the day takes them, and walks home to bed at
+nightfall. `npm run sim -- run` runs it. See
+[docs/PHASE_1.md](docs/PHASE_1.md).
+
+Next is not Phase 2. It is the crudest possible day-in-review generated from
+the real event stream, because the question this project is actually asking is
+whether a simulated day is interesting to *read*, and that is much cheaper to
+find out now than after hunger, work and money are layered on top —
+see [docs/CHRONICLE.md](docs/CHRONICLE.md).
 
 ## Quick start
 
@@ -25,7 +32,8 @@ npm install
 
 npm run verify                                   # the five determinism checks
 npm run check                                    # typecheck + full test suite
-npm run sim -- run --seed world-zero --days 30   # run the Phase 0 probe world
+npm run sim -- run --seed world-zero --days 30   # build World Zero and run it
+npm run sim -- run --world probe --days 30       # the Phase 0 kernel harness
 npm run sim -- help
 ```
 
@@ -34,13 +42,13 @@ scratch, runs them, saves them, reloads them and compares, and prints a pass or
 fail for each of the five guarantees the project rests on.
 
 ```
-determinism check: seed "world-zero", 12 probes, 30 days
+determinism check: village, seed "world-zero", 30 days
 
-  PASS  identical replay: 30 day-boundary hashes matched; final 9d98884c7511c920
-  PASS  seed sensitivity: alternate seed produced a9b75f95a648c629
+  PASS  identical replay: 30 day-boundary hashes matched; final 4a084240788c4b8c
+  PASS  seed sensitivity: alternate seed produced 20d2df7c82292d00
   PASS  save/load continuation: resumed at day 15 and matched to day 30
-  PASS  saving is side-effect free: saved-then-continued world hashed 9d98884c7511c920
-  PASS  invariants: 6 invariants held at tick 2592000
+  PASS  saving is side-effect free: saved-then-continued world hashed 4a084240788c4b8c
+  PASS  invariants: 26 invariants held at tick 10368000
 ```
 
 Saving and resuming a world:
@@ -69,10 +77,12 @@ The kernel, and deliberately nothing else:
 There is no village, no NPC, no economy, no combat, no politics, no UI and no
 LLM. Those are Phases 1 and onward — see [docs/ROADMAP.md](docs/ROADMAP.md).
 
-The `probe world` the CLI runs is a **test harness**, not World Zero. Its agents
-exist to exercise scheduling, cancellation, randomness and persistence together,
-and it is tuned so that its awkward paths happen often enough for tests to see
-them.
+The **probe world**, still reachable as `--world probe`, is a test harness and
+not World Zero. Its agents exist to exercise scheduling, cancellation,
+randomness and persistence together, and it is tuned so that its awkward paths
+happen often enough for tests to see them. It stays because it still covers
+ground the village does not — a village nobody has given a reason to cancel
+anything never exercises cancellation.
 
 ## Layout
 

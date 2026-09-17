@@ -179,6 +179,64 @@ export class WorldMap {
     this.buildings.set(building.id, building);
   }
 
+  /**
+   * Swap a building for a new version of itself.
+   *
+   * The one thing that may not change is where it stands. A building that moved
+   * would be a different building, and the interior location is what everything
+   * else -- a person's home, a household's dwelling, an occupancy count --
+   * actually refers to; letting it move would silently repoint all of them.
+   * Everything else about a building is expected to change over a life: it is
+   * bought, inherited, repaired, let fall down, and filled with different
+   * people.
+   */
+  replaceBuilding(building: Building): void {
+    const existing = this.buildings.get(building.id);
+    assert(existing !== undefined, 'no building with this id exists', { id: building.id });
+    assert(
+      (existing as Building).location === building.location,
+      'a building cannot move; its interior is what everything else refers to',
+      { id: building.id, from: (existing as Building).location, to: building.location },
+    );
+    this.buildings.set(building.id, building);
+  }
+
+  /**
+   * Swap a place for a new version of itself.
+   *
+   * Two things may not change. **Where it is**, because every travel cost on
+   * every road leading here was set against that point, and moving the place
+   * would leave all of them describing a walk nobody could take. And **capacity
+   * below what is already inside it**, because the people standing here are
+   * standing here: a map that accepted the change would be holding a place with
+   * nine people in room for six and reporting nothing wrong, which is precisely
+   * the silent correction sim-core rule 10 forbids. Shrinking a house means
+   * moving somebody out first.
+   *
+   * Everything else is expected to change. A cottage takes a family's name and
+   * their right to enter it; a workshop changes hands; a barn is extended.
+   */
+  replaceLocation(location: Location): void {
+    const existing = this.locations.get(location.id);
+    assert(existing !== undefined, 'no location with this id exists', { id: location.id });
+    const before = existing as Location;
+    assert(
+      before.coordinate.x === location.coordinate.x &&
+        before.coordinate.y === location.coordinate.y,
+      'a location cannot move; the roads to it were costed against where it stands',
+      { id: location.id, from: before.coordinate, to: location.coordinate },
+    );
+
+    const inside = this.occupancyOf(location.id) + this.reservationCountAt(location.id);
+    assert(
+      location.capacity === null || location.capacity >= inside,
+      'a location cannot be shrunk below the people already in it',
+      { id: location.id, capacity: location.capacity, inside },
+    );
+
+    this.locations.set(location.id, location);
+  }
+
   location(id: EntityId): Location {
     const location = this.locations.get(id);
     assert(location !== undefined, 'no such location', { id });

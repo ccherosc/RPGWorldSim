@@ -6,8 +6,9 @@ The spatial model. It answers where a thing is, how long it takes to get
 there, and who may enter — the questions Prime Directive 7 says no action may
 skip.
 
-**Status: slices 1 and 2 of Phase 1 have landed.** Space exists, persists, and
-takes time to cross. Objects and terrain come later.
+**Status: slices 1, 2 and 6 of Phase 1 have landed.** Space exists, persists,
+takes time to cross, and now holds an actual village built from
+`data/world/village.json`. Objects and terrain come later.
 
 ## What is here
 
@@ -35,7 +36,7 @@ travel.begin(npc, tavern);              // { started: true, journey } | a refusa
 sim.runUntil(90);                       // they arrive when the roads say so
 ```
 
-## Four decisions worth knowing before reading the code
+## Five decisions worth knowing before reading the code
 
 **Adjacency lives in the graph, never on a `Location`.** `connect(a, b, cost)`
 writes both directions at once, so an edge cannot disagree with itself. The
@@ -49,6 +50,17 @@ whole world unsaveable.
 **A route is a fact about the map, not about the traveller.** `findRoute`
 ignores access and capacity; whether a particular person may walk a path is
 `canEnter`'s question, asked per step at the moment of arrival.
+
+**A place can be rewritten, but it cannot move or shrink underneath anybody.**
+`withLocation` and `withBuilding` copy a value with changes, back through the
+same constructor, so a copy cannot route around a construction rule.
+`replaceLocation` and `replaceBuilding` put the copy on the map. Worldgen needs
+this: a cottage is laid out before the family who live in it exists, so the
+house learns its name, its owner and who may walk in afterwards. What they
+refuse is the part everything else was built against — a building's interior,
+a location's coordinate (every road leading there was costed against that
+point), and any capacity below the number of people already inside, counting
+the ones walking towards it.
 
 **A traveller takes the seat before they take the road.** While walking they
 are in no location at all, so the place they are walking to holds their room —

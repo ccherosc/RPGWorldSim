@@ -122,10 +122,13 @@ tomorrow night, the code says tomorrow night.
   silently corrected (sim-core rule 10). `makeTraits` refuses a value of 140
   rather than storing 100; `clampTrait` is for computed drift, where clamping
   is the intended behaviour.
-- Balance numbers live in `data/`, not in these sources. The age bands, the
-  trait distribution, the routine bands and the role shifts are code defaults
-  until `data/world/village.json` exists in slice 6, on the same pattern as
-  `DEFAULT_CALENDAR`.
+- Balance numbers live in `data/`, not in these sources. Since slice 6 the
+  village states its own trait curve, routine bands and role shifts in
+  `data/world/village.json`, and the constants here are the defaults for tests
+  and for a world built without one, on the pattern of `DEFAULT_CALENDAR`. The
+  age bands are the exception: nothing reads them on the path worldgen takes,
+  because every founding villager's age is fixed by their household template,
+  so they stay in code until Phase 2 gives them a reader.
 - The founding transition is the one that spends no jitter draw. A drifted
   *first* bedtime can land behind the clock and cost a villager a whole day, so
   `begin` schedules the stated hour exactly. `test/golden.test.ts` pins that by

@@ -7,6 +7,8 @@ import {
   MAX_CONDITION,
   makeBuilding,
   makeLocation,
+  withBuilding,
+  withLocation,
 } from '../src/location.ts';
 
 /**
@@ -220,5 +222,79 @@ describe('makeBuilding', () => {
         residents: [npc(3), npc(3)],
       }),
     ).toThrow(/duplicate/);
+  });
+});
+
+/**
+ * The copy-with-changes helpers.
+ *
+ * Worldgen builds a cottage before the family that lives in it exists, so the
+ * cottage has to be rewritten once they do. The danger in a copy helper is that
+ * it copies its way around the construction rules: `{...cottage, owner: head}`
+ * would produce a private house nobody may enter and no error at all. These go
+ * back through `makeLocation` and `makeBuilding`, and these tests exist to say
+ * that they still do.
+ */
+describe('withLocation and withBuilding', () => {
+  const cottage = () =>
+    makeLocation({
+      id: loc(7),
+      name: 'A cottage on Mill Lane',
+      type: LocationType.Dwelling,
+      coordinate: { x: 40, y: 12 },
+      capacity: 8,
+      access: Access.Private,
+    });
+
+  it('changes only what it is given', () => {
+    const named = withLocation(cottage(), { name: 'Hale Cottage', owner: npc(1), permitted: [npc(2)] });
+    expect(named).toEqual({
+      ...cottage(),
+      name: 'Hale Cottage',
+      owner: 'npc:1',
+      permitted: ['npc:2'],
+    });
+  });
+
+  it('leaves the original untouched', () => {
+    const before = cottage();
+    withLocation(before, { name: 'Hale Cottage' });
+    expect(before.name).toBe('A cottage on Mill Lane');
+    expect(before.owner).toBeNull();
+  });
+
+  it('still enforces every construction rule', () => {
+    // A public place with a permitted list is the rule makeLocation refuses,
+    // and the one a spread-based copy would sail straight past.
+    expect(() => withLocation(cottage(), { access: Access.Public })).not.toThrow();
+    expect(() =>
+      withLocation(cottage(), { access: Access.Public, permitted: [npc(2)] }),
+    ).toThrow(/public/);
+    expect(() => withLocation(cottage(), { capacity: 0 })).toThrow();
+    expect(() => withLocation(cottage(), { name: '' })).toThrow();
+  });
+
+  it('normalises the fields it rewrites', () => {
+    expect(withLocation(cottage(), { permitted: [npc(12), npc(3)] }).permitted).toEqual([
+      'npc:3',
+      'npc:12',
+    ]);
+  });
+
+  const smithy = () =>
+    makeBuilding({
+      id: makeEntityId(EntityKind.Building, 4),
+      name: 'The Smithy',
+      type: BuildingType.Smithy,
+      location: loc(7),
+      condition: 70,
+    });
+
+  it('copies a building through its own rules', () => {
+    const owned = withBuilding(smithy(), { owner: npc(1), residents: [npc(9), npc(1)] });
+    expect(owned).toEqual({ ...smithy(), owner: 'npc:1', residents: ['npc:1', 'npc:9'] });
+    expect(smithy().owner).toBeNull();
+    expect(() => withBuilding(smithy(), { condition: MAX_CONDITION + 1 })).toThrow();
+    expect(() => withBuilding(smithy(), { residents: [npc(1), npc(1)] })).toThrow(/duplicate/);
   });
 });

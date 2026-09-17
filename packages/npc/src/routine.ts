@@ -63,12 +63,41 @@ export const ROUTINE_JITTER = minutes(20);
  */
 export const MIN_WAKING_TICKS = hours(8);
 
+/**
+ * The validated shape of one band, so a data file can carry the table.
+ *
+ * `maxAge` accepts `null` for the catch-all band. The code default writes
+ * `Number.MAX_SAFE_INTEGER` there, which is a legal JSON number and an
+ * unreadable one; `null` says "and everybody older" in a way somebody editing
+ * `village.json` will understand, and `routineBandsFromJson` turns it back.
+ */
+export const RoutineBandSchema = z
+  .object({
+    name: z.string().min(1),
+    maxAge: z.number().int().nonnegative().nullable(),
+    rise: TickRangeSchema,
+    bed: TickRangeSchema,
+  })
+  .strict();
+
 export interface RoutineBand {
   readonly name: string;
   /** Inclusive upper age for this band. The last band must catch everybody. */
   readonly maxAge: number;
   readonly rise: TickRange;
   readonly bed: TickRange;
+}
+
+/** Read a band table out of data, turning a `null` ceiling into a real one. */
+export function routineBandsFromJson(
+  bands: readonly z.infer<typeof RoutineBandSchema>[],
+): readonly RoutineBand[] {
+  return bands.map((band) => ({
+    name: band.name,
+    maxAge: band.maxAge ?? Number.MAX_SAFE_INTEGER,
+    rise: band.rise,
+    bed: band.bed,
+  }));
 }
 
 /**
@@ -79,9 +108,10 @@ export interface RoutineBand {
  * and the elderly are earliest of all. Children get the most sleep and youths
  * the latest nights.
  *
- * Balance values, so directive 10 says they belong in data. Slice 6 reads them
- * from `data/world/village.json`; this constant is the default for tests and
- * for a world built without one, on the pattern of `DEFAULT_AGE_BANDS`.
+ * Balance values, so directive 10 says they belong in data, and since slice 6
+ * the village reads its own table from `data/world/village.json`. This constant
+ * is the default for tests and for a world built without one, on the pattern of
+ * `DEFAULT_AGE_BANDS`.
  */
 export const DEFAULT_ROUTINE_BANDS: readonly RoutineBand[] = Object.freeze([
   Object.freeze({

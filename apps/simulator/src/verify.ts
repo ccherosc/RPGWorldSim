@@ -1,15 +1,43 @@
-import { type CalendarConfig, MemorySaveStore, TICKS_PER_DAY } from '@rpgsim/sim-core';
-import { ProbeWorld, attachProbeWorld, createProbeWorld } from './probe-world.ts';
+import { MemorySaveStore, type Simulation, TICKS_PER_DAY } from '@rpgsim/sim-core';
 
 /**
- * The Phase 0 acceptance checks, expressed as runnable code rather than prose.
+ * The acceptance checks, expressed as runnable code rather than prose.
  *
  * These are the guarantees the kickoff brief names: seeded reproducibility,
  * stable ordering, deterministic scheduling, save/load continuation, and
  * identical replay from identical inputs. They run in the test suite and from
  * `npm run verify`, so a determinism regression is catchable in one command
  * without reading a test report.
+ *
+ * **Nothing here knows what a world is.** It takes a factory and asks it for
+ * worlds. That is slice 6's doing: until then this file built probe worlds
+ * directly, and the village could not be checked by the one command that is
+ * supposed to be the answer to "is it still deterministic?". Both worlds are
+ * worth checking and for different reasons -- the probe harness exercises
+ * cancellation and colliding priorities that the village does not yet reach,
+ * and the village exercises everything the project is actually about.
  */
+
+/** The little a determinism check needs from a world. */
+export interface SimWorld {
+  readonly sim: Simulation;
+  summary(): string;
+}
+
+/**
+ * How to build the world under test, twice over.
+ *
+ * `create` builds a populated world from a seed. `attach` builds the same
+ * wiring with nothing in it, ready to be loaded from a save — which is the
+ * whole point of having two: a save that only ever loads into the world that
+ * wrote it proves nothing about whether the save is complete.
+ */
+export interface WorldFactory {
+  /** What to call it in the report: "probe", "village". */
+  readonly label: string;
+  create(seed: string): SimWorld;
+  attach(seed: string): SimWorld;
+}
 
 export interface VerificationCheck {
   readonly name: string;
@@ -19,26 +47,33 @@ export interface VerificationCheck {
 
 export interface VerificationReport {
   readonly seed: string;
+  readonly world: string;
   readonly days: number;
-  readonly probes: number;
   readonly checks: readonly VerificationCheck[];
   readonly passed: boolean;
 }
 
 export interface VerifyOptions {
   readonly seed: string;
+  readonly world: WorldFactory;
   readonly days?: number;
-  readonly probes?: number;
-  readonly calendar?: CalendarConfig;
 }
 
 const DEFAULT_DAYS = 30;
 
-/** Run a world for `days` and fingerprint it at every day boundary. */
-export function fingerprintRun(world: ProbeWorld, days: number): string[] {
+/**
+ * Run a world for `days` and fingerprint it at every day boundary.
+ *
+ * Boundaries are counted from the world's own starting tick, not from tick
+ * zero. The probe world opens at tick 0 and the village opens on a date, so a
+ * run measured absolutely would ask the village to run until a moment ninety
+ * days behind it and stop instantly.
+ */
+export function fingerprintRun(world: SimWorld, days: number): string[] {
+  const origin = world.sim.tick;
   const hashes: string[] = [];
   for (let day = 1; day <= days; day++) {
-    world.sim.runUntil(day * TICKS_PER_DAY);
+    world.sim.runUntil(origin + day * TICKS_PER_DAY);
     hashes.push(world.sim.hash());
   }
   return hashes;
@@ -47,21 +82,12 @@ export function fingerprintRun(world: ProbeWorld, days: number): string[] {
 export function verifyDeterminism(options: VerifyOptions): VerificationReport {
   const seed = options.seed;
   const days = options.days ?? DEFAULT_DAYS;
-  const probes = options.probes ?? 12;
-  const calendar = options.calendar;
-  const world = (worldSeed: string): ProbeWorld =>
-    createProbeWorld({
-      seed: worldSeed,
-      probes,
-      ...(calendar !== undefined ? { calendar } : {}),
-    });
-  const attach = (): ProbeWorld =>
-    attachProbeWorld({ seed, probes, ...(calendar !== undefined ? { calendar } : {}) });
+  const factory = options.world;
   const checks: VerificationCheck[] = [];
 
   // 1. Identical replay from identical inputs.
-  const runA = fingerprintRun(world(seed), days);
-  const runB = fingerprintRun(world(seed), days);
+  const runA = fingerprintRun(factory.create(seed), days);
+  const runB = fingerprintRun(factory.create(seed), days);
   const firstDivergence = runA.findIndex((hash, day) => hash !== runB[day]);
   checks.push({
     name: 'identical replay',
@@ -76,7 +102,7 @@ export function verifyDeterminism(options: VerifyOptions): VerificationReport {
 
   // 2. The seed actually matters. A kernel that ignored the seed would pass
   //    every other check here, so this is the control.
-  const other = fingerprintRun(world(`${seed}-variant`), days);
+  const other = fingerprintRun(factory.create(`${seed}-variant`), days);
   checks.push({
     name: 'seed sensitivity',
     passed: other[days - 1] !== runA[days - 1],
@@ -86,18 +112,19 @@ export function verifyDeterminism(options: VerifyOptions): VerificationReport {
   // 3. Save, reload into freshly-wired systems, and continue. The resumed world
   //    must land on the same state as one that was never interrupted.
   const half = Math.max(1, Math.floor(days / 2));
-  const original = world(seed);
-  original.sim.runUntil(half * TICKS_PER_DAY);
+  const original = factory.create(seed);
+  const origin = original.sim.tick;
+  original.sim.runUntil(origin + half * TICKS_PER_DAY);
 
   const store = new MemorySaveStore();
   original.sim.saveTo(store, 'verify');
 
-  const resumed = attach();
+  const resumed = factory.attach(seed);
   resumed.sim.loadFrom(store, 'verify');
 
   const resumedHashes: string[] = [];
   for (let day = half + 1; day <= days; day++) {
-    resumed.sim.runUntil(day * TICKS_PER_DAY);
+    resumed.sim.runUntil(origin + day * TICKS_PER_DAY);
     resumedHashes.push(resumed.sim.hash());
   }
   const expectedTail = runA.slice(half);
@@ -112,7 +139,7 @@ export function verifyDeterminism(options: VerifyOptions): VerificationReport {
   });
 
   // 4. Saving must not perturb the world that was saved.
-  original.sim.runUntil(days * TICKS_PER_DAY);
+  original.sim.runUntil(origin + days * TICKS_PER_DAY);
   checks.push({
     name: 'saving is side-effect free',
     passed: original.sim.hash() === (runA[days - 1] as string),
@@ -130,5 +157,11 @@ export function verifyDeterminism(options: VerifyOptions): VerificationReport {
         : report.violations.map((v) => `[${v.invariantId}] ${v.message}`).join('; '),
   });
 
-  return { seed, days, probes, checks, passed: checks.every((check) => check.passed) };
+  return {
+    seed,
+    world: factory.label,
+    days,
+    checks,
+    passed: checks.every((check) => check.passed),
+  };
 }

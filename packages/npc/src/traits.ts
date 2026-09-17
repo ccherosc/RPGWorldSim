@@ -103,6 +103,11 @@ export interface TraitDistribution {
   readonly stdDev: number;
 }
 
+/** The same shape, validated, so a data file can carry it. */
+export const TraitDistributionSchema = z
+  .object({ mean: z.number(), stdDev: z.number().positive() })
+  .strict();
+
 export const DEFAULT_TRAIT_MEAN = 50;
 export const DEFAULT_TRAIT_STD_DEV = 18;
 
@@ -110,9 +115,11 @@ export const DEFAULT_TRAIT_STD_DEV = 18;
  * The default roll, used for every trait unless a caller overrides it.
  *
  * Per-trait skews (a pious village, a stubborn one) are balance, and directive
- * 10 puts balance in data -- they will arrive with `data/world/village.json` in
- * slice 6, as an override map passed to `generateTraits`. Until there is a data
- * file to hold them, one honest default beats twelve invented ones.
+ * 10 puts balance in data. Since slice 6 `data/world/village.json` carries the
+ * curve and worldgen passes it in as an override map; it currently states one
+ * curve for all twelve traits, which is the same shape as this default and not
+ * the same thing as inheriting it. A village that skews a trait states that
+ * trait's own curve there, not here.
  */
 export const DEFAULT_TRAIT_DISTRIBUTION: TraitDistribution = Object.freeze({
   mean: DEFAULT_TRAIT_MEAN,

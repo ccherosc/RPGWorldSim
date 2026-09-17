@@ -11,6 +11,8 @@ export {
   MIN_CONDITION,
   makeBuilding,
   makeLocation,
+  withBuilding,
+  withLocation,
 } from './location.ts';
 export type {
   AccessName,

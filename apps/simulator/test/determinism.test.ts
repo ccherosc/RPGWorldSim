@@ -15,6 +15,7 @@ import {
   type ProbeWorld,
   attachProbeWorld,
   createProbeWorld,
+  probeWorldFactory,
   fingerprintRun,
   verifyDeterminism,
 } from '../src/index.ts';
@@ -312,7 +313,7 @@ describe('world invariants under sustained running', () => {
 describe('the verify command', () => {
   it('passes for several unrelated seeds', () => {
     for (const seed of ['alpha', 'beta-42', 'a very long seed string with spaces']) {
-      const report = verifyDeterminism({ seed, days: 12, probes: 6 });
+      const report = verifyDeterminism({ seed, days: 12, world: probeWorldFactory({ probes: 6 }) });
       const failures = report.checks.filter((check) => !check.passed);
       expect(failures, seed).toEqual([]);
       expect(report.passed).toBe(true);
@@ -320,6 +321,6 @@ describe('the verify command', () => {
   });
 
   it('exercises the single-probe boundary', () => {
-    expect(verifyDeterminism({ seed: 'lonely', days: 8, probes: 1 }).passed).toBe(true);
+    expect(verifyDeterminism({ seed: 'lonely', days: 8, world: probeWorldFactory({ probes: 1 }) }).passed).toBe(true);
   });
 });

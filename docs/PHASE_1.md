@@ -1,6 +1,10 @@
 # Phase 1 — World Zero Skeleton
 
-**Status: in progress.**
+**Status: complete.** All six slices have landed. The village runs from
+`data/world/village.json`, and `npm run verify` proves the five determinism
+guarantees about it. Whether a day *reads* like a village rather than a log is
+the one part of the bar below that a test cannot answer, and the crude daily
+paper described in section 5 is what answers it.
 
 Phase 1 puts a village on the map and people in it. Roadmap deliverables: one
 village, locations, buildings, ~100 NPCs, households, basic identity, basic
@@ -360,7 +364,7 @@ that is already true when it is stated.
 
 *`RngStream` gains `Routines`.* As set out above, per determinism rule 6.
 
-### Slice 6: World Zero generation and the CLI
+### Slice 6: World Zero generation and the CLI — **done**
 
 A `data/world/village.json` describing the settlement: locations, edges,
 buildings, and the population parameters. Worldgen reads it, validates it
@@ -379,6 +383,91 @@ world stays exactly where it is, as the kernel's harness.
 **Exit test.** Seven days, all invariants holding at every day boundary, a
 save/load in the middle matching an uninterrupted run, and the same seed
 producing the same village twice.
+
+**Five structural decisions taken before writing it.** Recorded here rather than
+in the landed note, because the Source of Truth rule asks that the design
+document change before the architecture does.
+
+*Data names places by slug; the simulation allocates the ids.* `village.json`
+says `"mill-lane"`, never `location:7`. Entity ids come from `sim.newId` and are
+an artefact of the order worldgen runs in, so writing them into data would make
+a file edit capable of renumbering an existing world. Worldgen keeps a
+slug-to-id table for the length of its own run and throws it away; nothing in
+the save refers to a slug. Every collection in the file is a JSON **array**, not
+an object keyed by slug, because determinism rule 5 forbids iteration order that
+is not itself deterministic.
+
+*Public places are authored; dwellings are generated.* The green, the streets,
+the church, the mill and the roads out are written down one by one with their
+own travel costs, because a village's shape is a decision and "costs are data".
+The twenty-odd cottages are not: the file says how many there are and which
+lanes they stand on, and worldgen lays them out. Hand-writing twenty near
+identical blocks would put the house count and the household count in two places
+that can disagree.
+
+*`WorldMap` gains a way to replace a building.* `Building` carries `owner` and
+`residents`, and until now nothing could ever set them — slice 1 left them empty
+with a note pointing here. A building is also the one thing in the map that
+legitimately changes without moving: people are born into it, inherit it and
+leave it. So `withBuilding` joins `withPerson` and `withHousehold`, and
+`map.replaceBuilding` refuses any change to the building's `location`, because a
+building that moved would be a different building.
+
+*The deferred dwelling check lands here, as an invariant of the wiring.*
+`world.dwelling-is-a-real-building` — every household's dwelling is a location
+that exists, is of type `dwelling`, and is the interior of a building. Neither
+`@rpgsim/society` nor `@rpgsim/world` can hold it without depending on the
+other; the worldgen wiring holds both. Registered by the world builder, not by
+either package.
+
+*The probe world stays, and `verify` runs against both.* `--world village` is
+the default for `run` and `resume`; `--world probe` keeps the Phase 0 harness
+reachable. `verifyDeterminism` takes a world factory instead of hard-coding the
+probe, so `npm run verify` proves the five guarantees about the *village* as
+well — which is what the exit test above actually asks for.
+
+**Landed as.** `data/world/village.json` (the whole settlement: 14 authored
+places, 13 roads, 4 structures, 24 cottages, and the population tables),
+`village-schema.ts` (the validator), `village-world.ts` (`VillageWorld`, the
+builder, the deferred dwelling invariant) and two new loaders in `data.ts`.
+The CLI grew `--world`, and `verify.ts` lost its knowledge of what a world is.
+The shipped village is 86 people in 24 households across 38 places, running 26
+invariants. 26 tests in `apps/simulator/test/village.test.ts` plus 9 in
+`packages/world/test`, checked against twelve deliberate mutations; all twelve
+die.
+
+**Three corrections to the decisions above.** Recorded because the Source of
+Truth rule asks that the document and the code not drift apart quietly.
+
+*Three tables named for `village.json` stayed in code.* The plan was to move
+the age bands, the culture tag and the minimum parent/child age gap into data
+along with everything else. Nothing reads them on any path worldgen takes:
+`ageBands` is consulted only when a person's age is *not* already fixed, and
+every founding villager's age is fixed by the household template they belong
+to; `culture` is already stated once at the top of `names.json`; and the age
+gap is enforced by an invariant as well as used by the generator, so making it
+data would let the rule and the check disagree. A knob in a data file that
+changes nothing is worse than a constant in code, because it looks live. Each
+moves on the day something reads it — `ageBands` when people are born into the
+world rather than generated into it, in Phase 2.
+
+*`WorldMap` gained a way to replace a **location**, not only a building.* A
+cottage is private, and a private place whose `permitted` list is empty refuses
+everybody — including the family who live there. The list cannot be written
+when the cottage is laid out, because the family that goes in it does not exist
+until worldgen has generated them, so the house has to be rewritten afterwards.
+`withLocation` and `map.replaceLocation` are the symmetric pair to
+`withBuilding`/`replaceBuilding`, and they refuse the two things the rest of the
+map has already been built against: a place may not **move**, because every
+travel cost on every road leading to it was set against that point, and it may
+not be **shrunk below the people already inside it**, counting inbound
+travellers as well as occupants.
+
+*`verify` measures its days from the world's own starting tick.* The probe world
+opens at tick 0 and the village opens on a date — `{1200, 4, 1}`, tick 7 776 000.
+A run measured absolutely would ask the village to run until a moment ninety
+days behind it and stop instantly, reporting five passes on a world that never
+moved.
 
 ## 3. Events
 

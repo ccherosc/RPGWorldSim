@@ -131,7 +131,10 @@ not a test yet.
   every personality in the village.
 - Invalid state is refused at construction and reported by an invariant, never
   silently corrected (sim-core rule 10).
-- Balance numbers live in `data/`, not in these sources.
-  `DEFAULT_HOUSEHOLD_TEMPLATES`, `RESIDENT_PARENT_AGE_GAP` and
-  `MIN_PARENT_AGE_GAP` are code defaults until `data/world/village.json` exists
-  in slice 6, on the same pattern as `DEFAULT_CALENDAR`.
+- Balance numbers live in `data/`, not in these sources. Since slice 6 the
+  village states its own household templates in `data/world/village.json`, and
+  `DEFAULT_HOUSEHOLD_TEMPLATES` is the default for tests and for a world built
+  without one, on the pattern of `DEFAULT_CALENDAR`. `MIN_PARENT_AGE_GAP` and
+  `RESIDENT_PARENT_AGE_GAP` stay in code on purpose: an invariant enforces them,
+  and a data file holding the rule the check is written against would let the
+  two disagree.

@@ -6,7 +6,7 @@ import {
   type SimEvent,
   type Simulation,
 } from '@rpgsim/sim-core';
-import type { NameBook, PeopleSystem } from '@rpgsim/npc';
+import type { NameBook, PeopleSystem, TraitDistribution, TraitName } from '@rpgsim/npc';
 import {
   type HouseholdTemplate,
   type PlannedParent,
@@ -74,6 +74,13 @@ export interface GenerateHouseholdOptions {
   readonly templates?: readonly HouseholdTemplate[];
   /** Force one shape, skipping the template draw. */
   readonly template?: HouseholdTemplate;
+  /**
+   * The bell curves personalities are rolled from, passed through to each
+   * villager. Worldgen reads them from `village.json`; omitting them uses the
+   * package default, which is what every test that does not care about traits
+   * wants.
+   */
+  readonly traits?: Partial<Record<TraitName, TraitDistribution>>;
   readonly causes?: readonly SimEvent['id'][];
 }
 
@@ -172,6 +179,7 @@ export class HouseholdSystem {
         age: member.age,
         familyName: member.familyName,
         avoidGivenNames: spoken,
+        ...(options.traits !== undefined ? { traitDistributions: options.traits } : {}),
       });
       ids.push(person.id);
       spoken.push(person.givenName);

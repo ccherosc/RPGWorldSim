@@ -13,6 +13,7 @@ import {
   nextTimeOfDay,
   violation,
 } from '@rpgsim/sim-core';
+import type { WorldFactory } from './verify.ts';
 
 /**
  * A deliberately trivial world used to exercise the Phase 0 kernel.
@@ -341,4 +342,19 @@ export function createProbeWorld(options: ProbeWorldOptions): ProbeWorld {
 /** Rebuild the wiring for a world that is about to be loaded from a save. */
 export function attachProbeWorld(options: ProbeWorldOptions): ProbeWorld {
   return new ProbeWorld(options);
+}
+
+/**
+ * The probe world as `verify` wants it: something that builds one from a seed.
+ *
+ * Everything except the seed is fixed at the point the factory is made, which
+ * is what lets the acceptance checks vary the seed -- and only the seed --
+ * across the four worlds they build.
+ */
+export function probeWorldFactory(options: Omit<ProbeWorldOptions, 'seed'>): WorldFactory {
+  return {
+    label: 'probe',
+    create: (seed) => createProbeWorld({ ...options, seed }),
+    attach: (seed) => attachProbeWorld({ ...options, seed }),
+  };
 }

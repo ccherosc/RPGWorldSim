@@ -55,10 +55,14 @@ export type AgeBand = z.infer<typeof AgeBandSchema>;
  * day one is not a hundred thirty-year-olds, which would make every later
  * demographic result unreadable.
  *
- * These are balance values, so directive 10 says they belong in data. Slice 6
- * will read them from `data/world/village.json`; this constant is the default
- * for tests and for a world built without one, on the same pattern as
- * `DEFAULT_CALENDAR`.
+ * These are balance values, so directive 10 says they belong in data, and slice
+ * 6 planned to move them to `data/world/village.json`. They stayed here,
+ * because on the path worldgen takes nothing would read them: a band is
+ * consulted only when a person's age is *not* already fixed, and every founding
+ * villager's age is fixed by the household template they belong to. A knob in a
+ * data file that changes nothing is worse than a constant in code, because it
+ * looks live. This moves the day something reads it — when people are born into
+ * the world rather than generated into it, in Phase 2.
  */
 export const DEFAULT_AGE_BANDS: readonly AgeBand[] = Object.freeze([
   Object.freeze({ name: 'child', minAge: 0, maxAge: 13, weight: 32 }),

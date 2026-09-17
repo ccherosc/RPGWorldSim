@@ -21,6 +21,7 @@ export {
   TRAIT_MIN,
   TRAIT_NAMES,
   Trait,
+  TraitDistributionSchema,
   TraitsSchema,
   clampTrait,
   isTraitName,
@@ -58,6 +59,7 @@ export {
   MIN_WAKING_TICKS,
   ROUTINE_JITTER,
   ROUTINE_ROLE_SHIFTS,
+  RoutineBandSchema,
   RoutineSchema,
   TickRangeSchema,
   at,
@@ -67,6 +69,7 @@ export {
   makeRoutine,
   nextTickOfDay,
   routineBandFor,
+  routineBandsFromJson,
   tickOfDayTomorrow,
   validateRoutineBands,
 } from './routine.ts';

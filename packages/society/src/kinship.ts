@@ -120,7 +120,9 @@ export function hasLivingRecordedParent(parentage: Parentage): boolean {
  * Not a moral claim, a coherence one: without a floor, generation is free to
  * produce a mother eleven years older than nobody and a father younger than his
  * son. It is enforced as an invariant, so a generator that drifts is caught
- * rather than trusted. Balance, so slice 6 moves it to
- * `data/world/village.json`.
+ * rather than trusted, and that is why it stayed in code when slice 6 moved the
+ * other balance numbers to `data/world/village.json`: the generator and the
+ * invariant read the same constant, and a data file holding one of them would
+ * let the rule and the check that enforces it disagree.
  */
 export const MIN_PARENT_AGE_GAP = 14;
