@@ -220,6 +220,23 @@ describe('main', () => {
     expect(manifest?.days.at(-1)?.hash).toBe(finalHash);
     expect(manifest?.days.every((day) => day.events > 0)).toBe(true);
 
+    // The founding is in there.
+    //
+    // This is the part that is impossible to recover after the fact: worldgen
+    // announces every person and every household as it creates them, so an
+    // archive attached to the finished world would hold a village of strangers
+    // -- correct in every other respect, and useless to a chronicle that has to
+    // say who anybody is. Counting `npc.created` is the cheapest proof that the
+    // sink was listening before the village existed.
+    const firstDay = readEventDay(archiveRoot, '1200-04-01');
+    const opening = firstDay.filter((e) => e.type === 'world.generated');
+    expect(opening).toHaveLength(1);
+    const counts = opening[0]?.data as { people: number; households: number };
+    expect(firstDay.filter((e) => e.type === 'npc.created')).toHaveLength(counts.people);
+    expect(firstDay.filter((e) => e.type === 'society.household-founded')).toHaveLength(
+      counts.households,
+    );
+
     // Every event filed under a day happened during it. A dateline depends on it.
     for (const day of manifest?.days ?? []) {
       const events = readEventDay(archiveRoot, day.key);

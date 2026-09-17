@@ -7,6 +7,7 @@ import {
   type SaveModule,
   type ScheduledEventId,
   type SimEvent,
+  type SimEventId,
   type Simulation,
   type Tick,
   compareEntityIds,
@@ -299,7 +300,9 @@ export class RestSystem {
 
     const at = this.map.locationOf(npc);
     this.set(npc, { ...rest, asleep: false, headingHome: false });
-    this.sim.emit({
+    // Waking has no cause to cite: it is a scheduled transition, not a reply to
+    // anything that happened. Everything the villager does next cites *it*.
+    const woke = this.sim.emit({
       type: RestEvent.Woke,
       actors: [npc],
       ...(at !== undefined ? { location: at } : {}),
@@ -312,7 +315,7 @@ export class RestSystem {
     this.reschedule(npc, RestKind.Bed);
 
     if (rest.dayDestination !== null && at !== rest.dayDestination) {
-      this.travel.begin(npc, rest.dayDestination);
+      this.travel.begin(npc, rest.dayDestination, [woke.id]);
     }
   }
 
@@ -373,16 +376,26 @@ export class RestSystem {
     if (rest === undefined || !rest.headingHome) return;
     if (readFlag(event, 'final') !== true) return;
 
+    // Whatever happens next happened *because* they got here, so the arrival is
+    // carried through as its cause. That is what turns a walk home broken into
+    // four legs by four crossroads into one readable chain.
     const home = this.homeOf(npc);
     if (this.map.locationOf(npc) === home) {
-      this.sleep(npc, home);
+      this.sleep(npc, home, [event.id]);
       return;
     }
-    this.walkHome(npc, home);
+    this.walkHome(npc, home, [event.id]);
   }
 
   /**
    * Start the walk home, or say out loud why they are staying up.
+   *
+   * The decision is announced before the walk rather than after it, because the
+   * walk is a consequence of the decision. With the emits the other way round
+   * the record read — in order — as a villager who set out and then decided to,
+   * and nothing downstream could cite the reason they were on the road. The
+   * departure it causes carries the arrival tick, so nothing was lost by moving
+   * it.
    *
    * Schedules nothing. Every caller reaches here with tomorrow night's bedtime
    * already pending — `onBed` sets it before the first step of the walk, and
@@ -391,21 +404,21 @@ export class RestSystem {
    * happens to need, so that lengthening one road would reshuffle every
    * decision made afterwards anywhere in the world.
    */
-  private walkHome(npc: EntityId, home: EntityId): void {
-    const outcome = this.travel.begin(npc, home);
-    if (outcome.started) {
-      this.sim.emit({
-        type: RestEvent.TurningIn,
-        actors: [npc],
-        data: { npc, home, interrupted: false, arrivesAt: outcome.journey.legArrivesAt },
-      });
-      return;
-    }
+  private walkHome(npc: EntityId, home: EntityId, causes: readonly SimEventId[] = []): void {
+    const turningIn = this.sim.emit({
+      type: RestEvent.TurningIn,
+      actors: [npc],
+      data: { npc, home, interrupted: false },
+      causes,
+    });
+
+    const outcome = this.travel.begin(npc, home, [turningIn.id]);
+    if (outcome.started) return;
 
     if (outcome.reason === 'already-there') {
       // The map and the journey disagreed for an instant. Either way they are
       // standing in their own house, which is all that going to bed requires.
-      this.sleep(npc, home);
+      this.sleep(npc, home, [turningIn.id]);
       return;
     }
 
@@ -421,11 +434,12 @@ export class RestSystem {
         standingIn: this.map.locationOf(npc) ?? null,
         tryingAgainAt: this.require(npc).nextAt,
       },
+      causes: [turningIn.id],
     });
   }
 
   /** Lie down. The only place `asleep` becomes true after `begin`. */
-  private sleep(npc: EntityId, home: EntityId): void {
+  private sleep(npc: EntityId, home: EntityId, causes: readonly SimEventId[] = []): void {
     const rest = this.require(npc);
     this.set(npc, { ...rest, asleep: true, headingHome: false });
     this.reschedule(npc, RestKind.Rise);
@@ -434,6 +448,7 @@ export class RestSystem {
       actors: [npc],
       location: home,
       data: { npc, bed: rest.routine.bed, wakingAt: this.require(npc).nextAt },
+      causes,
     });
   }
 

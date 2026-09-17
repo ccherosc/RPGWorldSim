@@ -109,7 +109,35 @@ export class VillageWorld {
     const cottages = this.buildDwellings(places);
     this.buildStructures(places);
     this.settle(cottages, places);
+    this.announce();
     return this;
+  }
+
+  /**
+   * The village's own first line: `world.generated`.
+   *
+   * Last rather than first, because the counts it carries do not exist until
+   * worldgen has finished, and an opening record that had to be corrected
+   * afterwards would not be a record. It shares its tick with every founding
+   * event, so a reader that wants the founding in order reads by event id.
+   *
+   * It carries the seed on purpose. Everything else in the archive is an
+   * observation about the village; this is the one line that says which village
+   * it is, and it is what lets a rebuilt archive be checked against the one it
+   * claims to reproduce.
+   */
+  private announce(): void {
+    this.sim.emit({
+      type: 'world.generated',
+      data: {
+        seed: this.sim.seed,
+        village: this.config.name,
+        opened: this.config.start,
+        people: this.population,
+        households: this.households.register.householdCount,
+        places: this.map.locationCount,
+      },
+    });
   }
 
   get population(): number {
@@ -388,7 +416,11 @@ export function attachVillageWorld(options: VillageWorldOptions): VillageWorld {
 export function villageWorldFactory(options: Omit<VillageWorldOptions, 'seed'>): WorldFactory {
   return {
     label: 'village',
-    create: (seed) => createVillageWorld({ ...options, seed }),
+    create: (seed, beforePopulating) => {
+      const world = attachVillageWorld({ ...options, seed });
+      beforePopulating?.(world);
+      return world.populate();
+    },
     attach: (seed) => attachVillageWorld({ ...options, seed }),
   };
 }

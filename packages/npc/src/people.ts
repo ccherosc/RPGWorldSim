@@ -86,7 +86,12 @@ export class PeopleSystem {
         npc: person.id,
         name: fullName(person),
         sex: person.sex,
+        // Both the age and the date. The age is what a reader wants; the date
+        // is what a record needs, because an age is only true on the day it was
+        // written and a chronicle read back in ten years would age everybody
+        // wrongly from it.
         age: ageInYears(person.birth, this.sim.now()),
+        born: { year: person.birth.year, month: person.birth.month, day: person.birth.day },
         culture: person.culture,
         origin,
       },
@@ -114,7 +119,11 @@ export class PeopleSystem {
   }
 
   /** Move someone into a household, or out of one with `null`. */
-  setHousehold(id: EntityId, household: EntityId | null): Person {
+  setHousehold(
+    id: EntityId,
+    household: EntityId | null,
+    causes: readonly SimEvent['id'][] = [],
+  ): Person {
     const before = this.population.require(id).household;
     const person = this.population.setHousehold(id, household);
     if (before !== household) {
@@ -122,13 +131,14 @@ export class PeopleSystem {
         type: NpcEvent.HouseholdChanged,
         actors: [id],
         data: { npc: id, from: before, to: household },
+        causes,
       });
     }
     return person;
   }
 
   /** Give someone a dwelling to sleep in, or none with `null`. */
-  setHome(id: EntityId, home: EntityId | null): Person {
+  setHome(id: EntityId, home: EntityId | null, causes: readonly SimEvent['id'][] = []): Person {
     const before = this.population.require(id).home;
     const person = this.population.setHome(id, home);
     if (before !== home) {
@@ -137,6 +147,7 @@ export class PeopleSystem {
         actors: [id],
         ...(home !== null ? { location: home } : {}),
         data: { npc: id, from: before, to: home },
+        causes,
       });
     }
     return person;

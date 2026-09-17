@@ -458,6 +458,78 @@ describe('interruption', () => {
   });
 });
 
+/**
+ * Causality, which is the whole reason the event stream is worth keeping.
+ *
+ * `docs/CHRONICLE.md` asks that every sentence a chronicle prints trace back to
+ * an event, and a trace is only as good as the `causes` links it walks. A pile
+ * of departures and arrivals that all mention the same traveller is not a
+ * chain; two of them at the same minute cannot be told apart.
+ */
+describe('the causal chain', () => {
+  it('links every leg of a walk to the one before it', () => {
+    const w = departing();
+    const reason = w.sim.emit({ type: 'test.decided', actors: [npc(0)], data: {} });
+    w.travel.begin(npc(0), COTTAGE, [reason.id]);
+    w.sim.runUntil(SQUARE_TO_STREET + STREET_TO_COTTAGE);
+
+    const departures = w.events('travel.departed');
+    const arrivals = w.events('travel.arrived');
+    expect(departures).toHaveLength(2);
+    expect(arrivals).toHaveLength(2);
+
+    // decision -> out of the square -> into the street -> out of the street ->
+    // into the cottage. Read backwards from the last arrival, the trace answers
+    // "why is this person standing in the cottage" without guessing.
+    expect(departures[0]?.causes).toEqual([reason.id]);
+    expect(arrivals[0]?.causes).toEqual([departures[0]?.id]);
+    expect(departures[1]?.causes).toEqual([arrivals[0]?.id]);
+    expect(arrivals[1]?.causes).toEqual([departures[1]?.id]);
+
+    expect(w.sim.log.trace(arrivals[1]?.id as number).map((step) => step.event.type)).toEqual([
+      'travel.arrived',
+      'travel.departed',
+      'travel.arrived',
+      'travel.departed',
+      'test.decided',
+    ]);
+  });
+
+  it('gives a refusal the same cause the attempt had', () => {
+    const w = departing();
+    const reason = w.sim.emit({ type: 'test.decided', actors: [npc(0)], data: {} });
+    w.travel.begin(npc(0), ISLE, [reason.id]);
+
+    // A refused action is as informative as a successful one, and it is only
+    // informative if it says what was being attempted.
+    expect(w.events('travel.blocked')[0]?.causes).toEqual([reason.id]);
+  });
+
+  /**
+   * The link survives a save, because it has to.
+   *
+   * The arrival cites the departure that started the leg, and the departure
+   * happened before the save. If the journey did not carry that id across the
+   * boundary the resumed world would emit an arrival citing nothing, which is a
+   * different event from the one the uninterrupted run emits -- determinism
+   * rule 8, caught by the hash rather than by inspection.
+   */
+  it('still cites the departure after a reload in the middle of the leg', () => {
+    const straight = departing();
+    straight.travel.begin(npc(0), COTTAGE);
+
+    const resumed = world();
+    straight.sim.runUntil(10);
+    resumed.sim.load(straight.sim.save());
+
+    const departed = resumed.sim.log.byType('travel.departed', 10)[0];
+    expect(resumed.travel.journeyOf(npc(0))?.departure).toBe(departed?.id);
+
+    resumed.sim.runUntil(SQUARE_TO_STREET);
+    expect(resumed.sim.log.byType('travel.arrived', 10)[0]?.causes).toEqual([departed?.id]);
+  });
+});
+
 describe('persistence', () => {
   it('reloads a traveller mid-walk and lands them at the same tick', () => {
     const { sim, travel } = departing();

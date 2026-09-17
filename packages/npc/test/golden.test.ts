@@ -299,6 +299,6 @@ describe('golden: the daily cycle', () => {
     // walking to the mill, walking home and going to bed, with every jitter
     // draw and every scheduled handle folded in. A change to draw order
     // anywhere in the cycle moves this even when nothing visible changes.
-    expect(sim.hash()).toBe('1cce10c6afbff3ca');
+    expect(sim.hash()).toBe('cee71217ba3a9e4b');
   });
 });

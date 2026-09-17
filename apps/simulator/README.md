@@ -26,7 +26,7 @@ village, seed "world-zero", 4 days
   Blossom 5, 1200 (Midweek) 00:00:00  people=86  households=24  places=38  asleep=86  travelling=0  events=2640
 
 final state: Blossom 5, 1200 (Midweek) 00:00:00  ...
-state hash:  cab59ae7231437ab
+state hash:  edc35fdf84c49af3
 world time:  1200-04-05 00:00:00
 ```
 
@@ -68,6 +68,13 @@ history/
   days/1200-04-02/events.jsonl
   days/1200-04-03/events.jsonl
 ```
+
+The sink is attached **before** worldgen runs, not to the world that comes
+back. Worldgen announces every person and every household as it makes them, and
+those announcements are the only record of who anybody is — an archive opened a
+moment later holds a village of strangers. That is what `WorldFactory`'s
+`beforePopulating` hook exists for, and it is the only place in the run where
+the order matters.
 
 The event log keeps only a bounded window in memory on purpose — unbounded
 event growth is a named failure mode in CLAUDE.md — so this is where anything

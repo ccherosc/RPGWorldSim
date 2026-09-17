@@ -107,6 +107,20 @@ export class HouseholdSystem {
    * allowed to write one without the other.
    */
   found(options: FoundHouseholdOptions): Household {
+    return this.raise(options).household;
+  }
+
+  /**
+   * `found`, plus the event it emitted.
+   *
+   * Private because the event id is only useful to the code that is about to
+   * make something else happen on the strength of it; a caller who just wants a
+   * household should not have to know what an event id is.
+   */
+  private raise(options: FoundHouseholdOptions): {
+    readonly household: Household;
+    readonly founded: SimEvent;
+  } {
     for (const member of options.members) {
       const existing = this.register.householdOf(member.npc);
       assert(existing === undefined, 'that person is already in a household', {
@@ -124,12 +138,13 @@ export class HouseholdSystem {
     });
     this.register.add(household);
 
-    for (const npc of memberIds(household)) {
-      this.people.setHousehold(npc, household.id);
-      this.people.setHome(npc, household.dwelling);
-    }
-
-    this.sim.emit({
+    // Announced before the members are written in, not after, because moving
+    // into a house is a consequence of the house existing — and a consequence
+    // recorded first has nothing to point back at. Everything the event says is
+    // already true when it goes out: the household is in the register and its
+    // membership is in the payload. Only the two *sides* of each membership are
+    // still being written, and nothing reads those from inside this event.
+    const founded = this.sim.emit({
       type: SocietyEvent.HouseholdFounded,
       actors: memberIds(household),
       location: household.dwelling,
@@ -143,7 +158,13 @@ export class HouseholdSystem {
       },
       causes: options.causes ?? [],
     });
-    return household;
+
+    for (const npc of memberIds(household)) {
+      this.people.setHousehold(npc, household.id, [founded.id]);
+      this.people.setHome(npc, household.dwelling, [founded.id]);
+    }
+
+    return { household, founded };
   }
 
   /**
@@ -185,7 +206,7 @@ export class HouseholdSystem {
       spoken.push(person.givenName);
     }
 
-    const household = this.found({
+    const { household, founded } = this.raise({
       name: plan.name,
       dwelling: options.dwelling,
       members: plan.members.map((member, index) => ({
@@ -195,12 +216,18 @@ export class HouseholdSystem {
       ...(options.causes !== undefined ? { causes: options.causes } : {}),
     });
 
+    // The kinship lines exist because this house was founded with these people
+    // in it. At worldgen that is the only true answer: nobody was born here, so
+    // there is no birth to cite, and `npc.created` says no more than that they
+    // turned up. Once people are born in the village a birth is the better
+    // cause, and this is where that will be read from.
     for (const [index, member] of plan.members.entries()) {
       if (member.mother === undefined || member.father === undefined) continue;
       this.recordParentage(
         ids[index] as EntityId,
         resolveParent(member.mother, ids),
         resolveParent(member.father, ids),
+        [founded.id],
       );
     }
 
@@ -298,11 +325,17 @@ export class HouseholdSystem {
   }
 
   /** Record who somebody's parents were. */
-  recordParentage(child: EntityId, mother: ParentRef, father: ParentRef): void {
+  recordParentage(
+    child: EntityId,
+    mother: ParentRef,
+    father: ParentRef,
+    causes: readonly SimEvent['id'][] = [],
+  ): void {
     const parentage = this.register.setParentage(child, mother, father);
     this.sim.emit({
       type: SocietyEvent.ParentageRecorded,
       actors: [child],
+      causes,
       data: {
         child,
         mother: parentage.mother.kind === 'known' ? parentage.mother.npc : null,

@@ -259,29 +259,107 @@ tell an atomic write from a direct one.
 
 A fourteen-mutant sweep over the module and the CLI leaves no survivors.
 
-### Slice 2: events the Chronicle needs and the village does not emit
+### Slice 2: the events the Chronicle needs — **built**
 
-[PHASE_1.md](PHASE_1.md) section 3 lists ten event types. Three of them are not
-emitted by any code: `world.generated`, `npc.born` and `household.formed`. They
-were specified because a chronicle needs them and deferred because nothing read
-them. Now something does.
+[PHASE_1.md](PHASE_1.md) section 3 listed ten event types and named three as
+unemitted: `world.generated`, `npc.born` and `household.formed`. Two of those
+three turned out to exist already under better names — `npc.created` carries
+`origin: "founding"` and does everything `npc.born` was specified to do, and
+`society.household-founded` is `household.formed` with the package that owns it
+in the name. PHASE_1.md section 3 has been corrected to the names that ship.
 
-- `world.generated` — at the opening tick: the seed, the village name, the
-  counts, the date it opens on.
-- `npc.born` — one per villager at worldgen, carrying the name and the backdated
-  birth date, with the household as cause where one exists.
-- `household.formed` — members, the dwelling, the family name.
+So the slice shrank to one new event, and grew a second half that the plan had
+not seen: the record was complete in *what* it contained and empty in *why*.
 
-These land at the world's starting tick, which means a naive day-one paper would
-announce eighty-six births and twenty-four weddings on the same morning. So:
-**events at the world's opening tick are the founding record, not news.** The
-chronicle renders them once, on an "About Wodenshill" page, and excludes them
-from every daily paper. The rule is stated as a predicate on tick, not a list of
-event types, so a future `npc.born` from an actual birth is news.
+**`world.generated`** — the seed, the village name, the counts and the date it
+opens on. Emitted **last** rather than first, because the counts it carries do
+not exist until worldgen has finished and an opening line that had to be
+corrected afterwards would not be a record. Every founding event shares its
+tick, so a reader wanting them in order reads by event id. It carries the seed
+on purpose: everything else in the archive is an observation about the village,
+and this is the one line that says *which* village, which is what lets a rebuilt
+archive be checked against the one it claims to reproduce.
 
-Tests: each new event carries actors, a location where one is meaningful, and
-`causes` where a cause exists; a village of 86 people emits 86 `npc.born`; the
-day-one paper contains no founding event.
+**The founding was being lost entirely.** `--archive` attached its sink to the
+world the factory returned, and by then worldgen had already announced every
+person and every household as it made them. A two-day archive held 1,250 events
+and not one `npc.created`: a village of strangers, correct in every other
+respect and useless to a chronicle that has to say who anybody is. `WorldFactory`
+gained a `beforePopulating` hook, the CLI attaches the archive through it, and
+the same run now archives the full founding — 86 creations, 24 households, 47
+kinship lines. Worldgen is the one moment that cannot be observed after the
+fact, and nothing else in Phase 1 has that property.
+
+**`causes`, threaded through the three chains that make a day.** Before this,
+every archived event had `"causes":[]`: a pile, not a chain. Eighty-six
+villagers walking the same four lanes emit departures that are indistinguishable
+by their payloads, so "why is Edric standing in the mill" could be guessed from
+timestamps and not read from the record.
+
+- *Travel.* `begin` takes the decision that prompted it. `travel.departed` cites
+  that decision; `travel.arrived` cites its own departure; the next leg cites
+  the arrival before it; `travel.blocked` cites whatever was being attempted. A
+  walk across the village reads back as one unbroken chain.
+- *The daily cycle.* `npc.woke` is cited by the walk out. `npc.turning-in` is
+  cited by the walk home. `npc.went-to-bed` cites the arrival at the door.
+- *The founding.* `society.household-founded` is cited by every
+  `npc.household-changed`, every `npc.home-changed` and every
+  `society.parentage-recorded` it produced.
+
+That is 87% of a village day. The remainder is deliberate and is pinned by a
+test rather than left to drift: `world.generated`, `npc.created` and
+`society.household-founded` are the founding, which did not come from anywhere,
+and `npc.woke` and `npc.turning-in` are the clock coming round, which is not an
+event. An invented cause would be a worse record than an honest silence.
+
+**Founding events are the record, not the news.** They all land on the world's
+opening tick, so a naive day-one paper would announce eighty-six births and
+twenty-four weddings on the same morning. The chronicle renders them once, on an
+“About Wodenshill” page, and excludes them from every daily paper. The rule is a
+predicate on tick, not a list of event types, so an actual birth years later is
+news.
+
+Three things came out differently from the plan.
+
+**`Journey` gained a saved field.** An arrival cites the departure that started
+its leg, and the departure happened before any save taken mid-walk. A resumed
+world whose arrival cited nothing would be emitting a different event from the
+one an uninterrupted run emits — so the departure's id is journey state, and
+determinism rule 8 says journey state persists. It is optional in the schema
+only so that saves written before this slice still load.
+
+**`npc.turning-in` moved ahead of the walk it causes.** It used to be emitted
+after `travel.begin` returned, so it could carry the arrival tick. Read in
+order, the record therefore said a villager set out and *then* decided to, and
+nothing downstream could cite the reason they were on the road. The decision now
+goes out first and the departure it causes carries the arrival tick, so nothing
+was lost.
+
+**`society.household-founded` moved ahead of its memberships** for the same
+reason: moving into a house is a consequence of the house existing, and a
+consequence recorded first has nothing to point back at. Everything the event
+says is already true when it goes out.
+
+Every golden hash in the project moved, because `Simulation.hash()` is taken
+over the save envelope and the envelope contains the event log. That is the
+intended design — the record is part of the world — and it is why this slice
+landed as one commit rather than five.
+
+Tests:
+
+- A two-leg walk links decision → departure → arrival → departure → arrival, and
+  `log.trace` walks it back to the decision in one call.
+- A refusal carries the same cause the attempt had.
+- A journey saved mid-leg still cites its departure after the reload, checked
+  against an uninterrupted run rather than against its own hash.
+- A village day contains **no** event with an empty `causes` outside the five
+  listed types, and no event cites an id that does not exist or is later than
+  itself.
+- A listener attached through `beforePopulating` sees every `npc.created`, and
+  attaching one does not change the world's hash — observation is not
+  participation.
+- `world.generated` is the last event of the founding and its counts match the
+  world that was built.
 
 ### Slice 3: the annals — the village's memory
 

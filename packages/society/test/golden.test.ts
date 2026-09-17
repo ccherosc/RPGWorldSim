@@ -184,6 +184,6 @@ describe('golden: generation', () => {
   });
 
   it('hashes to one fixed world', () => {
-    expect(pinnedVillage().sim.hash()).toBe('14758c4709ac8a6b');
+    expect(pinnedVillage().sim.hash()).toBe('6a989ee107c4f47d');
   });
 });

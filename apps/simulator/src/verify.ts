@@ -35,7 +35,17 @@ export interface SimWorld {
 export interface WorldFactory {
   /** What to call it in the report: "probe", "village". */
   readonly label: string;
-  create(seed: string): SimWorld;
+  /**
+   * Build a populated world.
+   *
+   * `beforePopulating` runs once the systems are wired and before worldgen
+   * emits anything. It exists because worldgen is the only moment that cannot
+   * be observed after the fact: the village announces every person and every
+   * household as it makes them, and a sink attached to the finished world has
+   * already missed all of it. That is not a detail -- it is the entire founding
+   * record, and without it a chronicle cannot say who anybody is.
+   */
+  create(seed: string, beforePopulating?: (world: SimWorld) => void): SimWorld;
   attach(seed: string): SimWorld;
 }
 

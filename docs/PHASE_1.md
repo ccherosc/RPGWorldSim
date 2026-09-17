@@ -471,14 +471,24 @@ moved.
 
 ## 3. Events
 
-Phase 1's event vocabulary. Every one carries actors, a location, and `causes`
-linking to what prompted it — see [CHRONICLE.md](CHRONICLE.md) section 3 for
-why this is not optional.
+Phase 1's event vocabulary. Every one carries actors, a location where one is
+meaningful, and `causes` linking to what prompted it — see
+[CHRONICLE.md](CHRONICLE.md) section 3 for why this is not optional. Five types
+are allowed to carry no cause, and only five: the founding did not come from
+anywhere, and the hours of the clock are not events. Which five, and the test
+that pins the list, are in [CHRONICLE_V1.md](CHRONICLE_V1.md) slice 2.
+
+The sketch below originally named `npc.born` and `household.formed`. Both ship
+under the names the packages that own them use — `npc.created`, which carries an
+`origin` so that a birth years from now is distinguishable from a founding, and
+`society.household-founded`. The table is the shipped vocabulary.
 
 | Event | Emitted when |
 | --- | --- |
 | `world.generated` | Worldgen completes; carries the seed and the counts |
-| `npc.born` | An NPC is created (at worldgen, with a backdated birth date) |
+| `npc.created` | An NPC enters the world; `origin` says whether by founding |
+| `npc.household-changed` | An NPC joins or leaves a household |
+| `npc.home-changed` | An NPC is given a roof, or loses one |
 | `npc.woke` | An NPC wakes |
 | `npc.turning-in` | Bedtime has come and an NPC sets off home |
 | `npc.went-to-bed` | An NPC reaches their own bed and sleeps |
@@ -486,7 +496,9 @@ why this is not optional.
 | `travel.departed` | A traveller leaves a location for a destination |
 | `travel.arrived` | A traveller reaches a destination |
 | `travel.blocked` | A move is refused — full, forbidden, or no route |
-| `household.formed` | A household is created |
+| `society.household-founded` | A household is created |
+| `society.member-joined` / `-left` / `society.role-changed` | Its membership changes |
+| `society.parentage-recorded` | Who somebody's parents were |
 
 `travel.blocked` exists because a refused action is as informative as a
 successful one, both for debugging and for the `WHY?` view, which must be able
@@ -544,3 +556,25 @@ against which every later system can be judged.
 - **Trait bloat.** The full 40–60 traits are tempting to enumerate now. Without
   a decision model consuming them, they would be untested numbers that later
   code inherits without justification. Ten, used, beats fifty, unused.
+
+## 7. Known debt
+
+1. **Worldgen fails on roughly one seed in fifteen.** A household template can
+   roll a couple, five children, two resident parents and an apprentice — ten
+   people — and `village.json` gives a cottage a capacity of eight. Settling the
+   ninth throws `entity may not enter this location … reason: full`, which is
+   the map refusing correctly; the bug is that the generator was never told the
+   size of the roof it is filling. Measured at **13 of 200 seeds** (`scan-6`,
+   `scan-16` and `scan-50` are reproductions). The shipped seed `world-zero` is
+   not affected, which is why this has been invisible.
+
+   Two candidate fixes, and they are not equivalent. Raising the cottage
+   capacity in `village.json` until it exceeds the largest possible household is
+   a data change, but it makes the data file quietly dependent on constants in
+   `packages/society/src/generate.ts` that nobody editing it can see. Passing
+   the dwelling's capacity into `generateHouseholdPlan` and having it trim the
+   optional members — the apprentice first, then the resident parents — keeps
+   the constraint where the constraint is, and is the one to take. Either way it
+   wants a build-time check that no household is larger than the roof it was
+   given, because the current failure mode is an exception from three layers
+   down rather than a sentence about the village.

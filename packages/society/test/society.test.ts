@@ -596,6 +596,42 @@ describe('a village', () => {
   });
 });
 
+/**
+ * Who lives here, and why the record says so.
+ *
+ * A founding is four kinds of event about the same moment, and a chronicle
+ * reading them cold cannot tell whether one household's membership belongs to
+ * the household announced just before it or the one announced just after. The
+ * `causes` links are what make that a fact rather than an inference.
+ */
+describe('the founding, as a chain', () => {
+  it('has every membership and every kinship line cite the founding', () => {
+    const { sim, households } = world();
+    const household = households.generate({ dwelling: bld(0), names: NAMES });
+
+    const founded = sim.log.byType(SocietyEvent.HouseholdFounded)[0];
+    expect(founded).toBeDefined();
+
+    // Nothing caused the founding. At worldgen that is the truth: the village
+    // did not come from anywhere, and an invented cause would be a worse record
+    // than an honest silence.
+    expect(founded?.causes).toEqual([]);
+
+    for (const type of [NpcEvent.HouseholdChanged, NpcEvent.HomeChanged]) {
+      const moves = sim.log.byType(type);
+      expect(moves).toHaveLength(household.members.length);
+      expect(moves.every((event) => event.causes.includes(founded?.id as number))).toBe(true);
+      // And after it, in the stream: a consequence recorded first would have
+      // nothing to point back at.
+      expect(moves.every((event) => event.id > (founded?.id as number))).toBe(true);
+    }
+
+    const kin = sim.log.byType(SocietyEvent.ParentageRecorded);
+    expect(kin.length).toBeGreaterThan(0);
+    expect(kin.every((event) => event.causes.includes(founded?.id as number))).toBe(true);
+  });
+});
+
 describe('rolling a family', () => {
   const plan = (seed: string, options: Parameters<typeof generateHouseholdPlan>[1] = { names: NAMES }) =>
     generateHouseholdPlan(new Sim({ seed }).random(RngStream.Households), options);

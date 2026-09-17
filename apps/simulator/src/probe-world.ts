@@ -354,7 +354,11 @@ export function attachProbeWorld(options: ProbeWorldOptions): ProbeWorld {
 export function probeWorldFactory(options: Omit<ProbeWorldOptions, 'seed'>): WorldFactory {
   return {
     label: 'probe',
-    create: (seed) => createProbeWorld({ ...options, seed }),
+    create: (seed, beforePopulating) => {
+      const world = attachProbeWorld({ ...options, seed });
+      beforePopulating?.(world);
+      return world.populate();
+    },
     attach: (seed) => attachProbeWorld({ ...options, seed }),
   };
 }

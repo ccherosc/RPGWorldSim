@@ -586,6 +586,49 @@ describe('a day', () => {
   });
 });
 
+/**
+ * A day, read backwards.
+ *
+ * `docs/CHRONICLE.md` asks that every sentence trace to an event, and a trace
+ * is only as good as its `causes` links. Twelve villagers walking the same
+ * lanes produce departures that are indistinguishable by their payloads, so
+ * without the links "why is Edric in bed" cannot be answered from the record --
+ * only guessed at from timestamps.
+ */
+describe('the causal chain of a day', () => {
+  it('links waking to the walk out, and the walk home to the pillow', () => {
+    const w = world();
+    w.settle(npc(0), 30);
+    w.rest.begin(npc(0), { dayDestination: MILL });
+    expect(runAudited(w, TICKS_PER_DAY)).toEqual([]);
+
+    const woke = w.events(RestEvent.Woke)[0];
+    const turningIn = w.events(RestEvent.TurningIn)[0];
+    const abed = w.events(RestEvent.WentToBed)[0];
+    const departures = w.sim.log.byType('travel.departed', 100);
+    const arrivals = w.sim.log.byType('travel.arrived', 100);
+
+    // They set out for the mill because they got up.
+    expect(departures[0]?.causes).toEqual([woke?.id]);
+    // They walked home because they decided to turn in...
+    expect(turningIn?.causes).toEqual([]);
+    expect(departures.find((e) => e.causes.includes(turningIn?.id as number))).toBeDefined();
+    // ...and they lay down because they reached their own door.
+    expect(abed?.causes).toEqual([arrivals.at(-1)?.id]);
+
+    // The whole evening, read backwards from the pillow, reaches the decision
+    // without a break. It stops there on purpose: bedtime is the hour coming
+    // round, and the hour is not an event. An invented cause would be worse
+    // than an honest end.
+    const chain = w.sim.log.trace(abed?.id as number, 32).map((step) => step.event.type);
+    expect(chain[0]).toBe(RestEvent.WentToBed);
+    expect(chain.at(-1)).toBe(RestEvent.TurningIn);
+    expect(new Set(chain)).toEqual(
+      new Set([RestEvent.WentToBed, 'travel.arrived', 'travel.departed', RestEvent.TurningIn]),
+    );
+  });
+});
+
 describe('bedtime while out of doors', () => {
   it('interrupts a journey and sends them home from wherever it stops', () => {
     const w = world();
@@ -622,6 +665,16 @@ describe('bedtime while out of doors', () => {
     expect(abed).toHaveLength(1);
     expect(abed[0]?.location).toBe(COTTAGE);
     expect(w.map.locationOf(npc(0))).toBe(COTTAGE);
+
+    // The walk home resumes *because* they were set down at the crossroads, and
+    // the record has to say so. This is the one branch where the walk home is
+    // not the villager's own idea, and without the link the second decision
+    // reads as having come out of nowhere an hour after the first.
+    const stopped = w.sim.log
+      .byType('travel.arrived', 100)
+      .find((event) => event.data && (event.data as { final?: boolean }).final === true);
+    const resumed = turning.find((event) => (event.data as { interrupted: boolean }).interrupted === false);
+    expect(resumed?.causes).toEqual([stopped?.id]);
   });
 
   it('says so out loud when there is no way home, and tries again tomorrow', () => {

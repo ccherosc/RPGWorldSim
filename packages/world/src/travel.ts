@@ -5,6 +5,7 @@ import {
   Priority,
   type SaveModule,
   type ScheduledEventId,
+  type SimEventId,
   type Simulation,
   type Tick,
   compareEntityIds,
@@ -87,6 +88,15 @@ export interface Journey {
   /** Total cost of the route in ticks, fixed when the journey started. */
   readonly totalCost: number;
   readonly arrival: ScheduledEventId;
+  /**
+   * The `travel.departed` that started the leg being walked.
+   *
+   * Saved, because the arrival at the far end cites it and an arrival that
+   * cited nothing after a reload would be a different event from the one an
+   * uninterrupted run emits — determinism rule 8. Optional only for saves
+   * written before causes were recorded; every journey made since has one.
+   */
+  readonly departure?: SimEventId;
 }
 
 interface ArrivalPayload extends Record<string, JsonValue> {
@@ -105,6 +115,7 @@ const JourneySchema = z.object({
   legArrivesAt: z.number().int().nonnegative(),
   totalCost: z.number().int().positive(),
   arrival: z.number().int().positive(),
+  departure: z.number().int().positive().optional(),
 });
 
 const TravelSnapshotShape = z.object({ journeys: z.array(JourneySchema) });
@@ -154,30 +165,44 @@ export class TravelSystem {
    * action is as informative as a successful one — it is what the `WHY?` view
    * reads to explain why a villager did something else instead.
    */
-  begin(traveller: EntityId, destination: EntityId): TravelOutcome {
+  begin(
+    traveller: EntityId,
+    destination: EntityId,
+    causes: readonly SimEventId[] = [],
+  ): TravelOutcome {
     assert(isEntityId(traveller), 'not a valid entity id', { traveller });
 
     if (this.journeys.has(traveller)) {
-      return this.refuse(traveller, destination, TravelRefusal.AlreadyTravelling, {
-        headedFor: this.destinationOf(traveller) ?? null,
-      });
+      return this.refuse(
+        traveller,
+        destination,
+        TravelRefusal.AlreadyTravelling,
+        { headedFor: this.destinationOf(traveller) ?? null },
+        causes,
+      );
     }
 
     const origin = this.map.locationOf(traveller);
     if (origin === undefined) {
-      return this.refuse(traveller, destination, TravelRefusal.NotPlaced, {});
+      return this.refuse(traveller, destination, TravelRefusal.NotPlaced, {}, causes);
     }
     if (!this.map.hasLocation(destination)) {
-      return this.refuse(traveller, destination, TravelRefusal.UnknownDestination, { origin });
+      return this.refuse(
+        traveller,
+        destination,
+        TravelRefusal.UnknownDestination,
+        { origin },
+        causes,
+      );
     }
     if (origin === destination) return { started: false, reason: 'already-there' };
 
     const route = this.map.findRoute(origin, destination);
     if (route === undefined) {
-      return this.refuse(traveller, destination, TravelRefusal.NoRoute, { origin });
+      return this.refuse(traveller, destination, TravelRefusal.NoRoute, { origin }, causes);
     }
 
-    return this.departLeg(traveller, route.path, 0, this.sim.tick, route.cost);
+    return this.departLeg(traveller, route.path, 0, this.sim.tick, route.cost, causes);
   }
 
   /**
@@ -192,7 +217,11 @@ export class TravelSystem {
    * Returns the node they will stop at, or `undefined` if they were not
    * travelling.
    */
-  interrupt(traveller: EntityId, reason = 'interrupted'): EntityId | undefined {
+  interrupt(
+    traveller: EntityId,
+    reason = 'interrupted',
+    causes: readonly SimEventId[] = [],
+  ): EntityId | undefined {
     const journey = this.journeys.get(traveller);
     if (journey === undefined) return undefined;
 
@@ -209,6 +238,7 @@ export class TravelSystem {
       actors: [traveller],
       location: stopAt,
       data: { traveller, reason, stoppingAt: stopAt, abandoned },
+      causes,
     });
     return stopAt;
   }
@@ -248,6 +278,7 @@ export class TravelSystem {
     leg: number,
     startedAt: Tick,
     totalCost: number,
+    causes: readonly SimEventId[],
   ): TravelOutcome {
     const from = path[leg] as EntityId;
     const to = path[leg + 1] as EntityId;
@@ -256,7 +287,13 @@ export class TravelSystem {
     const entry = this.map.canEnter(traveller, to);
     if (!entry.allowed) {
       this.journeys.delete(traveller);
-      return this.refuse(traveller, destination, entry.reason, { ...entry.details, from, to });
+      return this.refuse(
+        traveller,
+        destination,
+        entry.reason,
+        { ...entry.details, from, to },
+        causes,
+      );
     }
 
     const cost = this.map.travelCost(from, to);
@@ -284,14 +321,23 @@ export class TravelSystem {
     };
     this.journeys.set(traveller, journey);
 
-    this.sim.emit({
+    const departed = this.sim.emit({
       type: 'travel.departed',
       actors: [traveller],
       location: from,
       data: { traveller, from, to, destination, cost, arrivesAt: journey.legArrivesAt },
+      causes,
     });
 
-    return { started: true, journey };
+    // The departure's id goes back into the journey so that the arrival at the
+    // far end can cite it. Written after the emit rather than before, because
+    // both orderings owe something: the journey must be in the table before the
+    // announcement so a listener asking `isTravelling` during `travel.departed`
+    // is told the truth, and the announcement must exist before it has an id.
+    const walking: Journey = { ...journey, departure: departed.id };
+    this.journeys.set(traveller, walking);
+
+    return { started: true, journey: walking };
   }
 
   /** The arrival handler. Lands the traveller, then either stops or walks on. */
@@ -315,16 +361,22 @@ export class TravelSystem {
     // catches somebody out of doors.
     if (final) this.journeys.delete(traveller);
 
-    this.sim.emit({
+    const arrived = this.sim.emit({
       type: 'travel.arrived',
       actors: [traveller],
       location: at,
       data: { traveller, at, from, final, destination, travelled: this.sim.tick - journey.startedAt },
+      causes: journey.departure === undefined ? [] : [journey.departure],
     });
 
     if (final) return;
 
-    this.departLeg(traveller, journey.path, journey.leg + 1, journey.startedAt, journey.totalCost);
+    // Each leg is caused by the arrival that ended the one before it, so a walk
+    // across the village reads back as an unbroken chain rather than as a pile
+    // of departures that happen to share a traveller.
+    this.departLeg(traveller, journey.path, journey.leg + 1, journey.startedAt, journey.totalCost, [
+      arrived.id,
+    ]);
   }
 
   private refuse(
@@ -332,6 +384,7 @@ export class TravelSystem {
     destination: EntityId,
     reason: TravelRefusalReason,
     details: Readonly<Record<string, unknown>>,
+    causes: readonly SimEventId[],
   ): TravelOutcome {
     const at = this.map.locationOf(traveller);
     this.sim.emit({
@@ -339,6 +392,7 @@ export class TravelSystem {
       actors: [traveller],
       ...(at !== undefined ? { location: at } : {}),
       data: { traveller, destination, reason, ...(details as Record<string, JsonValue>) },
+      causes,
     });
     return { started: false, reason, details };
   }

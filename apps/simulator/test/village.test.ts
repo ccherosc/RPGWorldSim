@@ -159,6 +159,38 @@ describe('building the village', () => {
     expect(world.population).toBeGreaterThan(CONFIG.population.households);
   });
 
+  /**
+   * The village's own first line.
+   *
+   * Everything else in the record is an observation about the village;
+   * `world.generated` is the one line that says which village it is. A
+   * chronicle printed from an archive with no dateline would have to take the
+   * reader's word for what it was describing.
+   */
+  it('announces itself once worldgen has finished, with the seed and the counts', () => {
+    const world = village('announce');
+    const announcements = world.sim.log.byType('world.generated', 10);
+    expect(announcements).toHaveLength(1);
+
+    const announced = announcements[0];
+    expect(announced?.data).toEqual({
+      seed: 'announce',
+      village: CONFIG.name,
+      opened: CONFIG.start,
+      people: world.population,
+      households: world.households.register.householdCount,
+      places: world.map.locationCount,
+    });
+
+    // Last, not first: the counts it carries do not exist until worldgen has
+    // finished, and an opening line that had to be corrected afterwards would
+    // not be a record. Every founding event shares its tick, so the order that
+    // matters is the order of ids.
+    const founding = world.sim.log.recent(10_000);
+    expect(founding.at(-1)?.id).toBe(announced?.id);
+    expect(founding.every((event) => event.tick === announced?.tick)).toBe(true);
+  });
+
   it('opens on the date the data file names, not at tick zero', () => {
     const world = village();
     expect(world.sim.tick).toBe(dateTimeToTick(CONFIG.start, CALENDAR));
@@ -325,7 +357,103 @@ describe('the village under way', () => {
   it('reproduces the pinned hash for the shipped data and seed', () => {
     const world = village('world-zero');
     world.sim.runUntil(world.sim.tick + 3 * TICKS_PER_DAY);
-    expect(world.sim.hash()).toBe('3efcad9ed1df72d2');
+    expect(world.sim.hash()).toBe('14b554c818b3bc74');
+  });
+});
+
+/**
+ * The rule the Chronicle depends on, checked against a whole village day.
+ *
+ * `docs/CHRONICLE.md`: "An event with no cause and no actor is almost always a
+ * bug in the system that emitted it." The `causes` links are what turn a day's
+ * four thousand events into something a reader can ask *why* of; eighty-six
+ * villagers walking the same four lanes produce departures that are otherwise
+ * indistinguishable by their payloads.
+ *
+ * The list below is the whole of the exception, and it is short on purpose. Two
+ * kinds of thing belong on it: the founding, which did not come from anywhere,
+ * and the hours of the clock, which are not events. Adding a type to it is a
+ * claim that nothing in the world caused that event, and that claim should be
+ * hard to make by accident.
+ */
+describe('every event says what caused it', () => {
+  const UNCAUSED = new Set([
+    // The village did not come from anywhere.
+    'world.generated',
+    'npc.created',
+    'society.household-founded',
+    // The clock came round. `npc.turning-in` is caused only when the walk home
+    // is resumed after an interruption; the first decision each night is the
+    // hour itself.
+    'npc.woke',
+    'npc.turning-in',
+  ]);
+
+  it('leaves nothing but the founding and the clock unexplained', () => {
+    const world = village('causes');
+    world.sim.runUntil(world.sim.tick + TICKS_PER_DAY);
+
+    // The retained window has to hold the whole day, or this is a test of the
+    // last two thousand events pretending to be a test of a day.
+    expect(world.sim.log.recent(100_000)).toHaveLength(world.sim.log.count);
+
+    const orphans = world.sim.log
+      .recent(100_000)
+      .filter((event) => event.causes.length === 0 && !UNCAUSED.has(event.type));
+    expect(orphans.map((event) => event.type)).toEqual([]);
+
+    // And the list is not quietly larger than the world: a type that stops
+    // being emitted should come off it rather than sit there excusing nothing.
+    const emitted = new Set(world.sim.log.recent(100_000).map((event) => event.type));
+    expect([...UNCAUSED].filter((type) => !emitted.has(type))).toEqual([]);
+  });
+
+  it('never cites an event that does not exist', () => {
+    const world = village('causes');
+    world.sim.runUntil(world.sim.tick + TICKS_PER_DAY);
+
+    // A dangling id is worse than no id: it reads as an explanation right up to
+    // the moment somebody follows it.
+    const events = world.sim.log.recent(100_000);
+    expect(events).toHaveLength(world.sim.log.count);
+    const known = new Set(events.map((event) => event.id));
+    for (const event of events) {
+      for (const cause of event.causes) {
+        expect(known.has(cause), `${event.type} cites ${cause}`).toBe(true);
+        expect(cause, `${event.type} cites something later than itself`).toBeLessThan(event.id);
+      }
+    }
+  });
+});
+
+describe('the factory hook that catches the founding', () => {
+  /**
+   * Worldgen is the only moment that cannot be observed after the fact.
+   *
+   * A listener attached to the world the factory returns has already missed
+   * every `npc.created` in the village, and no later event repeats them. The
+   * hook exists for exactly one reason -- to let a sink be in place before the
+   * first person is made -- so the test is the count, not the call.
+   */
+  it('runs its listener before anybody exists, and after the systems are wired', () => {
+    const factory = villageWorldFactory({ config: CONFIG, names: NAMES, calendar: CALENDAR });
+    const seen: string[] = [];
+    const world = factory.create('hooked', (built) => {
+      expect(built.sim.log.byType('npc.created', 10)).toHaveLength(0);
+      built.sim.subscribe((event) => void seen.push(event.type));
+    });
+
+    const created = world.sim.log.byType('npc.created', 10_000).length;
+    expect(created).toBeGreaterThan(0);
+    expect(seen.filter((type) => type === 'npc.created')).toHaveLength(created);
+    expect(seen.at(-1)).toBe('world.generated');
+  });
+
+  it('builds the same world whether or not anybody is listening', () => {
+    const factory = villageWorldFactory({ config: CONFIG, names: NAMES, calendar: CALENDAR });
+    // Observation is not participation. A sink that changed the hash would make
+    // an archived run a different run from the one it claims to record.
+    expect(factory.create('hooked', () => {}).sim.hash()).toBe(factory.create('hooked').sim.hash());
   });
 });
 

@@ -187,8 +187,12 @@ function openArchive(world: SimWorld, options: Options): EventArchive | undefine
   return archive;
 }
 
-function runWorld(world: SimWorld, options: Options, startDay: number): void {
-  const archive = openArchive(world, options);
+function runWorld(
+  world: SimWorld,
+  options: Options,
+  startDay: number,
+  archive: EventArchive | undefined,
+): void {
   const endDay = startDay + options.days;
   for (let day = startDay + 1; day <= endDay; day++) {
     world.sim.runUntil(day * TICKS_PER_DAY);
@@ -220,10 +224,19 @@ archived to: ${archive.root} (${options.days} days)`);
 
 function commandRun(options: Options): void {
   const factory = worldFactory(options);
-  const world = factory.create(options.seed);
+  // The archive is attached *before* worldgen rather than after the world
+  // comes back, because worldgen is the one moment that cannot be recovered
+  // later: it announces every person and every household as it creates them,
+  // and those announcements are the only record of who anybody is. A sink
+  // attached to the finished world would archive a village of strangers.
+  let archive: EventArchive | undefined;
+  const world = factory.create(options.seed, (built) => {
+    archive = openArchive(built, options);
+  });
+
   console.log(`${factory.label}, seed "${options.seed}", ${options.days} days\n`);
   console.log(`  ${world.summary()}`);
-  runWorld(world, options, Math.floor(world.sim.tick / TICKS_PER_DAY));
+  runWorld(world, options, Math.floor(world.sim.tick / TICKS_PER_DAY), archive);
 }
 
 function commandResume(options: Options): void {
@@ -233,7 +246,9 @@ function commandResume(options: Options): void {
 
   const startDay = Math.floor(world.sim.tick / TICKS_PER_DAY);
   console.log(`resumed "${options.key}" at ${world.sim.format()}\n`);
-  runWorld(world, options, startDay);
+  // Nothing to catch ahead of time here: a resumed world was populated by
+  // whichever run wrote the save, and that run's archive holds the founding.
+  runWorld(world, options, startDay, openArchive(world, options));
 }
 
 function commandVerify(options: Options): number {
