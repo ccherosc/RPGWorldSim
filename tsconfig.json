@@ -6,6 +6,7 @@
     "packages/sim-core/**/*.ts",
     "packages/world/**/*.ts",
     "packages/npc/**/*.ts",
+    "packages/society/**/*.ts",
     "apps/simulator/**/*.ts",
     "vitest.config.ts"
   ],

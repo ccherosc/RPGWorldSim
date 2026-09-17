@@ -10,7 +10,12 @@ import {
   makeEntityId,
   tickToDateTime,
 } from '@rpgsim/sim-core';
-import { DEFAULT_AGE_BANDS, birthYearForAge, generateTraits } from '../src/generate.ts';
+import {
+  DEFAULT_AGE_BANDS,
+  availableGivenNames,
+  birthYearForAge,
+  generateTraits,
+} from '../src/generate.ts';
 import { makeNameBook } from '../src/names.ts';
 import { type GenerateVillagerOptions, NpcEvent, NpcOrigin } from '../src/people.ts';
 import { Sex, ageInYears, fullName, isBirthday, makePerson } from '../src/person.ts';
@@ -305,6 +310,26 @@ describe('generation', () => {
     // An age costs two: the band, then the year inside it.
     expect(drawsFor({ age: 30 })).toBe(full - 2);
     expect(drawsFor({ sex: Sex.Female, familyName: 'Webb', age: 30 })).toBe(full - 4);
+    // Excluding names narrows the list before the pick; it does not re-roll.
+    expect(drawsFor({ avoidGivenNames: ['Alice', 'Joan'] })).toBe(full);
+  });
+
+  it('will not hand somebody a given name that is already spoken for', () => {
+    const { people } = world('names');
+    const taken = NAMES.given.female.slice(0, NAMES.given.female.length - 1);
+    const person = people.generate({ names: NAMES, sex: Sex.Female, avoidGivenNames: taken });
+    expect(person.givenName).toBe(NAMES.given.female.at(-1));
+  });
+
+  it('repeats a name rather than leaving somebody nameless', () => {
+    // A house that runs out of names is a worse problem than a house with two
+    // Joans in it, and silently failing to name somebody is worse than both.
+    const free = availableGivenNames(NAMES, Sex.Male, NAMES.given.male);
+    expect(free).toEqual(NAMES.given.male);
+    expect(availableGivenNames(NAMES, Sex.Male, [])).toBe(NAMES.given.male);
+    expect(availableGivenNames(NAMES, Sex.Female, [NAMES.given.female[0] as string])).not.toContain(
+      NAMES.given.female[0],
+    );
   });
 
   it('spreads birthdays over the whole year rather than bunching in one month', () => {

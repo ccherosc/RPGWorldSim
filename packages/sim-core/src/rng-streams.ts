@@ -18,6 +18,8 @@ export const RngStream = {
   NpcDecisions: 'npc_decisions',
   /** Trait, skill and appearance rolls when a person is created. */
   NpcGeneration: 'npc_generation',
+  /** Household composition: family shape, sibling counts, apprentice placement. */
+  Households: 'households',
   /** Weather and seasonal variation. */
   Weather: 'weather',
   /** Births, fertility, aging, natural death. */

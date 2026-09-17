@@ -160,6 +160,24 @@ export interface GeneratePersonOptions {
   readonly sex?: SexName;
   /** Fix the family name, so a household shares one. Skips that draw. */
   readonly familyName?: string;
+  /**
+   * Given names already spoken for, which this villager will not be handed.
+   *
+   * Household generation passes the names already under the roof. Without it,
+   * each given name is drawn independently and a house of five turns up with a
+   * mother and three living daughters all called Sabina -- legal, deterministic,
+   * and unreadable to anybody following the village through their own posts.
+   *
+   * Costs exactly one draw whether or not anything is excluded, because it
+   * narrows the list before picking rather than re-rolling on a clash. A house
+   * that exhausts every name of a sex falls back to the full list rather than
+   * failing: a repeat is bad, and no name at all is worse.
+   *
+   * Two people in one house sharing a name is a real medieval practice -- a
+   * child named for one who died -- but it is a thing to do on purpose, in a
+   * later phase, not an accident of independent draws.
+   */
+  readonly avoidGivenNames?: readonly string[];
   /** Fix the age in whole years. Skips the band and age draws. */
   readonly age?: number;
   readonly birthplace?: EntityId | null;
@@ -176,6 +194,18 @@ export interface GeneratePersonOptions {
  * chance, so a household of four siblings does not silently consume four
  * surname draws it never used.
  */
+/** The given names a villager of this sex can be handed, minus the taken ones. */
+export function availableGivenNames(
+  names: NameBook,
+  sex: SexName,
+  taken: readonly string[],
+): readonly string[] {
+  const pool = sex === Sex.Male ? names.given.male : names.given.female;
+  if (taken.length === 0) return pool;
+  const free = pool.filter((name) => !taken.includes(name));
+  return free.length > 0 ? free : pool;
+}
+
 export function generatePerson(rng: Rng, options: GeneratePersonOptions): Person {
   const calendar = options.calendar ?? DEFAULT_CALENDAR;
   const names = options.names;
@@ -183,7 +213,7 @@ export function generatePerson(rng: Rng, options: GeneratePersonOptions): Person
 
   // Draw order. Do not reorder: it is part of what a seed means.
   const sex: SexName = options.sex ?? (rng.chance(0.5) ? Sex.Male : Sex.Female);
-  const givenName = rng.pick(sex === Sex.Male ? names.given.male : names.given.female);
+  const givenName = rng.pick(availableGivenNames(names, sex, options.avoidGivenNames ?? []));
   const familyName = options.familyName ?? rng.pick(names.family);
   const age = options.age ?? generateAge(rng, options.ageBands ?? DEFAULT_AGE_BANDS);
   const birthday = generateBirthDayOfYear(rng, calendar);

@@ -36,6 +36,7 @@ export type { NameBook } from './names.ts';
 export {
   AgeBandSchema,
   DEFAULT_AGE_BANDS,
+  availableGivenNames,
   birthYearForAge,
   generateAge,
   generateBirthDayOfYear,

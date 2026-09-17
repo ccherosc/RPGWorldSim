@@ -10,6 +10,7 @@ export default defineConfig({
       '@rpgsim/sim-core': r('./packages/sim-core/src/index.ts'),
       '@rpgsim/world': r('./packages/world/src/index.ts'),
       '@rpgsim/npc': r('./packages/npc/src/index.ts'),
+      '@rpgsim/society': r('./packages/society/src/index.ts'),
     },
   },
   test: {

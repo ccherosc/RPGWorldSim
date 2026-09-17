@@ -31,6 +31,7 @@ const SIMULATION_SOURCES = [
   join('packages', 'sim-core', 'src'),
   join('packages', 'world', 'src'),
   join('packages', 'npc', 'src'),
+  join('packages', 'society', 'src'),
   join('apps', 'simulator', 'src'),
 ];
 
@@ -161,6 +162,7 @@ describe('layering', () => {
       join('packages', 'sim-core', 'src'),
       join('packages', 'world', 'src'),
       join('packages', 'npc', 'src'),
+      join('packages', 'society', 'src'),
     ]) {
       for (const file of collectSourceFiles(root)) {
         expect(forbidden.test(readFileSync(file, 'utf8')), relative(REPO_ROOT, file)).toBe(false);
@@ -182,6 +184,7 @@ describe('layering', () => {
       ...collectSourceFiles(join('packages', 'shared', 'src')),
       ...collectSourceFiles(join('packages', 'world', 'src')),
       ...collectSourceFiles(join('packages', 'npc', 'src')),
+      ...collectSourceFiles(join('packages', 'society', 'src')),
     ]) {
       const text = readFileSync(file, 'utf8');
       for (const match of text.matchAll(relativeImport)) {

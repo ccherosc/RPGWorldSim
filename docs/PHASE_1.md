@@ -184,7 +184,7 @@ fixing a field skips its draw rather than drawing and discarding it; that is
 what will let slice 4 give a household a shared surname without shifting
 everybody generated afterwards, and it now has a draw-count test.
 
-### Slice 4: `packages/society` — households
+### Slice 4: `packages/society` — households — **done**
 
 Households as entities: members, a dwelling, and family roles (parent, child,
 spouse, dependent, apprentice). Generated to match the distribution in
@@ -199,6 +199,81 @@ than a crowd.
 dwelling. Membership is symmetric with the NPC's household reference. No one
 is their own parent; no cycles in descent. Every child has at least one parent
 present in the world or recorded as absent for a stated reason.
+
+**Landed as.** `household.ts` (the frozen household, six roles, exactly one
+head), `kinship.ts` (`Parentage`, and `MIN_PARENT_AGE_GAP`), `generate.ts` (the
+template table and the plan), `register.ts` (both registers and their
+serialization), `system.ts` (`HouseholdSystem` and seven events),
+`invariants.ts` (six rules), and the `society` save module. 64 tests — 55
+behavioural and 9 golden — checked against twenty deliberate mutations; all
+twenty die.
+
+*Generation produces a plan, not people.* `generateHouseholdPlan` returns
+roles, sexes, ages and surnames with parents referred to by position in the same
+list, and allocates no id and touches no `Simulation`. That is what lets the
+composition rules be tested as values — is a mother ever younger than her
+daughter, does a widow's house ever contain a living husband — without standing
+up a world. The plan-level age-gap test deliberately walks the plan itself
+rather than calling the invariant's helper, so that a generator and its check
+cannot be wrong in the same way.
+
+*Households supersede `DEFAULT_AGE_BANDS` for anybody housed.* Slice 3 drew an
+age from a band table. A villager generated as part of a household now takes
+their age from the template instead — a head within the template's range, a
+spouse skewed against them, children below the youngest parent by at least
+`MIN_PARENT_AGE_GAP`. The band table still applies to anyone generated outside a
+household, and both are balance values headed for
+`data/world/village.json` in slice 6, along with `DEFAULT_HOUSEHOLD_TEMPLATES`,
+`RESIDENT_PARENT_AGE_GAP` and `MIN_PARENT_AGE_GAP`.
+
+*The dwelling check is deferred to slice 6, on purpose.* A household's dwelling
+should be a building that exists, but this package holds no map and depends on
+no `@rpgsim/world`; adding a dependency to check one id would couple family
+structure to terrain. Save modules load in sorted id order, so `society` also
+loads before any location exists. The check belongs in the worldgen wiring that
+holds both, and is recorded there rather than left as a comment.
+
+**Three corrections the slice found in its own code.**
+
+*A forced template escaped validation entirely.* `generate({ template })` fed
+the caller's table straight to the roll, so worldgen could hand in the one shape
+the weighted draw could never have produced. A forced template is now validated
+like any other.
+
+*A live-in parent could be younger than the rule allows.* Clamping an elder's
+age down to `MAX_FOUNDING_AGE` could leave them twelve years older than their
+own child — a config the generator would happily build and
+`society.parents-are-older-than-their-children` would then fire on. Fixed with
+an assert on the template table rather than a silent clamp, which is sim-core
+rule 10: a template whose head can be old enough for the arithmetic to fail is
+refused at validation, not quietly repaired at generation.
+
+*A dead branch in the child count.* `oldestChild` cannot be negative given the
+validated ranges, so the guard against it was unreachable and hid the fact.
+
+**Balance, measured rather than guessed.** The first table produced a village
+too young to be believed: 6.7% over sixty and 8.5% in the 45–59 band. Three
+changes — the family head's ceiling 49 → 52, `elder-couple` 9 → 11,
+`elder-alone` 6 → 7 — land at, across eight seeds, 28.8 households and 96.8
+people at an average size of 3.37, with 31.1% children under 14, 22.9% youths,
+26.5% adults 25–44, 12.3% at 45–59 and 7.2% over sixty, and no invariant
+violations. Those weights are pinned in `golden.test.ts`, because changing one
+changes every village ever generated.
+
+**What reading the golden roster caught.** The pinned roster is written as
+names and ages rather than ids, and so it gets read — which is how a household
+turned up with a mother and three living daughters all called Sabina. Legal,
+deterministic, invariant-clean, and unreadable to anybody meant to follow the
+village through their own posts; no invariant would ever have found it.
+`avoidGivenNames` now narrows the pool before the draw rather than re-rolling on
+a clash, so it costs no extra draws and changed no existing world — `npc`'s own
+golden test, which does not pass the option, still passes untouched.
+
+**What the mutation sweep caught.** Nothing that survived. Twenty mutations
+across all six modules, including the two shapes that beat slice 3's suite —
+swapping two draws (`M13`) and drawing names without regard to the house
+(`M18`) — and both died against the golden roster and hash rather than against
+any behavioural test, which is the whole reason that file exists.
 
 ### Slice 5: `packages/npc` — the daily cycle
 

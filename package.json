@@ -11,6 +11,7 @@
     "packages/sim-core",
     "packages/world",
     "packages/npc",
+    "packages/society",
     "apps/simulator"
   ],
   "scripts": {
