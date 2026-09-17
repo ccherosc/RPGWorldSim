@@ -33,6 +33,19 @@ export type {
   WorldMapSnapshot,
 } from './map.ts';
 
+// Movement
+export {
+  TRAVEL_ARRIVAL_EVENT,
+  TRAVEL_SAVE_MODULE_ID,
+  TRAVEL_SAVE_MODULE_VERSION,
+  TravelRefusal,
+  TravelSystem,
+  installTravel,
+  isTravelSnapshot,
+  registerTravelInvariants,
+} from './travel.ts';
+export type { Journey, TravelOutcome, TravelRefusalReason } from './travel.ts';
+
 // Wiring
 export { registerWorldInvariants } from './invariants.ts';
 export {

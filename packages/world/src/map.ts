@@ -97,6 +97,8 @@ export interface WorldMapSnapshot {
   readonly edges: readonly { readonly a: EntityId; readonly b: EntityId; readonly cost: number }[];
   readonly buildings: readonly Building[];
   readonly occupancy: readonly { readonly entity: EntityId; readonly location: EntityId }[];
+  /** Who is on the road, and which place is holding room for them. */
+  readonly reservations: readonly { readonly entity: EntityId; readonly location: EntityId }[];
 }
 
 export class WorldMap {
@@ -108,6 +110,17 @@ export class WorldMap {
   private placement = new Map<EntityId, EntityId>();
   /** Reverse index of `placement`, maintained in lockstep so lookups are O(1). */
   private occupants = new Map<EntityId, Set<EntityId>>();
+  /**
+   * Room held for travellers who are on their way.
+   *
+   * A traveller belongs to no location while walking, but the place they are
+   * walking to holds their seat: the last stool in the tavern is taken by the
+   * man coming up the lane. This is what makes arrival unable to fail — see
+   * `reserve`.
+   */
+  private reservations = new Map<EntityId, EntityId>();
+  /** Reverse index of `reservations`. */
+  private reserved = new Map<EntityId, Set<EntityId>>();
 
   // --- topology -------------------------------------------------------------
 
@@ -118,6 +131,7 @@ export class WorldMap {
     this.locations.set(location.id, location);
     this.edges.set(location.id, new Map());
     this.occupants.set(location.id, new Set());
+    this.reserved.set(location.id, new Set());
   }
 
   /**
@@ -277,11 +291,20 @@ export class WorldMap {
       };
     }
 
-    if (place.capacity !== null && this.occupancyOf(location) >= place.capacity) {
+    // Occupants *plus* inbound travellers. Counting only the people already
+    // standing here would let two walkers be promised the same last seat, and
+    // the second one would arrive to find no room and nowhere to be.
+    const pressure = this.pressureOn(location, entity);
+    if (place.capacity !== null && pressure >= place.capacity) {
       return {
         allowed: false,
         reason: EntryRefusal.Full,
-        details: { location, capacity: place.capacity, occupancy: this.occupancyOf(location) },
+        details: {
+          location,
+          capacity: place.capacity,
+          occupancy: this.occupancyOf(location),
+          inbound: this.reservationCountAt(location),
+        },
       };
     }
 
@@ -301,6 +324,12 @@ export class WorldMap {
     assert(!this.placement.has(entity), 'entity is already placed; use move or remove first', {
       entity,
       at: this.placement.get(entity),
+    });
+    // A traveller holding a seat must arrive through `settle`, or the seat
+    // would stay held forever and quietly shrink the place by one.
+    assert(!this.reservations.has(entity), 'entity holds a reservation; settle or release it first', {
+      entity,
+      reservedAt: this.reservations.get(entity),
     });
     this.enter(entity, location);
   }
@@ -328,6 +357,101 @@ export class WorldMap {
     this.detach(entity, from);
     this.placement.delete(entity);
     return from;
+  }
+
+  // --- reservations ---------------------------------------------------------
+
+  /**
+   * Hold room at a location for an entity that is on its way there.
+   *
+   * Travel takes time, and a place can fill up while someone is walking to it.
+   * Without a held seat the walker arrives to a full room and has to be put
+   * *somewhere* — and every candidate (back where they came from, the nearest
+   * open door) can be full too, which ends with a person who is nowhere. Taking
+   * the seat at departure removes the whole class of problem: if the reservation
+   * succeeded, the arrival will succeed.
+   *
+   * The reservation is real occupancy pressure. Someone already in the room
+   * cannot be displaced by it, but a third party trying to walk in is refused.
+   */
+  reserve(entity: EntityId, location: EntityId): void {
+    assert(isEntityId(entity), 'not a valid entity id', { entity });
+    // Deliberately allowed while the entity is still standing somewhere: a
+    // traveller takes the seat at the far end *before* stepping off the map, so
+    // that a refusal leaves them exactly where they were rather than nowhere.
+    // Holding both at rest is a broken world, and
+    // `world.reservations-are-coherent` is the check that says so.
+    assert(!this.reservations.has(entity), 'entity already holds a reservation', {
+      entity,
+      at: this.reservations.get(entity),
+    });
+    this.requireEntry(entity, location);
+    this.reservations.set(entity, location);
+    this.requireReserved(location).add(entity);
+  }
+
+  /** Give up a held seat. Returns where it was held, or `undefined`. */
+  releaseReservation(entity: EntityId): EntityId | undefined {
+    const at = this.reservations.get(entity);
+    if (at === undefined) return undefined;
+    this.reservations.delete(entity);
+    this.reserved.get(at)?.delete(entity);
+    return at;
+  }
+
+  /**
+   * Turn a held seat into presence: the traveller has arrived.
+   *
+   * Cannot be refused for room, because the room was taken at departure. Access
+   * is still checked, and a refusal here throws rather than returning: nothing
+   * in Phase 1 can revoke permission while someone is walking, so if it happens
+   * it is a bug, and sim-core rule 10 says a bug is reported, not absorbed. A
+   * later slice that lets an owner bar the door mid-journey has to decide where
+   * the traveller ends up, and that decision belongs to that slice.
+   */
+  settle(entity: EntityId): EntityId {
+    const location = this.reservations.get(entity);
+    assert(location !== undefined, 'entity holds no reservation to settle', { entity });
+    const place = this.locations.get(location) as Location;
+    assert(
+      place.access !== Access.Private || place.owner === entity || place.permitted.includes(entity),
+      'a traveller arrived somewhere they are no longer permitted',
+      { entity, location },
+    );
+    this.releaseReservation(entity);
+    this.enter(entity, location);
+    return location;
+  }
+
+  /** Where this entity is headed, or `undefined` if it holds no seat. */
+  reservationOf(entity: EntityId): EntityId | undefined {
+    return this.reservations.get(entity);
+  }
+
+  /** Who is on their way here, in id order. */
+  reservationsAt(location: EntityId): EntityId[] {
+    return [...this.requireReserved(location)].sort(compareEntityIds);
+  }
+
+  reservationCountAt(location: EntityId): number {
+    return this.requireReserved(location).size;
+  }
+
+  /** Every entity holding a seat, in id order. */
+  reservingEntities(): EntityId[] {
+    return [...this.reservations.keys()].sort(compareEntityIds);
+  }
+
+  /** Occupancy as capacity sees it: bodies present plus seats held by others. */
+  private pressureOn(location: EntityId, asker: EntityId): number {
+    const held = this.reservations.get(asker) === location ? 1 : 0;
+    return this.occupancyOf(location) + this.reservationCountAt(location) - held;
+  }
+
+  private requireReserved(location: EntityId): Set<EntityId> {
+    const set = this.reserved.get(location);
+    assert(set !== undefined, 'no such location', { location });
+    return set;
   }
 
   // --- routing --------------------------------------------------------------
@@ -451,6 +575,10 @@ export class WorldMap {
         entity,
         location: this.placement.get(entity) as EntityId,
       })),
+      reservations: this.reservingEntities().map((entity) => ({
+        entity,
+        location: this.reservations.get(entity) as EntityId,
+      })),
     };
   }
 
@@ -472,6 +600,8 @@ export class WorldMap {
     this.edges = new Map();
     this.placement = new Map();
     this.occupants = new Map();
+    this.reservations = new Map();
+    this.reserved = new Map();
 
     for (const location of snapshot.locations) {
       this.addLocation(makeLocation(location));
@@ -484,6 +614,11 @@ export class WorldMap {
     }
     for (const { entity, location } of snapshot.occupancy) {
       this.place(entity, location);
+    }
+    // After the occupants, so that a save in which the room was already full
+    // before the traveller set out is refused rather than quietly overbooked.
+    for (const { entity, location } of snapshot.reservations) {
+      this.reserve(entity, location);
     }
   }
 
@@ -542,4 +677,5 @@ const SnapshotShape = z.object({
   ),
   buildings: z.array(BuildingSchema),
   occupancy: z.array(z.object({ entity: EntityIdSchema, location: EntityIdSchema })),
+  reservations: z.array(z.object({ entity: EntityIdSchema, location: EntityIdSchema })),
 });

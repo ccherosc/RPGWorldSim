@@ -6,9 +6,8 @@ The spatial model. It answers where a thing is, how long it takes to get
 there, and who may enter — the questions Prime Directive 7 says no action may
 skip.
 
-**Status: slice 1 of Phase 1 has landed.** Space exists and persists. Movement
-through it — travel as a scheduled event rather than a teleport — is slice 2,
-and is not here yet. Objects and terrain come later still.
+**Status: slices 1 and 2 of Phase 1 have landed.** Space exists, persists, and
+takes time to cross. Objects and terrain come later.
 
 ## What is here
 
@@ -17,6 +16,7 @@ and is not here yet. Objects and terrain come later still.
 | `location.ts` | `Location` and `Building` as validated, frozen values |
 | `map.ts` | `WorldMap`: the graph, occupancy, entry rules, routing |
 | `invariants.ts` | the five rules space obeys |
+| `travel.ts` | `TravelSystem`: journeys, arrivals, and the rules movement obeys |
 | `save.ts` | `installWorld`, and the `world` save module |
 
 ```ts
@@ -29,9 +29,13 @@ map.place(npc, cottage);
 
 map.canEnter(npc, tavern);              // { allowed: false, reason: 'full' }
 map.findRoute(green, cottage);          // { path: [...], cost: 90 } | undefined
+
+const travel = installTravel(sim, map);
+travel.begin(npc, tavern);              // { started: true, journey } | a refusal
+sim.runUntil(90);                       // they arrive when the roads say so
 ```
 
-## Three decisions worth knowing before reading the code
+## Four decisions worth knowing before reading the code
 
 **Adjacency lives in the graph, never on a `Location`.** `connect(a, b, cost)`
 writes both directions at once, so an edge cannot disagree with itself. The
@@ -45,6 +49,12 @@ whole world unsaveable.
 **A route is a fact about the map, not about the traveller.** `findRoute`
 ignores access and capacity; whether a particular person may walk a path is
 `canEnter`'s question, asked per step at the moment of arrival.
+
+**A traveller takes the seat before they take the road.** While walking they
+are in no location at all, so the place they are walking to holds their room —
+the last stool in the tavern is taken by the man coming up the lane. That is
+what makes arrival unable to fail, and it is the answer to the only question
+this package really has to get right: where is somebody who is not anywhere?
 
 ## Rules it inherits
 

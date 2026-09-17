@@ -169,6 +169,82 @@ describe('SaveRegistry migrations', () => {
   });
 });
 
+/**
+ * Cross-module checks after the whole envelope is in.
+ *
+ * Modules load in sorted id order, so an early module cannot inspect a later
+ * one's state during its own `load` — it would be reading a half-built world.
+ * The second pass exists so that a module can assert about its neighbours, and
+ * the tests that matter are about *when* it runs, not that it runs at all.
+ */
+describe('SaveRegistry post-load verification', () => {
+  it('runs every verify only after every module has loaded', () => {
+    const trace: string[] = [];
+    const registry = new SaveRegistry();
+    // 'travel' sorts before 'world': the exact ordering that made this hook
+    // necessary, where the earlier module is the one with something to check.
+    registry.register({
+      id: 'travel',
+      version: 1,
+      save: () => null,
+      load: () => trace.push('load travel'),
+      verify: () => trace.push('verify travel'),
+    });
+    registry.register({
+      id: 'world',
+      version: 1,
+      save: () => null,
+      load: () => trace.push('load world'),
+      verify: () => trace.push('verify world'),
+    });
+
+    registry.load(
+      envelope({ modules: { travel: { version: 1, data: null }, world: { version: 1, data: null } } }),
+    );
+
+    expect(trace).toEqual(['load travel', 'load world', 'verify travel', 'verify world']);
+  });
+
+  it('lets a module refuse a save that disagrees with another module', () => {
+    let loaded: JsonValue = null;
+    const registry = new SaveRegistry();
+    registry.register({
+      id: 'travel',
+      version: 1,
+      save: () => null,
+      load: () => {},
+      verify: () => {
+        if (loaded !== 'expected') throw new Error('travel and world disagree about the world');
+      },
+    });
+    registry.register({
+      id: 'world',
+      version: 1,
+      save: () => null,
+      load: (data) => {
+        loaded = data;
+      },
+    });
+
+    expect(() =>
+      registry.load(
+        envelope({
+          modules: { travel: { version: 1, data: null }, world: { version: 1, data: 'wrong' } },
+        }),
+      ),
+    ).toThrow(/disagree about the world/);
+  });
+
+  it('is optional, and a registry of modules without it loads unchanged', () => {
+    const registry = new SaveRegistry();
+    let loads = 0;
+    registry.register({ id: 'npc', version: 1, save: () => null, load: () => void loads++ });
+
+    expect(() => registry.load(envelope({ modules: { npc: { version: 1, data: null } } }))).not.toThrow();
+    expect(loads).toBe(1);
+  });
+});
+
 describe('hashEnvelope', () => {
   it('is stable for identical state', () => {
     expect(hashEnvelope(envelope({ tick: 42 }))).toBe(hashEnvelope(envelope({ tick: 42 })));

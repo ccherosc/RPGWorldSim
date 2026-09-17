@@ -50,6 +50,17 @@ export interface SaveModule {
    * Required if a save written by an older version should still load.
    */
   migrate?(data: JsonValue, fromVersion: number): JsonValue;
+  /**
+   * Cross-module checks, run once every block in the envelope has loaded.
+   *
+   * Modules load in sorted id order, so a module cannot inspect another's
+   * state during its own `load` — `travel` loads before `world` and would be
+   * reading a map that is still empty. Anything a module wants to assert about
+   * a *neighbour's* state belongs here, where the whole world exists. Throw to
+   * refuse the save; sim-core rule 10 prefers a refused load to a world that
+   * quietly disagrees with itself.
+   */
+  verify?(): void;
 }
 
 /**
@@ -137,6 +148,13 @@ export class SaveRegistry {
         version = module.version;
       }
       module.load(data, version);
+    }
+
+    // Second pass: now that every module holds its own state, let them check
+    // each other. Same sorted order, so which module reports a mutual
+    // inconsistency first is deterministic.
+    for (const id of this.ids()) {
+      (this.modules.get(id) as SaveModule).verify?.();
     }
   }
 }

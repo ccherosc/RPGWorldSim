@@ -95,6 +95,7 @@ describe('installWorld', () => {
       'world.entity-in-exactly-one-location',
       'world.graph-is-connected',
       'world.occupancy-within-capacity',
+      'world.reservations-are-coherent',
     ]);
   });
 

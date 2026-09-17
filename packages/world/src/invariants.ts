@@ -78,12 +78,14 @@ export function registerWorldInvariants(sim: Simulation, map: WorldMap): void {
 
   sim.registerInvariant({
     id: 'world.occupancy-within-capacity',
-    description: 'No location holds more entities than it has room for.',
+    description: 'No location holds more entities, present or inbound, than it has room for.',
     check: () =>
       map
         .locationsInOrder()
         .filter(
-          (location) => location.capacity !== null && map.occupancyOf(location.id) > location.capacity,
+          (location) =>
+            location.capacity !== null &&
+            map.occupancyOf(location.id) + map.reservationCountAt(location.id) > location.capacity,
         )
         .map((location) =>
           violation('world.occupancy-within-capacity', 'a location is over capacity', {
@@ -91,8 +93,75 @@ export function registerWorldInvariants(sim: Simulation, map: WorldMap): void {
             name: location.name,
             capacity: location.capacity,
             occupancy: map.occupancyOf(location.id),
+            inbound: map.reservationCountAt(location.id),
           }),
         ),
+  });
+
+  sim.registerInvariant({
+    id: 'world.reservations-are-coherent',
+    description: 'A held seat belongs to someone who is not already here, and is counted once.',
+    check: () => {
+      const violations: InvariantViolation[] = [];
+      const seen = new Map<EntityId, EntityId>();
+
+      for (const location of map.locationIds()) {
+        for (const entity of map.reservationsAt(location)) {
+          const first = seen.get(entity);
+          if (first !== undefined) {
+            violations.push(
+              violation('world.reservations-are-coherent', 'an entity holds two reservations', {
+                entity,
+                locations: [first, location],
+              }),
+            );
+            continue;
+          }
+          seen.set(entity, location);
+
+          if (map.reservationOf(entity) !== location) {
+            violations.push(
+              violation(
+                'world.reservations-are-coherent',
+                'a location holds a seat for an entity that is not headed there',
+                { entity, heldBy: location, headedFor: map.reservationOf(entity) ?? null },
+              ),
+            );
+          }
+          if (map.isPlaced(entity)) {
+            violations.push(
+              violation(
+                'world.reservations-are-coherent',
+                'an entity is standing somewhere and holding a seat elsewhere',
+                { entity, standingIn: map.locationOf(entity) ?? null, holding: location },
+              ),
+            );
+          }
+        }
+      }
+
+      for (const entity of map.reservingEntities()) {
+        const location = map.reservationOf(entity) as EntityId;
+        if (!map.hasLocation(location)) {
+          violations.push(
+            violation('world.reservations-are-coherent', 'a seat is held at a location that does not exist', {
+              entity,
+              location,
+            }),
+          );
+        } else if (!seen.has(entity)) {
+          violations.push(
+            violation(
+              'world.reservations-are-coherent',
+              'a held seat is missing from its location’s reservation list',
+              { entity, location },
+            ),
+          );
+        }
+      }
+
+      return violations;
+    },
   });
 
   sim.registerInvariant({

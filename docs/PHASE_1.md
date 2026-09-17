@@ -78,7 +78,7 @@ both directions in one call, so the symmetric invariant is a net under a bad
 save file, not a repair for ordinary code. The coordinate stayed; it is
 decoration and worldgen input, and routing still never reads it.
 
-### Slice 2: `packages/world` — movement
+### Slice 2: `packages/world` — movement — **done**
 
 Travel as a scheduled event, not a teleport. Departure removes the traveller
 from the origin and marks them in transit; arrival at `now + cost` places them
@@ -90,6 +90,39 @@ Interrupting travel leaves the traveller somewhere legal, never nowhere.
 
 This is the first system that can violate Prime Directive 7, so it gets the
 most adversarial tests in the phase.
+
+**Landed as.** `travel.ts` — `TravelSystem`, the `world.travel.arrive`
+scheduled event at `Priority.Movement`, three invariants, and the `travel` save
+module. 38 tests, checked against eight deliberate mutations; all eight die.
+
+**Two refinements of the sketch above, both about where a person is.**
+
+*A journey is walked leg by leg, not in one jump.* The sketch had a single
+arrival at `now + routeCost`. Walking each edge separately costs the same total
+and buys three things: a traveller is recorded passing through the places
+between, so an observer can see where they went; a walk can be interrupted at
+the next crossroads rather than only at its end; and every place a journey can
+stop is a real location with a name.
+
+*Departure takes the seat at the far end.* A traveller belongs to no location
+while walking, which raises the question the invariants are really about: what
+happens when they arrive and the room is full? Every answer that resolves it at
+arrival — turn back, stand outside, wait — can fail in turn, and the failure is
+a person who is nowhere. So the room is taken at departure: `WorldMap.reserve`
+holds it, a third party trying to walk in is refused, and arrival cannot fail
+for want of space. The seat is held one leg ahead, not for the whole route, so
+a distant destination can still fill up while the traveller is on their way and
+turn them away at the door — which is the truthful outcome, and the one that
+leaves them standing in the last real place they reached.
+
+A villager is *not* pre-checked against a door they have not reached. They can
+walk to the vestry and be turned away at it. Knowing in advance would be
+knowledge Prime Directive 5 does not let the simulation hand out for free.
+
+**One change to `sim-core`.** Save modules load in sorted id order, so `travel`
+loads before `world` and cannot compare a journey against a map that is still
+empty. `SaveModule` gained an optional `verify()`, run in a second pass once
+every block in the envelope has loaded. Cross-module save checks go there.
 
 ### Slice 3: `packages/npc` — identity
 
