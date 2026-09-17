@@ -57,6 +57,17 @@ export type { EventListener, SimEvent, SimEventDraft, SimEventId, Unsubscribe } 
 export { EventLog, eventFromJson, eventToJson } from './event-log.ts';
 export type { CausalStep, EventLogOptions, EventLogSnapshot, EventSink } from './event-log.ts';
 
+// Durable event history
+export {
+  EventArchive,
+  dayIndexOf,
+  dayKeyOf,
+  listArchivedDays,
+  readArchiveManifest,
+  readEventDay,
+} from './event-archive.ts';
+export type { ArchiveManifest, ArchivedDay, EventArchiveOptions } from './event-archive.ts';
+
 // Invariants
 export { InvariantError, InvariantRegistry, violation } from './invariants.ts';
 export type {

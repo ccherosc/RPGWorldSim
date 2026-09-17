@@ -49,6 +49,43 @@ have reached — same hash, same events, same pending schedule.
 | `--dir <path>` / `--key <name>` | where a save goes and what it is called |
 | `--save` | write a save when the run finishes |
 | `--every <n>` | print a status line every n simulated days, `0` for none |
+| `--archive <path>` | write the durable event history there, one file per simulated day |
+| `--rewrite` | let `--archive` replace days it finds already written |
+
+## Keeping a durable history
+
+`--archive` attaches an `EventArchive` to the run and writes every event to
+disk, one file per simulated day:
+
+```bash
+npm run sim -- run --days 3 --archive ./history
+```
+
+```
+history/
+  manifest.json
+  days/1200-04-01/events.jsonl
+  days/1200-04-02/events.jsonl
+  days/1200-04-03/events.jsonl
+```
+
+The event log keeps only a bounded window in memory on purpose — unbounded
+event growth is a named failure mode in CLAUDE.md — so this is where anything
+that needs the whole of a day reads from instead. The Chronicle
+([docs/CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md)) is the first such reader.
+
+Each day in `manifest.json` carries the world's state hash at the moment that
+day ended. That is the evidence the launch freeze is checked against: a rebuild
+that produces a different hash for a day already published has rewritten
+history. The manifest also carries `complete`, which is `true` only once the run
+closed the archive itself — so a publisher can tell a finished day from the
+wreckage of a run that died halfway.
+
+Days are written whole, through a temporary file and a rename, so a day file
+that exists is a day that is final. Writing over a day this run did not write is
+refused unless `--rewrite` says otherwise, because re-running an already
+archived world is easy to do by accident and the silent result would be a day
+whose events happened twice.
 
 ## What is here
 

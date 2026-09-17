@@ -165,39 +165,67 @@ read. Phase 3 gives it an author.
 Six slices. Each is independently testable and leaves the repository in a state
 where `npm run check` and `npm run verify` pass.
 
-### Slice 1: durable event history
+### Slice 1: durable event history — **built**
 
 Closes technical debt item 5 in [PHASE_0.md](PHASE_0.md) — "the event log has no
 persistent sink implementation" — which CHRONICLE.md section 3 promotes from
 nice-to-have to necessary.
 
-New in `packages/sim-core/src/event-file-sink.ts`:
+Built in `packages/sim-core/src/event-archive.ts`:
 
-- `JsonlEventSink implements EventSink` — buffers a simulated day, writes it to
-  `<root>/days/<year>-<month>-<day>/events.jsonl` when the day rolls over and on
-  `close()`, through a temp file and a rename.
-- `readEventDay(root, date)` — parses a day file back to `SimEvent[]`, validating
-  every line against a Zod schema.
-- `readManifest(root)` / `writeManifest(root, …)` — `<root>/manifest.json`: the
-  list of days present, in order, each with its event count and the world's
-  state hash at the end of that day.
+- `EventArchive implements EventSink` — buffers a simulated day and writes it to
+  `<root>/days/<year>-<month>-<day>/events.jsonl` when the day rolls over, on
+  `flush()`, and on `close()`, through a temporary file and a rename.
+- `readEventDay(root, key)` — parses a day file back to `SimEvent[]`, validating
+  every line through the log's own `eventFromJson` and naming the line that fails.
+- `readArchiveManifest(root)` — `<root>/manifest.json`: the days present, in
+  order, each with its event count and the world's state hash at the end of that
+  day. `listArchivedDays(root)` reads the same thing off the disk, so the
+  manifest can be checked against reality rather than trusted.
+- `apps/simulator` gains `--archive <path>` and `--rewrite`, and seals each day
+  with `sim.hash()` as that day finishes.
 
 Rules it enforces:
 
-- It refuses to overwrite an existing day file unless constructed with
-  `rewrite: true`. Re-running a world that has already been archived is the
+- It refuses to overwrite a day file it did not write itself unless constructed
+  with `rewrite: true`. Re-running a world that has already been archived is the
   normal case during development and must be asked for explicitly, because the
   alternative is silently doubling a day's events on a resume.
-- Reading a day that is not in the manifest throws, naming the date. An absent
-  day is not an empty day (sim-core rule 10).
+- Reading a day that is not on disk throws, naming the date. An absent day is
+  not an empty day (sim-core rule 10): a silent village still writes a file.
 - A malformed line throws, naming the file and the line number, and does not
   skip it.
+- Events arriving out of tick order, or for a day already closed, throw. Either
+  one means two histories are being interleaved into one file.
 
-Tests: round-trip every Phase 1 event type through write and read and compare
-deep-equal; two runs of the same seed produce byte-identical files; a day
-boundary lands exactly on the tick where the date changes; an unasked-for
-overwrite throws; a truncated last line throws with the line number; the
-manifest's hashes match `sim.hash()` taken at the same ticks.
+Three things the plan did not anticipate, recorded here because they changed the
+design and not only the code:
+
+- **The module is `event-archive.ts`, not `event-file-sink.ts`.** The sink is
+  the smaller half of what this is; the readers and the manifest are the other
+  half, and naming the module after the sink hid the part the Chronicle actually
+  depends on.
+- **The manifest carries `complete`.** It is rewritten as each day lands, so an
+  interrupted run leaves a readable partial archive — which is the point — but
+  that also means "there is a manifest" does not mean "the run finished". Only
+  `close()` sets `complete`, and slice 6 refuses to publish an archive without it.
+- **`sealDay` accepts a day that has already rolled shut on its own.**
+  `runUntil(t)` is inclusive of `t`, so a driver that runs to the first tick of
+  tomorrow hands the archive an event belonging to tomorrow before it can seal
+  today. Moving that boundary would have changed every golden hash in the
+  project, so the archive absorbs it instead: when the day just closed is the
+  day being sealed, the hash is attached to it.
+
+Tests: 29 in `packages/sim-core/test/event-archive.test.ts` and two in the CLI's.
+Round-trip every Phase 1 event type through write and read and compare
+deep-equal; two runs of one seed produce byte-identical files; a day boundary
+lands exactly on the tick where the date changes; an unasked-for overwrite
+throws; a truncated last line throws with the line number; the manifest's hashes
+match `sim.hash()` taken at the same ticks; and a write that dies part way
+through leaves the previous day still readable, which is the only test that can
+tell an atomic write from a direct one.
+
+A fourteen-mutant sweep over the module and the CLI leaves no survivors.
 
 ### Slice 2: events the Chronicle needs and the village does not emit
 

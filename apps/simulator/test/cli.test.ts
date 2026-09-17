@@ -2,6 +2,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readArchiveManifest, readEventDay } from '@rpgsim/sim-core';
 import { main, parseArgs } from '../src/index.ts';
 
 /**
@@ -37,7 +38,18 @@ describe('parseArgs', () => {
       key: 'autosave',
       save: false,
       every: 5,
+      rewrite: false,
     });
+    // `archive` has no default on purpose: writing history to disk is a
+    // publishing decision, so the absence of the flag has to be distinguishable
+    // from a path.
+    expect(options.archive).toBeUndefined();
+  });
+
+  it('reads where the durable history goes, and whether it may be replaced', () => {
+    expect(parseArgs(['run', '--archive', 'C:/tmp/arch']).options.archive).toBe('C:/tmp/arch');
+    expect(parseArgs(['run', '--archive', 'x', '--rewrite']).options.rewrite).toBe(true);
+    expect(() => parseArgs(['run', '--archive'])).toThrow(/requires a value/);
   });
 
   it('reads values and flags', () => {
@@ -182,6 +194,45 @@ describe('main', () => {
     captured.lines.length = 0;
     expect(main(['resume', ...args, '--days', '1', '--key', 'village'])).toBe(0);
     expect(hashFrom(captured.lines)).toBe(straightThrough);
+  });
+
+  /**
+   * The durable history, end to end.
+   *
+   * The manifest's per-day hash is the evidence the launch freeze is checked
+   * against (docs/CHRONICLE_V1.md slice 6), so the thing worth proving here is
+   * that the hash filed against the last day is the hash the run actually
+   * finished on -- not merely that some hash was written.
+   */
+  it('writes one archived day per simulated day, and refuses to overwrite one', () => {
+    const archiveRoot = join(directory, 'history');
+    const args = ['run', '--seed', 'arch-seed', '--every', '0', '--archive', archiveRoot];
+
+    expect(main([...args, '--days', '2'])).toBe(0);
+    const finalHash = hashFrom(captured.lines);
+
+    const manifest = readArchiveManifest(archiveRoot);
+    expect(manifest?.world).toBe('village');
+    // The run ended on its own terms, so the archive says it is finished. A
+    // publisher refuses to print from one that does not.
+    expect(manifest?.complete).toBe(true);
+    expect(manifest?.days.map((day) => day.key)).toEqual(['1200-04-01', '1200-04-02']);
+    expect(manifest?.days.at(-1)?.hash).toBe(finalHash);
+    expect(manifest?.days.every((day) => day.events > 0)).toBe(true);
+
+    // Every event filed under a day happened during it. A dateline depends on it.
+    for (const day of manifest?.days ?? []) {
+      const events = readEventDay(archiveRoot, day.key);
+      expect(events).toHaveLength(day.events);
+      expect(events.every((e) => e.tick >= day.firstTick && e.tick <= day.lastTick)).toBe(true);
+    }
+
+    captured.lines.length = 0;
+    expect(() => main([...args, '--days', '2'])).toThrow(/already holds 1200-04-01/);
+
+    captured.lines.length = 0;
+    expect(main([...args, '--days', '2', '--rewrite'])).toBe(0);
+    expect(hashFrom(captured.lines)).toBe(finalHash);
   });
 });
 

@@ -247,11 +247,12 @@ Phase 1.
    not speed. There is no benchmark suite and no regression guard on tick
    throughput. Phase 10 will need one; adding it earlier would be optimising
    against a world that does not exist.
-5. **The event log has no persistent sink implementation.** The `EventSink`
-   interface exists and is used by tests; nothing writes history to disk yet.
-   The observer will need one. *Being closed now:* the Chronicle needs the whole
-   of a day and weeks of continuing story, which the in-memory ring buffer
-   cannot hold, so slice 1 of [CHRONICLE_V1.md](CHRONICLE_V1.md) implements it.
+5. ~~**The event log has no persistent sink implementation.**~~ *Closed.* The
+   Chronicle needs the whole of a day and weeks of continuing story, which the
+   in-memory ring buffer cannot hold, so slice 1 of
+   [CHRONICLE_V1.md](CHRONICLE_V1.md) built `EventArchive` in `sim-core`: one
+   file per simulated day, written whole, with a manifest carrying each day's
+   state hash. `npm run sim -- run --archive <path>` writes one.
 6. **Migrations are untested against real old saves.** The migration mechanism
    is tested with synthetic version bumps. Until there is a genuine v1 save to
    migrate, that is the best available evidence.

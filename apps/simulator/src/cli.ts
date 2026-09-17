@@ -1,5 +1,10 @@
 import { pathToFileURL } from 'node:url';
-import { JsonFileSaveStore, TICKS_PER_DAY, formatTimestamp } from '@rpgsim/sim-core';
+import {
+  EventArchive,
+  JsonFileSaveStore,
+  TICKS_PER_DAY,
+  formatTimestamp,
+} from '@rpgsim/sim-core';
 import { loadCalendar, loadNames, loadVillage } from './data.ts';
 import { probeWorldFactory } from './probe-world.ts';
 import { villageWorldFactory } from './village-world.ts';
@@ -36,6 +41,8 @@ Options:
   --key <name>      Save slot name (default: "autosave")
   --save            Write a save when the run finishes
   --every <n>       Print a status line every n simulated days (default: 5, 0 = off)
+  --archive <path>  Write the durable event history there, one file per day
+  --rewrite         Let --archive replace days it finds already written
 
 "village" is World Zero, built from data/world/village.json.
 "probe" is the Phase 0 kernel harness: no economy, needs, knowledge or spatial
@@ -55,6 +62,9 @@ interface Options {
   key: string;
   save: boolean;
   every: number;
+  /** Where to write durable history. Undefined means do not write any. */
+  archive?: string;
+  rewrite: boolean;
 }
 
 export function parseArgs(argv: readonly string[]): { command: string; options: Options } {
@@ -67,6 +77,7 @@ export function parseArgs(argv: readonly string[]): { command: string; options: 
     key: 'autosave',
     save: false,
     every: 5,
+    rewrite: false,
   };
 
   const command = argv[0] ?? 'help';
@@ -102,8 +113,15 @@ export function parseArgs(argv: readonly string[]): { command: string; options: 
         options.every = requireNumber(flag, value);
         i++;
         break;
+      case '--archive':
+        options.archive = requireValue(flag, value);
+        i++;
+        break;
       case '--save':
         options.save = true;
+        break;
+      case '--rewrite':
+        options.rewrite = true;
         break;
       default:
         throw new Error(`Unknown option: ${flag}`);
@@ -148,13 +166,44 @@ function worldFactory(options: Options): WorldFactory {
   return villageWorldFactory({ config: loadVillage(), names: loadNames(), calendar });
 }
 
+/**
+ * Attach a durable event archive, if one was asked for.
+ *
+ * The world's own calendar is handed over rather than the file's, so a day file
+ * is named by the date the world thinks it is. Nothing is attached by default:
+ * writing history to disk is a publishing decision, and a developer running
+ * thirty days to look at a hash should not silently leave an archive behind.
+ */
+function openArchive(world: SimWorld, options: Options): EventArchive | undefined {
+  if (options.archive === undefined) return undefined;
+  const archive = new EventArchive({
+    root: options.archive,
+    world: options.world,
+    seed: options.seed,
+    calendar: world.sim.calendar,
+    rewrite: options.rewrite,
+  });
+  world.sim.log.addSink(archive);
+  return archive;
+}
+
 function runWorld(world: SimWorld, options: Options, startDay: number): void {
+  const archive = openArchive(world, options);
   const endDay = startDay + options.days;
   for (let day = startDay + 1; day <= endDay; day++) {
     world.sim.runUntil(day * TICKS_PER_DAY);
+    // The day that just finished is the one before the boundary just crossed,
+    // and it is sealed with the hash the world had at that exact moment - which
+    // is the evidence a frozen history is checked against.
+    archive?.sealDay(day - 1, world.sim.hash());
     if (options.every > 0 && (day - startDay) % options.every === 0) {
       console.log(`  ${world.summary()}`);
     }
+  }
+  if (archive !== undefined) {
+    archive.close();
+    console.log(`
+archived to: ${archive.root} (${options.days} days)`);
   }
 
   world.sim.assertInvariants();
