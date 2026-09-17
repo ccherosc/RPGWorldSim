@@ -35,6 +35,27 @@ Exit criteria:
 - run seven simulated days
 - every NPC remains spatially and temporally valid
 
+## Phase 1.5 — Chronicle v1
+
+Out of sequence on purpose. A generated daily paper is the fastest way to find
+out whether a simulated day is interesting to read, and that answer is far
+cheaper to act on before hunger, work and relationships are layered on top.
+Planned in [CHRONICLE_V1.md](CHRONICLE_V1.md); the destination is
+[CHRONICLE.md](CHRONICLE.md).
+
+Deliverables:
+- durable event history on disk
+- `packages/chronicle` — read model, newsworthiness, templates
+- villager posts, limited to what their author was present for
+- a daily Towne Publication
+- `apps/press` — static HTML
+- published daily to GitHub Pages
+
+Exit criteria:
+- a public link shows today's village and an archive back to day one
+- every sentence traces to an event id
+- the same seed rebuilds the same site byte for byte
+
 ## Phase 2 — Survival
 
 Deliverables:

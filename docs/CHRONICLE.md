@@ -3,10 +3,14 @@
 The long-term goal for how the world is *read*: a living publication written
 from inside the simulation.
 
-Nothing here is implemented, and none of it should be built yet. This document
-exists because the goal changes decisions that are being made now — what an
-event carries, what a memory is, how long history is kept — and those are far
-cheaper to get right in Phase 1 than to retrofit in Phase 9.
+This document is the destination, not the build plan. It exists because the
+goal changes decisions that are being made now — what an event carries, what a
+memory is, how long history is kept — and those are far cheaper to get right in
+Phase 1 than to retrofit in Phase 9.
+
+The first version is now being built, on the schedule section 5 sets out.
+[CHRONICLE_V1.md](CHRONICLE_V1.md) is its plan: the slices, the decisions taken
+in advance, and what v1 deliberately refuses to fake.
 
 [WORLD_ZERO_SPEC.md](WORLD_ZERO_SPEC.md) already names the Chronicler as a
 read-only interpretation system. This is what it grows into.
@@ -175,7 +179,9 @@ that ran it.** A generated day is a pure function of the world and the seed.
 
 The earliest useful version is a plain daily summary generated from the event
 store, and it is built **as soon as there is a village** — before Phase 2, not
-after it. It is the fastest way to find out whether the simulated day is
+after it. That version is planned in [CHRONICLE_V1.md](CHRONICLE_V1.md), which
+also covers hosting it, because a publication nobody can read is not a feedback
+loop. It is the fastest way to find out whether the simulated day is
 interesting. If the automatically generated paper is boring, the simulation is
 boring, and no amount of prose quality will fix that. That feedback is worth
 having while the world is still small enough to change cheaply.

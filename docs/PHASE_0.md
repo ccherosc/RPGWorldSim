@@ -249,7 +249,9 @@ Phase 1.
    against a world that does not exist.
 5. **The event log has no persistent sink implementation.** The `EventSink`
    interface exists and is used by tests; nothing writes history to disk yet.
-   The observer will need one.
+   The observer will need one. *Being closed now:* the Chronicle needs the whole
+   of a day and weeks of continuing story, which the in-memory ring buffer
+   cannot hold, so slice 1 of [CHRONICLE_V1.md](CHRONICLE_V1.md) implements it.
 6. **Migrations are untested against real old saves.** The migration mechanism
    is tested with synthetic version bumps. Until there is a genuine v1 save to
    migrate, that is the best available evidence.

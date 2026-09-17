@@ -523,7 +523,8 @@ by accident.
 
 Not Phase 2. Once the village runs for seven days, the next thing built is the
 crudest possible day-in-review generated from the real event stream — see
-[CHRONICLE.md](CHRONICLE.md).
+[CHRONICLE.md](CHRONICLE.md) for why, and [CHRONICLE_V1.md](CHRONICLE_V1.md)
+for the plan it is being built to.
 
 The reason is feedback, not features. A generated paper is the fastest way to
 find out whether a simulated day is interesting to *read*, which is the actual
