@@ -7,8 +7,9 @@ own, with a player who exists inside the world rather than at the centre of it.
 The simulation is headless first. The observer UI and any graphics come later,
 and only once the world is interesting as a stream of text.
 
-**Current status: Phases 0 and 1 complete.** The kernel — time, randomness,
-scheduling, events, identity, persistence — exists and is proven deterministic
+**Current status: Phases 0 and 1 complete, and the Chronicle on top of them.**
+The kernel — time, randomness, scheduling, events, identity, persistence —
+exists and is proven deterministic
 ([docs/PHASE_0.md](docs/PHASE_0.md)). On top of it stands World Zero: a village
 of 86 people in 24 households across 38 places, built from
 `data/world/village.json`, with space, movement that takes time, people who
@@ -17,11 +18,14 @@ their own hour, goes where the day takes them, and walks home to bed at
 nightfall. `npm run sim -- run` runs it. See
 [docs/PHASE_1.md](docs/PHASE_1.md).
 
-Next is not Phase 2. It is the crudest possible day-in-review generated from
-the real event stream, because the question this project is actually asking is
-whether a simulated day is interesting to *read*, and that is much cheaper to
-find out now than after hunger, work and money are layered on top —
-see [docs/CHRONICLE.md](docs/CHRONICLE.md).
+Next was not Phase 2. It was the Chronicle: a day-in-review, a villagers'
+blog and a public website generated from the real event stream, because the
+question this project is actually asking is whether a simulated day is
+interesting to *read*, and that is much cheaper to find out now than after
+hunger, work and money are layered on top. That is built —
+`npm run press -- build` prints 155 pages of Pennycroft — and the plan and the
+implementation record are in [docs/CHRONICLE.md](docs/CHRONICLE.md) and
+[docs/CHRONICLE_V1.md](docs/CHRONICLE_V1.md).
 
 ## Quick start
 
@@ -37,6 +41,18 @@ npm run sim -- run --world probe --days 30       # the Phase 0 kernel harness
 npm run sim -- cast --annals ./memory            # check the portraits against the record
 npm run sim -- help
 ```
+
+Printing the village as a website, which is three commands in order:
+
+```bash
+npm run sim   -- run    --seed world-zero --days 30 --archive ./history
+npm run sim   -- annals --archive ./history --annals ./memory
+npm run press -- build  --archive ./history --annals ./memory --out ./site
+```
+
+`./site` is then a static site that opens in a browser with no server, no
+JavaScript and nothing fetched from another domain. See
+[apps/press/README.md](apps/press/README.md).
 
 `npm run verify` is the one command worth knowing. It builds worlds from
 scratch, runs them, saves them, reloads them and compares, and prints a pass or
@@ -90,6 +106,7 @@ anything never exercises cancellation.
 ```
 apps/
   simulator/     headless driver: run, resume, verify, annals, cast
+  press/         turns the record into a static website: build, days, freeze
   observer/      React observer UI               (Phase 8)
 packages/
   shared/        primitives: assert, heap, canonical JSON, hashing, safe math
@@ -106,15 +123,18 @@ packages/
 data/
   world/         what the simulation reads: calendar, village, names
   chronicle/     what the press reads: significance, scoring, selection, templates,
-                 paper, portraits, casting, personas, community
+                 paper, portraits, casting, personas, community, publication
+assets/
+  site/          what the website ships: stylesheet, seal, illustrations, faces
+  source/        the full-size originals the shipped assets were made from
 docs/            architecture and design documents
 .claude/rules/   rules that apply to code in this repository
 ```
 
 Directories marked with a phase have no `package.json` yet: they are
 placeholders, not npm workspace members, and each has a README describing what
-it will own. The unmarked ones — `shared`, `sim-core`, `world`, `npc`, `society`, `chronicle`
-and `apps/simulator` — are live workspaces.
+it will own. The unmarked ones — `shared`, `sim-core`, `world`, `npc`, `society`,
+`chronicle`, `apps/simulator` and `apps/press` — are live workspaces.
 
 ## The rules that shape everything
 
@@ -154,6 +174,7 @@ code that works and code that works reproducibly.
 | [docs/DETERMINISM.md](docs/DETERMINISM.md) | How reproducibility is achieved and enforced |
 | [docs/PHASE_0.md](docs/PHASE_0.md) | Phase 0 implementation record and technical debt |
 | [docs/PHASE_1.md](docs/PHASE_1.md) | Phase 1 plan: the village, its people, and how they move |
+| [docs/CHRONICLE_V1.md](docs/CHRONICLE_V1.md) | The Chronicle as built: the record, the blog, the paper, the site |
 
 ## Contributing
 

@@ -48,7 +48,7 @@ import { main } from '../src/index.ts';
 
 const DAYS = 30;
 const SEED = 'world-zero';
-const VILLAGE = 'Wodenshill';
+const VILLAGE = 'Pennycroft';
 /** An ordinary day. Not the founding, which is the one day unlike all the rest. */
 const ORDINARY = '1200-04-02';
 const FOUNDING = '1200-04-01';
@@ -139,7 +139,7 @@ const dataOf = (event: SimEvent): Record<string, unknown> =>
 /**
  * Every name the record can print, and everything that answers to it.
  *
- * A list per name, not an id per name, because a name in Wodenshill does not
+ * A list per name, not an id per name, because a name in Pennycroft does not
  * identify one thing: twenty-four cottages are called "A cottage on Church
  * Lane". Longest first, because a name can also hide inside another one — the
  * street `Church Lane` is a substring of the cottages that stand on it, so a
@@ -220,7 +220,7 @@ describe('every number on the page', () => {
   });
 
   it('puts the whole village to bed by the end of an ordinary day', () => {
-    // Everybody in Wodenshill sleeps at night, so `abed` is the population.
+    // Everybody in Pennycroft sleeps at night, so `abed` is the population.
     // Worth pinning: it is the one glance number computed from a gap between
     // two events rather than from a count of them, and the shape of its bug is
     // an off-by-a-few that no aggregate would show.
@@ -346,7 +346,7 @@ describe('what the page says, and about whom', () => {
   });
 
   it('leaves out the review rather than printing an empty heading', () => {
-    // The plan's rule, asked of a real day. Wodenshill is never actually silent
+    // The plan's rule, asked of a real day. Pennycroft is never actually silent
     // -- somebody is turned away from the smithy every single day -- so the
     // silence has to be arranged: the same real day, offered a book with words
     // for nothing. The section is absent, not empty, and the rest of the page

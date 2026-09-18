@@ -1,0 +1,110 @@
+name: publish
+
+# Print the village and put it on the web.
+#
+# The whole history is regenerated from the seed on every run. That is linear in
+# the age of the world and it will not be the cheapest thing forever, but it
+# keeps generated state out of the repository and it means the site is always a
+# function of the code and the data rather than of whatever happened to be in a
+# cache. The fallback, if a year starts taking too long, is to commit the
+# archive and run only the new day -- the day hashes in the manifest already
+# make that safe. It is not built until the timing says it is needed.
+#
+# This file is the only place in the project that reads a clock. The village
+# runs one day per real day, so somebody has to know what day it is; `press
+# days` turns that date into a `--days` count and no simulation code ever sees
+# it. Everything downstream of that number is reproducible.
+
+on:
+  schedule:
+    # 06:17 UTC. Early enough that the day is up before most readers, odd enough
+    # that it is not sharing a minute with every other cron job on GitHub.
+    - cron: '17 6 * * *'
+  workflow_dispatch:
+
+# Read the repository, write to Pages. Nothing here needs write access to the
+# repository itself: the publish leaves no commit behind.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One publish at a time, and let a newer one wait rather than cancel -- a
+# half-deployed site is worse than a site that is a few minutes stale.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # A broken build never publishes. The site is generated from the same code
+      # the tests cover, so a red suite means the pages would be wrong too.
+      - name: Check
+        run: npm run check
+
+      - name: Determinism
+        run: npm run verify
+
+      # The clock read. `date -u` so the village's day does not depend on where
+      # the runner is, and `press days` does the arithmetic against
+      # `firstPublished` and `daysAtFirstPublished` in publication.json.
+      - name: How long is the village
+        id: length
+        run: |
+          today="$(date -u +%F)"
+          days="$(npx tsx apps/press/src/cli.ts days --today "$today")"
+          echo "today=$today" >> "$GITHUB_OUTPUT"
+          echo "days=$days" >> "$GITHUB_OUTPUT"
+          echo "$today: running $days village days"
+
+      - name: Run the village
+        run: >-
+          npx tsx apps/simulator/src/cli.ts run
+          --seed world-zero
+          --days ${{ steps.length.outputs.days }}
+          --every 0
+          --archive .publish/archive
+
+      # The freeze. A published day that comes back with a different world hash
+      # has been rewritten, and the publish stops here rather than reprinting a
+      # page somebody has already read. Before launch nothing is frozen and this
+      # step says so and passes.
+      - name: Check the published history
+        run: npx tsx apps/press/src/cli.ts freeze --archive .publish/archive
+
+      - name: Distil the record
+        run: >-
+          npx tsx apps/simulator/src/cli.ts annals
+          --archive .publish/archive
+          --annals .publish/annals
+
+      - name: Print the site
+        run: >-
+          npx tsx apps/press/src/cli.ts build
+          --archive .publish/archive
+          --annals .publish/annals
+          --out .publish/site
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: .publish/site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

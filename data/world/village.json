@@ -1,5 +1,5 @@
 {
-  "name": "Wodenshill",
+  "name": "Pennycroft",
   "note": "World Zero: one village. Places are named by slug; the simulation allocates the entity ids, so nothing in this file can renumber an existing world. Every list is an array and its order is significant — it is an input to generation, so reordering one changes the village a seed produces. Travel costs and routine hours are in seconds, because a tick is a second.",
   "start": { "year": 1200, "month": 4, "day": 1 },
 

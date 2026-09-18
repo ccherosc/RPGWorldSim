@@ -216,7 +216,7 @@ describe('the line itself', () => {
 
   it('says nobody rather than an empty column when no person was involved', () => {
     const { people } = fresh();
-    const events = [event('world.generated', { village: 'Wodenshill', people: 86 })];
+    const events = [event('world.generated', { village: 'Pennycroft', people: 86 })];
     const line = day(events, people, { ...SIGNIFICANCE, weights: { 'world.generated': 100 } })
       .lines[0];
     expect(line?.who).toBe('-');

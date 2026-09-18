@@ -1,8 +1,11 @@
 # Chronicle v1 — the published village
 
-**Status: planned.** No code yet. This document is written before the code, as
-CLAUDE.md's development philosophy requires, so the state transitions, events,
-invariants and failure cases are decided in advance.
+**Status: built.** All seven slices are done, and the deviations from the plan
+are recorded in each slice's `**Built.**` block rather than edited out of the
+plan above. The plan itself was written before any of the code, as CLAUDE.md's
+development philosophy requires, so the state transitions, events, invariants and
+failure cases were decided in advance -- and so that where the world disagreed
+with the plan, the disagreement is on the record.
 
 [CHRONICLE.md](CHRONICLE.md) is the vision: what the publication becomes over
 the next ten phases, and what it demands of the simulation along the way. This
@@ -58,14 +61,14 @@ a fact the simulation never produced.
 ### The bar for "done"
 
 A public link. Opening it shows today's paper and today's posts from
-Wodenshill. An archive reaches back to the village's first day. Every sentence
+Pennycroft. An archive reaches back to the village's first day. Every sentence
 on the site traces to an event id in the durable history. Running the pipeline
 twice from the same seed produces byte-identical HTML. The whole thing builds in
 CI with no secrets, and nothing about the machine that built it appears in the
 output.
 
 And the question the paper exists to answer gets answered: **is a simulated day
-in Wodenshill interesting to read?** If the honest answer is no, that is the
+in Pennycroft interesting to read?** If the honest answer is no, that is the
 most valuable thing this slice can produce, and it is why it comes before
 Phase 2 rather than after it.
 
@@ -179,7 +182,7 @@ import `chronicle`.
 
 **A section with nothing real to say is omitted, and the colophon says why.**
 An empty Classifieds box reads as a broken website. A colophon that reads "there
-are no classifieds yet; they arrive when Wodenshill has an economy" reads as a
+are no classifieds yet; they arrive when Pennycroft has an economy" reads as a
 world under construction, which is the truth and is more interesting than the
 box.
 
@@ -187,7 +190,7 @@ box.
 by one literate villager. Phase 1 has no literacy, no occupations and no status,
 so choosing an author would mean inventing a fact about a specific person —
 exactly what the governing rule forbids. The paper carries the village's name
-and a colophon noting that it will be signed when somebody in Wodenshill can
+and a colophon noting that it will be signed when somebody in Pennycroft can
 read. Phase 3 gives it an author.
 
 ---
@@ -316,7 +319,7 @@ event. An invented cause would be a worse record than an honest silence.
 **Founding events are the record, not the news.** They all land on the world's
 opening tick, so a naive day-one paper would announce eighty-six births and
 twenty-four weddings on the same morning. The chronicle renders them once, on an
-“About Wodenshill” page, and excludes them from every daily paper. The rule is a
+“About Pennycroft” page, and excludes them from every daily paper. The rule is a
 predicate on tick, not a list of event types, so an actual birth years later is
 news.
 
@@ -367,7 +370,7 @@ Tests:
 The durable archive from slice 1 is exact, machine-readable and far too big to
 be a record. At the measured rate — 1,250 events a day for 86 villagers — a
 simulated year is roughly 80 MB of JSONL. Nobody reads that, `git` should not
-carry it, and "what happened in Wodenshill a few years ago" is the wrong
+carry it, and "what happened in Pennycroft a few years ago" is the wrong
 question to ask of it.
 
 The thing that makes this cheap is already true and was not being used: **the
@@ -598,7 +601,7 @@ alone changed nothing — and the answer was to delete the redundant sort rather
 than to add a test for it: two guarantees of the same thing is one place for it
 to quietly stop being true.
 
-### Slice 4: `packages/chronicle` — the read model and the score
+### Slice 4: `packages/chronicle` — the read model and the score — **built**
 
 New package. Depends on `sim-core` read-only and on the archive. Never imported
 by `sim-core`.
@@ -768,7 +771,7 @@ One page a day. Sections, each omitted when empty:
   from real events.
 - **Colophon** — what this paper cannot yet tell you, and which phase brings it:
   classifieds with the economy, continuing stories with relationships, a named
-  author when somebody in Wodenshill can read, provenance when there is memory.
+  author when somebody in Pennycroft can read, provenance when there is memory.
 
 Tests: every number in "at a glance" is derivable from the day's events and is
 recomputed by the test independently; a day with no public events produces a
@@ -804,7 +807,7 @@ therefore has to pass the presence test in `witness.ts`. The paper has no author
 so there is no person whose knowledge it could exceed — it is the record
 speaking, the way a parish register speaks. That is why directive 5 does not
 apply to it, and why the colophon states the absence rather than inventing a
-byline. The day Wodenshill contains somebody who can read and write, the paper
+byline. The day Pennycroft contains somebody who can read and write, the paper
 acquires an author and inherits the presence rule with them. The paper's
 vocabulary is also missing `{me}`, `{first}` and `{others}`, so a first-person
 phrase lifted out of `templates.json` and pasted into `paper.json` does not
@@ -839,7 +842,7 @@ the wording has not got. So a story carries the lead event and a count of the
 others, and the count is checked against the day.
 
 **Three survivors and one bad mutation.** The first sweep left four. Three were
-weak tests, all of them for the same reason — Wodenshill is too regular to
+weak tests, all of them for the same reason — Pennycroft is too regular to
 distinguish the readings. Nobody here wakes twice in a day, so first-waking and
 last-waking give the same answer on every real day; `place.created` carries a
 `place` field that agrees with the event's own location, so a payload overruling
@@ -859,9 +862,9 @@ capacity six, occupied six, sixteen villagers turned away. The glance reads 86
 souls, 20 families, 38 places, 86 abed, 156 journeys, 16 refused. Seven colophon
 lines, five of which name a thing the paper cannot do and the phase that fixes
 it. That is a thin paper, and it is thin for the reason §7 already gives: almost
-nothing happens in Wodenshill yet. The press is not the bottleneck.
+nothing happens in Pennycroft yet. The press is not the bottleneck.
 
-### Slice 7: `apps/press` and the public link
+### Slice 7: `apps/press` and the public link — **built**
 
 `apps/press` turns chronicle output into a static site. It is an app, not a
 package, because the simulator must not acquire a dependency on HTML.
@@ -919,6 +922,154 @@ day page contains the paper and that day's posts and nothing from another day;
 the scan for machine facts passes; building twice produces byte-identical
 output; a deliberately mutated past day fails the frozen-manifest check.
 
+**Built.** `apps/press` is a workspace of its own: `html.ts` (escaping, elements,
+the document, responsive `<picture>`), `publication.ts` (the wording file's
+schema, and saying a village day out loud), `schedule.ts` (how long to run the
+village today), `freeze.ts` (the frozen history), `data.ts`, `issue.ts`,
+`site.ts`, `cli.ts` and seven page modules under `src/pages/`.
+`data/chronicle/publication.json` holds every sentence the site says in its own
+voice; `assets/site/` holds the stylesheet, the seal, nine illustrations at two
+widths each, and 280 portraits. Thirty days of `world-zero` print 155 pages and
+copy 300 assets — about seven megabytes — with no client-side JavaScript, no
+fonts, and nothing fetched from another domain. 146 tests over seven files, and
+`packages/sim-core/test/determinism-guard.test.ts` now scans `apps/press/src`
+alongside the simulation.
+
+**The output tree is not the one sketched above, because a paper and a blog are
+two different reads.** The plan proposed `days/<date>.html`, one page per day
+carrying both. In practice a reader arrives wanting either the news or the
+people, never an interleaving of the two, so the day splits into
+`paper/<date>.html` and `blog/<date>.html`, each with its own `index.html` and
+`archive.html`. Three pages the plan did not list were added for the same
+reason: `towne.html` and `map.html`, because the village is a place and a reader
+asks where before they ask what; and `people/<slug>.html`, because the blog
+names eighty-six people and a name that is not a link is a dead end. That is
+where the page count comes from — four landing pages, four for the paper and the
+blog, sixty issue pages, and eighty-seven for the roll and the people on it.
+
+**`days = today − firstPublished` was wrong by a month.** The site opens with
+the village's first thirty days already behind it, so the plan's arithmetic
+would have published a one-day archive on launch morning and grown from there,
+deleting twenty-nine days readers had been given. `publication.json` gained
+`daysAtFirstPublished`, and the count is that plus the days elapsed. The
+arithmetic lives in `schedule.ts` as integer maths on two Gregorian dates rather
+than in the workflow's shell, which is what makes it testable: the schedule is
+checked against `Date` as an independent oracle over every day from 1970 to
+2069, and against the century rule on both sides of it — 1900 was not a leap
+year, 2000 was, and a schedule that gets that wrong is wrong by a day for a
+hundred years. A date before `firstPublished` is refused rather than clamped,
+because a clock that has gone backwards is a fault to report, not a length to
+run.
+
+**The wall clock is read once, in `date -u +%F`, and never again.** The workflow
+hands that string to `press days`, which prints a number and nothing else
+because a shell substitution is reading it. Nothing downstream of that number
+sees a date: `press days` requires `--today` rather than defaulting to the
+clock, so the press stays a pure function of its inputs instead of being
+reproducible right up until midnight.
+
+**The press is the second reproducible thing, so it is guarded like the first.**
+A `new Date` in a page builder would put the real world's date on a page about
+the village, and a site built twice on two different afternoons would differ. So
+`REPRODUCIBLE_SOURCES` in the determinism guard now lists `apps/press/src`
+beside `packages/chronicle/src`, and a test names both directories explicitly —
+a scan that silently covers nothing is a guard that silently passes, and a
+mistyped path would fail no other test in that file.
+
+**The freeze became a check that has to fail correctly, not merely pass.** The
+plan asked for a comparison against the committed manifest. The comparison is
+the easy half. The hard half is that the same code can pass while guarding
+nothing: a freeze set with no hashes committed behind it, hashes left behind
+after a freeze is lifted, a published day absent from the file, a day archived
+without a hash. Each of those is now its own failure with its own message, and
+most of `frozen-history.test.ts` is about them rather than about the happy path.
+A green tick over an unguarded archive is worse than no tick at all. The hashes
+live in `data/chronicle/frozen.json`, written once by `press freeze --write`
+rather than copied by hand, because thirty hashes typed by a human is thirty
+chances to produce a file that fails every publish from then on with a message
+saying history was rewritten — the least helpful possible way to learn about a
+typo. There is no override flag, and that is deliberate: either the change is
+wrong and belongs reverted, or the archive is wrong and a person decides what to
+do, and neither is a decision a nightly job should make at four in the morning.
+
+**A year takes seventeen seconds, so the fallback is not built.** The plan said
+the first thing slice 7 measures is how long a year takes, and the answer for
+three hundred and sixty days of `world-zero` is 12.2 seconds to run, 2.1 to
+distil and 3.2 to print: 815 pages and thirteen megabytes of site off a
+ninety-eight megabyte archive that is never committed. Ten years would be under
+three minutes. Regenerating the whole history on every publish stays the right
+choice, and committing the archive to run only the new day stays unbuilt. The
+number to watch is not the runtime but the annals, which reach 468 KB after a
+year — four years or so from the 2 MB mark that triggers the collapse pass.
+
+**The leak scan proves the constraint against the output, not the intention.**
+CHRONICLE.md section 4 is a promise about generated files, so the test reads
+every generated file: all 155 pages plus the stylesheet, searching for the
+repository path, the home directory, the temp directory, `node_modules`, a
+Windows drive letter, anything shaped like an email address, and every value of
+eight characters or more in `process.env`. It then asserts that it looked at
+more than twenty files and that HTML and CSS were among them, because a scan
+whose glob has drifted passes silently. The seed is the one permitted machine
+word — it is a fact about the world — and its presence on the about page is
+asserted, so the exception is visible rather than accidental.
+
+**Twenty-six mutations, twenty-six deaths, and two of them took a second sweep.**
+The sweep breaks the generator one thing at a time — drop the ampersand from the
+escape table, print `families` where `places` belongs, flatten the `../` prefix
+on links, stop emptying the output directory, drop `.nojekyll`, make the freeze
+exclusive of its own last day, move the rota push below the `continue`, mark
+every nav link current, use a truncating modulo for pre-epoch weekdays, cite
+`§(id + 1)`, let cottages onto the map legend, accept a section naming an
+illustration nobody shipped, put the short dateline on the page, pad a quiet
+day's review, accept an unfinished run, drop the skipped-leap-century term from
+the date arithmetic, forget the launch archive in the day count, accept a clock
+that has gone backwards, pass a rewritten hash, pass a lifted freeze that left
+its hashes behind, pass a freeze with no hashes behind it, stop noticing a
+published day nobody froze, freeze days past the freeze date, decorate the bare
+day count — and confirms a test goes red. The nine for the schedule and the
+freeze died on the first sweep. The seventeen for the generator left two
+survivors.
+
+The first was moving `published.push` below the `continue` in `issue.ts`, which
+should have broken the rota and broke nothing. Two causes, and the second was
+worse than the first. `frozenThrough` can only ever hold back a *suffix* of
+days, so under the shipped rule no published day is ever preceded by a held one
+and the ordering cannot be observed from outside at all; and the test that
+claimed to check it was outright vacuous, re-reading the open village and
+comparing it to itself. The fix is a test-only `Holed extends Publication` that
+holds back a day in the *middle* and publishes the rest, which makes the gap
+observable and kills the mutation. That is the only test in the suite that
+reaches past the shipped rule, and it says so in its own doc comment, because
+the invariant is the kind that rots: a second reason to skip a day, added years
+from now, would break the rota silently and every page would still look
+internally consistent.
+
+The second was `§(id + 1)`, which died on the first sweep by luck and lived on
+the second. Event ids run in sequence within a day, so an off-by-one usually
+lands on another real event — and the test only asked whether each cited id
+existed. It now compares the exact per-story and per-post-line source lists
+against what the chronicle handed the page, id for id, with the existence check
+kept separately as an honesty check.
+
+**Two more mutations were dropped as equivalent mutants, and the reason is
+recorded so nobody re-derives it.** Taking the welcome page's figures from the
+first issue instead of the newest changes nothing, because every day of Phase 1
+produces an identical `Glance` — 86 souls, 20 families, 38 places, 86 abed, 156
+journeys, 16 refused, every day, since nobody is born, nobody dies and everybody
+walks the same round. Slicing a citation list down to its first id changes
+nothing either, because every story and every post line currently rests on
+exactly one event. Both are real mutations the day somebody is born, and the
+site test carries a comment saying which of its assertions are weaker than they
+read for this reason.
+
+**One content hazard, left standing and written down.** The illustrations were
+drawn before the village had a tavern name, and two of them show signs reading
+"The Stag & Muddler" and "The Hare & Mug" while Pennycroft's tavern is The
+Ploughshare. The captions in `publication.json` avoid quoting sign text, so
+nothing the site *says* is false, but the pictures disagree with the record and
+a reader with sharp eyes will notice. Redrawing them is cheap and is not part of
+this slice.
+
 ---
 
 ## 4. Invariants
@@ -963,8 +1114,11 @@ New invariants and checks, in the spirit of sim-core rule 11:
   now: it sets the baseline every later system is judged against. The risk is
   reacting to it by adding invention to the chronicle instead of depth to the
   simulation. The governing rule exists to make that reaction impossible.
-- **Rebuild time grows with the archive.** Measured in slice 7; the fallback is
-  written down above so it does not have to be invented under pressure.
+- **Rebuild time grows with the archive.** Measured in slice 7 and not a problem
+  yet: a full simulated year is 12.2 seconds to run, 2.1 to distil and 3.2 to
+  print, so ten years would be under three minutes. The fallback is written down
+  above so it does not have to be invented under pressure rather than because it
+  is needed.
 - **The presence proxy quietly becomes permanent.** It is a compromise with a
   named expiry: Phase 5 replaces it with memory and provenance. It is stated in
   the paper's own colophon so that the compromise is visible to readers, not

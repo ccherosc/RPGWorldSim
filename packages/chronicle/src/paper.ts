@@ -36,7 +36,7 @@ import {
  * papered over with a byline. This matters for directive 5. A post has an author
  * and therefore has to pass the presence test in `witness.ts`; the paper has no
  * author, so there is no person whose knowledge it could exceed — it is the
- * record speaking, in the way a parish register speaks. The day Wodenshill
+ * record speaking, in the way a parish register speaks. The day Pennycroft
  * contains somebody who can read and write, the paper acquires an author and
  * inherits the presence rule with them, and that is a slice of its own.
  *
@@ -174,7 +174,7 @@ export interface Paper {
   /** `1200-04-02`. */
   readonly day: string;
   readonly village: string;
-  /** `Wodenshill, Blossom 2, 1200 (Midweek)`. */
+  /** `Pennycroft, Blossom 2, 1200 (Midweek)`. */
   readonly dateline: string;
   /** Absent, not empty, on a day with nothing to report. */
   readonly review?: readonly Story[];
@@ -205,7 +205,7 @@ export interface PaperOptions {
  * One day's paper.
  *
  * The review is grouped by kind before it is worded, which is not decoration: on
- * an ordinary day in Wodenshill the two leading events are both somebody turned
+ * an ordinary day in Pennycroft the two leading events are both somebody turned
  * back from the same full smithy, and ungrouped that is the same sentence
  * printed twice. Grouping turns it into one story that knows how many.
  */
@@ -341,7 +341,7 @@ function thirdPerson(day: ChronicleDay): WordingContext {
   };
 }
 
-/** `Wodenshill, Blossom 2, 1200 (Midweek)` — the village and the date, nothing else. */
+/** `Pennycroft, Blossom 2, 1200 (Midweek)` — the village and the date, nothing else. */
 function datelineOf(village: string, key: string, calendar: CalendarConfig): string {
   const when = tickToDateTime(dateTimeToTick(partsOf(key), calendar), calendar);
   return `${village}, ${when.monthName} ${when.day}, ${when.year} (${when.weekday})`;

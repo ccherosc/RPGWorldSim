@@ -45,8 +45,13 @@ const SIMULATION_SOURCES = [
  * from the seed, distil it again, and get byte-identical annals. A
  * `Math.random` or a `new Date` anywhere in it would break that quietly and
  * permanently, because the annals are the one thing here that is never rewritten.
+ *
+ * The press is the second. It publishes world state and nothing else, so a
+ * `new Date` in it would put the real world's date on a page about the village,
+ * and a page built twice on two different afternoons would differ. A generated
+ * day has to be a pure function of the world and the seed.
  */
-const REPRODUCIBLE_SOURCES = [join('packages', 'chronicle', 'src')];
+const REPRODUCIBLE_SOURCES = [join('packages', 'chronicle', 'src'), join('apps', 'press', 'src')];
 
 interface BannedPattern {
   readonly name: string;
@@ -139,11 +144,12 @@ describe('determinism guard', () => {
     expect(files.every((file) => file.endsWith('.ts'))).toBe(true);
   });
 
-  it('scans the chronicle too, not only the simulation', () => {
+  it('scans the chronicle and the press too, not only the simulation', () => {
     // Named explicitly because a scan that silently covers nothing is a guard
     // that silently passes: a mistyped directory would fail no other test here.
     const scanned = files.map((file) => relative(REPO_ROOT, file).split(sep).join('/'));
     expect(scanned.some((file) => file.startsWith('packages/chronicle/src/'))).toBe(true);
+    expect(scanned.some((file) => file.startsWith('apps/press/src/'))).toBe(true);
   });
 
   for (const banned of BANNED) {

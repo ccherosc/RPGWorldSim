@@ -1,5 +1,5 @@
 {
-  "village": "Wodenshill",
+  "village": "Pennycroft",
   "families": [
     {
       "family": "netherby",
@@ -61,7 +61,7 @@
       "family": "vane",
       "kind": "land",
       "trade": null,
-      "standing": "The loudest house in Wodenshill, and the fullest",
+      "standing": "The loudest house in Pennycroft, and the fullest",
       "reputation": "Harold promises the moon in a good mood and Hawise quietly settles what he owes. Warm, chaotic, and always owed a favour."
     },
     {
@@ -221,7 +221,7 @@
         "winifred-barrow",
         "winifred-wheeler"
       ],
-      "note": "The two Winifreds. Between them, no child in Wodenshill goes hungry, and no piece of news goes unrepeated."
+      "note": "The two Winifreds. Between them, no child in Pennycroft goes hungry, and no piece of news goes unrepeated."
     },
     {
       "kind": "friendship",

@@ -90,11 +90,11 @@ const paper = writePaper({
   day: today,
   headlines: edition.headlines,
   book,          // data/chronicle/paper.json
-  village: 'Wodenshill',
+  village: 'Pennycroft',
   calendar,
   worldSeed: 'world-zero',
 });
-paper.dateline;  // 'Wodenshill, Blossom 1, 1200 (Restday)'
+paper.dateline;  // 'Pennycroft, Blossom 1, 1200 (Restday)'
 paper.glance;    // { souls: 86, families: 20, places: 38, abed: 86, journeys: 156, refused: 16 }
 ```
 

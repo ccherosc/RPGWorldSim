@@ -1,0 +1,186 @@
+{
+  "note": "Everything the website says in its own voice. The generator in apps/press supplies no prose of its own: if a sentence appears on the site and is not a fact out of the village record, it is in this file. Directive 10 for the same reason wording lives in templates.json -- a page should be improvable by somebody who has never opened a TypeScript file. Keep it plain. Short sentences, concrete nouns, no salesmanship.",
+
+  "masthead": "The Pennycroft Chronicle",
+  "tagline": "A simulation of medieval life, with a twist",
+  "firstVillageDay": "1200-04-01",
+  "firstPublished": "2026-09-18",
+  "daysAtFirstPublished": 30,
+  "frozenThrough": null,
+
+  "images": [
+    {
+      "name": "hero",
+      "alt": "Villagers standing around the well outside the tavern, talking",
+      "caption": "Argument at the well. Nobody in Pennycroft has anywhere else to be at this hour."
+    },
+    {
+      "name": "map",
+      "alt": "A drawn map of Pennycroft showing the green, the lanes, the church, the mill and the fields",
+      "caption": "Pennycroft, drawn from the village file. Every lane and building on this map is a real place in the simulation, and people walk between them at a real cost in minutes."
+    },
+    {
+      "name": "mill",
+      "alt": "Women washing linen in the mill stream while sacks of flour are carried into the mill",
+      "caption": "The Mill and the Mill Stream. The mill holds eight people, and when it is full the ninth has to come back later."
+    },
+    {
+      "name": "lane",
+      "alt": "A muddy village lane at dusk with a basket weaver, a woman carrying carrots and two neighbours arguing over a fence",
+      "caption": "Church Lane at dusk. Twenty-four households live along the lanes, and the record knows which cottage each of them sleeps in."
+    },
+    {
+      "name": "market",
+      "alt": "A crowded market day on the village green with stalls of herbs, eggs, bread and cheese",
+      "caption": "Market day on The Green. Buying and selling is not simulated yet, so no notice on this site claims a price."
+    },
+    {
+      "name": "chickens",
+      "alt": "A grinning man running off with two hens under his arms while a woman shouts and points",
+      "caption": "Not every villager is going to turn out well."
+    },
+    {
+      "name": "boar",
+      "alt": "A laughing man riding a boar through the mud outside the tavern while drinkers cheer",
+      "caption": "The Ploughshare holds thirty. On a good evening it needs to."
+    },
+    {
+      "name": "window",
+      "alt": "An old woman and a girl listening at a tavern window while the drinkers inside talk",
+      "caption": "How news travels. In the simulation it does not travel yet, and the paper says so on every page."
+    },
+    {
+      "name": "quarrel",
+      "alt": "A woman shouting at a man in a muddy lane while the neighbours watch and enjoy it",
+      "caption": "Quarrels are coming. The village needs to be able to hold a grudge first, and that is a later phase."
+    }
+  ],
+
+  "pages": {
+    "home": {
+      "title": "Welcome to Pennycroft",
+      "lead": "Pennycroft is a village of eighty-six people that does not exist. They wake up, walk to work, and go to bed without anybody telling them to, and this is their newspaper.",
+      "sections": [
+        {
+          "heading": "What this is",
+          "body": [
+            "Pennycroft is a computer program pretending to be a medieval village. There are eighty-six people in it. Each one has a name, an age, a family, a house, and a job to walk to. Time moves forward one second at a time, and the program writes down everything that happens.",
+            "Nobody writes the story. If Gilbert Hollis walks to the smithy and finds it full, that is because the smithy holds six people and six people got there before him. He turns around and walks home. That is the whole of it, and it gets put in the paper, because on most days it is the most interesting thing that happens."
+          ],
+          "image": "lane"
+        },
+        {
+          "heading": "The twist",
+          "body": [
+            "The village reports on itself. There is no narrator. Every day the program looks at what happened, decides what mattered, and prints a page about it. The villagers write their own short notes about their own day, and they are only allowed to mention things they were actually present for.",
+            "So the paper can be thin. Some days genuinely are. When the paper has nothing to say it says nothing, and there is a note at the bottom of every issue listing what it cannot tell you yet and why."
+          ],
+          "image": "window"
+        },
+        {
+          "heading": "Everything here can be checked",
+          "body": [
+            "Every sentence on this site stands on a numbered event in the village record, and the numbers are printed next to it. Nothing is added afterwards to make a day read better. If it is not in the record, it does not go on the page.",
+            "The village is also rebuildable. Give the program the same starting word and it produces the same eighty-six people living the same days in the same order, down to the second. That is what makes the record worth keeping."
+          ],
+          "image": "market"
+        }
+      ]
+    },
+
+    "towne": {
+      "title": "The Towne",
+      "lead": "Thirty-eight places, fourteen of them out of doors, joined by lanes that cost real minutes to walk.",
+      "sections": [
+        {
+          "heading": "Getting about",
+          "body": [
+            "The village is a set of places and the roads between them. Walking from The Green to Mill Lane takes three minutes. Walking out to the North Gate takes longer. Nobody in Pennycroft can be in two places at once, and nobody arrives anywhere without walking the distance first.",
+            "Most buildings have a limit on how many people fit inside. That is not decoration. It is the single most common thing that goes wrong in the village, and the paper reports it more than anything else."
+          ],
+          "image": "mill"
+        },
+        {
+          "heading": "Who owns the map",
+          "body": [
+            "The map was drawn by hand from the village file, which lists every place, its type, how many it holds, and what it connects to. If a lane is added to the file, it appears in the village, and people start using it the same day."
+          ]
+        }
+      ]
+    },
+
+    "people": {
+      "title": "The People",
+      "lead": "Eighty-six souls in twenty-four households. Each one has a face, a family, and a life the record can account for.",
+      "sections": [
+        {
+          "heading": "How they got their names",
+          "body": [
+            "The families were written by hand -- the Netherbys, the Hargraves, the Barrows, the Carters and the rest -- and then the program handed out the children. A person's family is the roof they were first recorded under. Two houses of Hargraves both count as Hargraves, which is why this site counts family names and not households.",
+            "The faces are drawn, and each one is assigned to a person whose age and sex actually match it. A face is checked against the record rather than trusted: nobody wears a face of the wrong sex or the wrong stage of life, and no two people wear the same one."
+          ],
+          "image": "quarrel"
+        },
+        {
+          "heading": "What they can and cannot do yet",
+          "body": [
+            "Right now a villager can wake, walk, work, be turned away from a full building, and go to bed. They do not yet remember anything, own anything, buy anything, marry anybody, or hold a grudge. Those arrive in later phases, one at a time, each with its own record in the paper.",
+            "Nobody in Pennycroft has died yet, of anything. When that changes, the paper will be the first to say so."
+          ],
+          "image": "chickens"
+        }
+      ]
+    },
+
+    "paper": {
+      "title": "The Chronicle",
+      "lead": "One page a day, written out of the village record. The day in review, a count of how the village stood at midnight, and an honest note about what is still missing."
+    },
+
+    "blog": {
+      "title": "The Villagers",
+      "lead": "Short notes from the people themselves. A villager may only write about something they were standing next to when it happened, which is why some days they have nothing to say."
+    },
+
+    "about": {
+      "title": "About Pennycroft",
+      "lead": "How the village works, what it can prove, and what it is still pretending about.",
+      "sections": [
+        {
+          "heading": "One second at a time",
+          "body": [
+            "The simulation keeps a clock and a queue of things waiting to happen. A villager decides what to do, the program works out how long it takes, and puts them down for that many seconds later. A day is eighty-six thousand four hundred ticks, and a tick is a second.",
+            "Every change of any importance is written down as a numbered event: who did it, where, when, and what caused it. A month of the village is about eighty megabytes of those events. That pile is a cache, not a record -- it can be deleted and rebuilt from the starting word whenever it is wanted."
+          ],
+          "image": "boar"
+        },
+        {
+          "heading": "What gets kept forever",
+          "body": [
+            "Out of those millions of events, a small number are worth remembering next year. Those get boiled down to three plain text files: everyone who has ever existed, everywhere that exists, and one line per day for everything that mattered. A year of village memory is a few hundred kilobytes and can be read in a text editor.",
+            "That is the part a seed cannot rebuild, because it is a judgement rather than a fact. It is also the part this website is printed from."
+          ]
+        },
+        {
+          "heading": "The rules it holds itself to",
+          "body": [
+            "A villager may only act on something they could actually know. Money, food, goods and people cannot appear out of nowhere. Nothing crosses the map without walking it. The program never uses the computer's clock or an unseeded coin flip, because either one would mean the same village could not be rebuilt twice.",
+            "There is no artificial intelligence in the simulation. None of the villagers' decisions are made by a language model, and the village runs with no internet connection at all. The pictures on this site were drawn with an image model and are illustrations, not evidence -- everything with a number next to it came out of the record."
+          ]
+        },
+        {
+          "heading": "What is missing on purpose",
+          "body": [
+            "The paper has no author, because nobody in Pennycroft can read or write yet. There are no classified notices, because there is no money. Nothing continues from yesterday, because nobody has a relationship the record can prove. Nobody remembers anything, so the page can tell you what was done and never why.",
+            "Each of those is a phase of work with a place in the plan, and each one is named at the bottom of every issue of the paper. A gap that is written down is a gap somebody can close."
+          ]
+        }
+      ]
+    }
+  },
+
+  "footer": [
+    "Pennycroft is a simulation. Nobody named on this site is a real person, living or dead.",
+    "The village is rebuilt from a single starting word, so every page here can be produced again from scratch and come out the same."
+  ]
+}

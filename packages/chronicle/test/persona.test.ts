@@ -111,7 +111,7 @@ const tie = (kind: Tie['kind'], one: string, other: string): Tie => ({
 });
 
 const community = (families: string[], ties: Tie[]) => ({
-  village: 'Wodenshill',
+  village: 'Pennycroft',
   families: families.map((family) => ({
     family,
     kind: 'trade' as const,

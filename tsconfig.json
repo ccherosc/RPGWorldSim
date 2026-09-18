@@ -9,6 +9,7 @@
     "packages/society/**/*.ts",
     "packages/chronicle/**/*.ts",
     "apps/simulator/**/*.ts",
+    "apps/press/**/*.ts",
     "vitest.config.ts"
   ],
   "exclude": ["**/node_modules", "**/dist"]

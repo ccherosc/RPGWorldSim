@@ -44,7 +44,7 @@ const FIRST_DAY = 90;
 const DAWN = FIRST_DAY * TICKS_PER_DAY;
 const KEY = dayKeyOf(DAWN, DEFAULT_CALENDAR);
 const SEED = 'world-zero';
-const VILLAGE = 'Wodenshill';
+const VILLAGE = 'Pennycroft';
 
 const npc = (index: number): EntityId => makeEntityId(EntityKind.Npc, index);
 const place = (index: number): EntityId => makeEntityId(EntityKind.Location, index);
@@ -360,7 +360,7 @@ describe('the village at a glance', () => {
 
   it('counts the last waking, not the first', () => {
     // Up at dawn, a nap, and up again: not abed. Reading the *first* waking
-    // against the last bedtime calls this person asleep, and no day Wodenshill
+    // against the last bedtime calls this person asleep, and no day Pennycroft
     // has ever produced tells the two readings apart -- everybody here wakes
     // exactly once. So it is asked here or it is not asked.
     const glance = glanceOf(day([woke(npc(0), 100), abed(npc(0), 200), woke(npc(0), 300)]));
@@ -380,7 +380,7 @@ describe('one day’s paper', () => {
     const paper = writePaper(issue([blocked(npc(0), 100)]));
     expect(paper.day).toBe(KEY);
     expect(paper.village).toBe(VILLAGE);
-    expect(paper.dateline).toBe('Wodenshill, Blossom 1, 1200 (Restday)');
+    expect(paper.dateline).toBe('Pennycroft, Blossom 1, 1200 (Restday)');
   });
 
   it('omits the review rather than printing an empty heading', () => {

@@ -37,7 +37,11 @@
       "@rpgsim/society": ["packages/society/src/index.ts"],
       "@rpgsim/society/*": ["packages/society/src/*"],
       "@rpgsim/chronicle": ["packages/chronicle/src/index.ts"],
-      "@rpgsim/chronicle/*": ["packages/chronicle/src/*"]
+      "@rpgsim/chronicle/*": ["packages/chronicle/src/*"],
+      "@rpgsim/simulator": ["apps/simulator/src/index.ts"],
+      "@rpgsim/simulator/*": ["apps/simulator/src/*"],
+      "@rpgsim/press": ["apps/press/src/index.ts"],
+      "@rpgsim/press/*": ["apps/press/src/*"]
     }
   }
 }

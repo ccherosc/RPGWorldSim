@@ -13,7 +13,8 @@
     "packages/npc",
     "packages/society",
     "packages/chronicle",
-    "apps/simulator"
+    "apps/simulator",
+    "apps/press"
   ],
   "scripts": {
     "typecheck": "tsc -p tsconfig.json --noEmit",
@@ -21,6 +22,7 @@
     "test:watch": "vitest",
     "sim": "tsx apps/simulator/src/cli.ts",
     "verify": "tsx apps/simulator/src/cli.ts verify",
+    "press": "tsx apps/press/src/cli.ts",
     "check": "npm run typecheck && npm run test"
   },
   "devDependencies": {
