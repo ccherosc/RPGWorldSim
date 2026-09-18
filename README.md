@@ -105,8 +105,8 @@ packages/
   ai/            optional LLM adapters                     (Phase 9)
 data/
   world/         what the simulation reads: calendar, village, names
-  chronicle/     what the press reads: significance, scoring, selection, portraits,
-                 casting, personas, community
+  chronicle/     what the press reads: significance, scoring, selection, templates,
+                 portraits, casting, personas, community
 docs/            architecture and design documents
 .claude/rules/   rules that apply to code in this repository
 ```

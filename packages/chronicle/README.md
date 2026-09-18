@@ -8,9 +8,11 @@ reproduces it byte for byte, so it can be deleted and rebuilt at will. What
 cannot be rebuilt from a seed is a *judgement* about what mattered. That
 judgement is what this package makes, and it is small enough to keep forever.
 
-**Status: slice 3 of [CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md) has landed.**
-Memory is recorded and exported. Nothing in the simulation reads it back yet —
-villagers do not act on what they remember until the slice after the paper.
+**Status: slices 3 to 5 of [CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md) have
+landed.** Memory is recorded and exported, the record is read back as a scored
+day, and the villagers write posts from it. Nothing in the simulation reads its
+own memory yet — villagers do not act on what they remember until the slice
+after the paper.
 
 ## What is here
 
@@ -25,6 +27,8 @@ villagers do not act on what they remember until the slice after the paper.
 | `day.ts` | `ChronicleDay`: one day, indexed by actor, place and type |
 | `score.ts` | `scoreOf`, `rank`: how newsworthy something is, in whole numbers |
 | `select.ts` | `select`: what leads the edition, and whose turn it is to post |
+| `witness.ts` | `Whereabouts`: where everybody was, and when — the honesty rule |
+| `post.ts` | `writePost`, `writePosts`: a villager's day, assembled from event ids |
 | `portraits.ts` | `PortraitCatalog`: the sheets of drawn faces, merged and indexed |
 | `casting.ts` | `Casting`: who wears which face, and whether that is still true |
 | `persona.ts` | `PersonaBook`: how each villager comes across, read off their traits |
@@ -61,6 +65,20 @@ const edition = select({
   selection,   // data/chronicle/selection.json
   published,   // every day already on the site: the rota reads nothing else
 });
+```
+
+`witness.ts` and `post.ts` are what the blog is made of:
+
+```ts
+const whereabouts = new Whereabouts(today);              // half-open stays, per person
+const posts = writePosts(edition.posters, {
+  day: today,
+  whereabouts,
+  scoring,
+  templates,   // data/chronicle/templates.json
+  worldSeed: 'world-zero',
+});
+posts[0]?.lines[0];   // { text: 'Turned away from The Mill.', sources: [41207] }
 ```
 
 The last four modules are the **press side**: they read the record and give the
@@ -176,6 +194,32 @@ feature that bypasses the economy. When Phase 2 gives the simulation
 relationships of its own, those become events and this file shrinks to whatever
 is still unmodelled.
 
+## Two more, for the blog
+
+**`Whereabouts` exists because `presenceOf` is not the honesty rule.**
+`ChronicleDay.presenceOf` gives the set of places somebody was at *some point
+today*, which is the right answer for counting and indexing and the wrong one
+for deciding what a person may say. Somebody who crossed the green at dawn was
+not there for the argument at dusk. So `witness.ts` rebuilds each person's day
+as half-open `[from, until)` stays, and `saw(actor, event)` asks where they were
+*at that tick*. `travel.blocked` is never used to place anybody: its two emit
+sites disagree about what its location means — a refusal fires where the
+traveller stands, an interruption fires at the node *ahead* of them — and one of
+the two would place somebody somewhere they have never been. Nothing is lost,
+because the arrival that put them on that road already opened the stay. The
+model errs towards "you were not there", which is the right direction: too
+strict costs a villager a sentence, too loose costs the project directive 5.
+
+**A post is assembled from the day, not written about it.** One line per event,
+each line carrying the id it came from, so "every sentence is traceable" is
+something a test walks rather than something a colophon claims. Wording lives in
+`templates.json` (directive 10) and a wording whose placeholders the event
+cannot fill is *passed over*, never filled with a guess — there is no
+"somewhere", no empty string, and no rendering of a boolean or a bare entity id,
+because `household:3` in the middle of a sentence is the most embarrassing thing
+this package could do. If nothing the author witnessed has wording, they do not
+post: padding a thin day is lying slowly.
+
 ## Tests
 
 `people.test.ts` and `places.test.ts` cover slugs and the file formats,
@@ -197,9 +241,19 @@ or life stage, and no face is worn by two people. Every way those files can be
 wrong is silent on the page, which is why they are tested against the record
 rather than reviewed.
 
-A sixteen-mutant sweep over the memory sources and a forty-four-mutant sweep
-over the press side each leave no survivors. A test that passes with the code
-broken is not a test yet.
+`witness.test.ts` and `post.test.ts` are written as attacks rather than as
+demonstrations: crossing a square hours before the thing that happened in it,
+standing next door, being named by an event that points at a place ahead of you,
+asking a wording for a fact the event has not got. The thirty-day checks are in
+`apps/simulator/test/posts.test.ts`, and two of them can only be asked of real
+days — **every line of every post of every day passes the presence test**, not a
+sample, because what would get past a unit test is a rare shape of day rather
+than a systematic fault; and **no shipped wording is dead**, because a misspelt
+placeholder reads as silence instead of as an error.
+
+A sixteen-mutant sweep over the memory sources, a forty-four-mutant sweep over
+the press side and a twenty-seven-mutant sweep over the blog each leave no
+survivors. A test that passes with the code broken is not a test yet.
 
 ## Rules it inherits
 

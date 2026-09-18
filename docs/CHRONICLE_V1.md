@@ -663,7 +663,7 @@ real days nobody is that far ahead, and the fix is a village where more kinds of
 thing happen rather than a bigger `cooling` — a bigger number only moves the
 threshold somebody has to clear before the same thing happens again.
 
-### Slice 5: villager posts — depth
+### Slice 5: villager posts — depth — **built**
 
 Four to six first-person posts a day.
 
@@ -689,6 +689,72 @@ exhaustively over thirty generated days, not on a sample; a post with no
 qualifying events is not generated rather than padded; the same day generates
 identical posts twice; a golden hash pinned on one day's posts for the
 `world-zero` seed.
+
+**Built.** `witness.ts` and `post.ts`, with the wording in
+`data/chronicle/templates.json` per directive 10. 41 tests across
+`witness.test.ts` and `post.test.ts`, plus 11 in
+`apps/simulator/test/posts.test.ts` that ask the two questions only real days
+can be asked. Checked against twenty-seven deliberate mutations; all
+twenty-seven die. Six survived the first sweep: five were weak tests — a `when`
+clause test that left an ungated wording eligible so the mutant hid behind a
+coin toss, a list-of-names test with only one name in the list, no test at all
+for a boolean placeholder, and two `Whereabouts` tests that asked `placeAt`
+about a lie only `trailOf` could see — and the sixth was a redundant guard in
+`chooseMoments`, fixed in the code rather than the test.
+
+**The presence proxy needed a clock, not a set.** The plan says "at a location
+they were at at the time", and `ChronicleDay.presenceOf` answers a weaker
+question: the set of places somebody was at *some point today*. Used as the
+honesty rule that is materially looser — somebody who crossed the green at dawn
+would be handed the argument that happened on it at dusk. So `witness.ts`
+reconstructs each person's day as half-open `[from, until)` stays from the
+events that name both them and a place, and `saw(actor, event)` asks where they
+were *at that tick*. A test asserts the gap directly: for one hand-built day
+`presenceOf(villager).has(GREEN)` is `true` and `saw(...)` is `false`. The day
+keeps its looser index for what it is honestly good for, which is counting and
+indexing.
+
+`travel.blocked` is excluded from placing people altogether. It has two emit
+sites that disagree about what its location means: a refusal fires where the
+traveller stands, an interruption fires at `stoppingAt`, the node *ahead* of
+them that they have not reached. One of the two would place somebody where they
+have never been, so neither is trusted, and nothing is lost because whatever
+arrival put them on that road already opened the stay. Villagers still write
+about being turned away — a refusal names them as an actor, which is a stronger
+claim than standing nearby.
+
+**A deliberate departure from the plan's letter.** The wording RNG stream is
+`(worldSeed, date, slug)` rather than `(worldSeed, date, npcId)`. A slug is a
+pure function of a name; an entity id is an artefact of the order worldgen
+happened to run in. Rebuild the archive from the seed and the slug survives;
+rebuild it after any worldgen change and the ids all shift, silently rewriting
+every post the site has ever published. Nothing else about the plan's
+determinism story changes.
+
+**Dead prose is a test failure.** A misspelt placeholder, or a `when` clause
+naming a value the simulation never produces, reads as silence rather than as
+an error — the wording is simply never chosen, and nobody finds out. So the
+thirty-day test offers every variant in the shipped book a real event of its
+own type and requires each to fit at least one. That test rejected nine of the
+first thirty-three wordings and, in doing so, surfaced **three code paths that
+exist and never execute**: `npc.could-not-rest` (nobody's house is ever full at
+bedtime), an interrupted turn-in and its `travel.blocked` with
+`reason: 'bedtime'` (nobody is ever caught far enough from home), and
+`npc.removed` (nothing kills anybody yet). They have no wording until they can
+happen. That list belongs in §7 next to the fork budget: three of the most
+readable things the village could produce are wired and unreachable.
+
+**What thirty real days of `world-zero` produce.** 150 posts — five a day,
+every day, because the rota fills its slots and every villager wakes — 450
+lines, three per post, from 59 distinct authors. The citations run
+`npc.woke` 145, `npc.went-to-bed` 145, `travel.blocked` 123, `npc.turning-in`
+27, `society.household-founded` 5, `npc.home-changed` 5, and the two remaining
+wordings (`npc.created`, `society.parentage-recorded`) are reachable but never
+reached by a villager the rota picked. So a post today is mostly *woke,
+somewhere; was turned away from somewhere; went to bed*. That is the fork
+budget again, reported rather than papered over: the honesty rule is doing its
+job and there is almost nothing honest to say. Slice 6 does not fix it and
+neither does looser wording; more kinds of thing happening does.
 
 ### Slice 6: the Towne Publication — breadth
 
@@ -855,6 +921,18 @@ bigger without making it more legible. The target is deliberately large -- dozen
 of forks reachable in an ordinary day, not three. A villager who faces three
 decisions a day has an invisible personality no matter how finely it is scored,
 and a blog written about them reads as weather.
+
+**Three forks are wired and unreachable, which is the cheapest fork work
+available.** Slice 5's coverage test had to be told which event types the
+simulation can actually produce, and found three that exist in code and fire
+zero times in thirty days: `npc.could-not-rest` (nobody's house is ever full
+when they turn in), an interrupted turn-in with its `travel.blocked` carrying
+`reason: 'bedtime'` (nobody is ever caught far enough from home for the walk to
+be cut short), and `npc.removed` (nothing kills anybody yet). The first two are
+already-built forks that the world's parameters never reach — a village with
+tighter dwellings, or errands that take somebody further out, would reach both
+without a line of new branching code. They have no post wording until they can
+happen, which is why they are listed here rather than left as a curiosity.
 
 What counts as a fork is strict: a real choice with a real cost. "Does she go to
 the alehouse" is a fork, because going means not being home when the child wakes.

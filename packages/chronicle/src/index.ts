@@ -62,6 +62,14 @@ export {
 } from './select.ts';
 export type { Candidate, Edition, PublishedDay, SelectOptions, SelectionConfig } from './select.ts';
 
+// Where everybody was, and when
+export { Whereabouts } from './witness.ts';
+export type { Stay } from './witness.ts';
+
+// The villagers, in their own words
+export { TemplateBookSchema, TemplateSchema, writePost, writePosts } from './post.ts';
+export type { Post, PostLine, PostOptions, Template, TemplateBook } from './post.ts';
+
 // The faces
 export {
   AGE_BANDS,

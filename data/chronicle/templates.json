@@ -1,0 +1,57 @@
+{
+  "note": "Wording for villager posts. One entry per event type; a type absent here is a type nobody posts about. travel.departed and travel.arrived are absent on purpose -- twenty-nine thousand of a thirty-day run's thirty-five thousand events are somebody walking somewhere, and a blog made of those is a travel log. Placeholders: {me} the writer's full name, {first} their first name, {place} where the event happened, {others} the other people it names. Any other {word} is read straight out of the event's own payload, and a wording whose placeholders cannot all be filled is passed over rather than filled in with a guess. `when` restricts a wording to events carrying particular payload values, so a refusal can be phrased for its actual reason instead of printing `no-route` in the middle of a sentence.",
+
+  "coverage": "Every wording here fires at least once in thirty days of the world-zero seed, and packages/chronicle/test/post.test.ts asserts it -- so a misspelt placeholder or a wording nothing can reach fails a test instead of quietly never appearing. That cuts both ways: wording may only be added here once the simulation can actually produce it. Three real code paths are dormant and therefore have no wording yet -- npc.could-not-rest (nobody's house is ever full at bedtime, so it fires zero times in thirty days), an interrupted turn-in and its travel.blocked with reason `bedtime` (nobody is ever caught far enough from home), and npc.removed (nothing kills anybody yet). When any of those starts firing, its wording belongs here.",
+
+  "maxLines": 3,
+
+  "wording": {
+    "npc.woke": [
+      { "text": "Awake, and the day already wants something." },
+      { "text": "Up with the light." },
+      { "text": "Woke early. No help for it." },
+      { "text": "Another morning. {place}, same as ever." },
+      { "text": "Opened my eyes at {place} and lay there a while longer than I should have." },
+      { "text": "{first} is awake. {first} is not pleased about it." }
+    ],
+
+    "npc.turning-in": [
+      { "text": "Enough for one day. Heading back to {home}.", "when": { "interrupted": [false] } },
+      { "text": "Turning in. {home} and nothing else tonight.", "when": { "interrupted": [false] } },
+      { "text": "Late. Going home." }
+    ],
+
+    "npc.went-to-bed": [
+      { "text": "Bed. Finally." },
+      { "text": "Abed at {place}." },
+      { "text": "{place}. Warm enough. Goodnight." },
+      { "text": "Lying down. Tomorrow can argue with me tomorrow." }
+    ],
+
+    "travel.blocked": [
+      { "text": "No room at {destination}. Stood outside a while and thought about it.", "when": { "reason": ["full"] } },
+      { "text": "{destination} is packed to the rafters. Not tonight.", "when": { "reason": ["full"] } },
+      { "text": "Walked all the way to {destination} for nothing. It was full.", "when": { "reason": ["full"] } }
+    ],
+
+    "npc.created": [
+      { "text": "A new name in the village: {me}." }
+    ],
+
+    "npc.home-changed": [
+      { "text": "Moved. {to} now." },
+      { "text": "{to}. This is where I live, then." }
+    ],
+
+    "society.household-founded": [
+      { "text": "The {name} household, under the roof at {dwelling}." },
+      { "text": "We are the {name}s now, and {dwelling} is ours." },
+      { "text": "Settled in at {dwelling} with {others}." }
+    ],
+
+    "society.parentage-recorded": [
+      { "text": "{mother} is my mother. That is written down now." },
+      { "text": "Set down in the record: {mother} and {father}." }
+    ]
+  }
+}

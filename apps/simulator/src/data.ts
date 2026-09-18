@@ -16,6 +16,8 @@ import {
   SelectionSchema,
   type SignificanceConfig,
   SignificanceSchema,
+  type TemplateBook,
+  TemplateBookSchema,
 } from '@rpgsim/chronicle';
 import { type NameBook, makeNameBook } from '@rpgsim/npc';
 import { type CalendarConfig, CalendarSchema } from '@rpgsim/sim-core';
@@ -160,6 +162,22 @@ export function loadScoring(dataRoot: string = DATA_ROOT): ScoringConfig {
 /** Read how long the edition is and how the posting rota turns. */
 export function loadSelection(dataRoot: string = DATA_ROOT): SelectionConfig {
   return loadJson(join(chronicleRoot(dataRoot), 'selection.json'), SelectionSchema, 'selection');
+}
+
+/**
+ * Read the wording the villagers post in.
+ *
+ * Prose in a data file rather than in code, for directive 10's reason and for
+ * one more: wording is the part of this that a person with no TypeScript should
+ * be able to improve. A new turn of phrase should be a line in a JSON file, not
+ * a pull request against a module.
+ */
+export function loadTemplates(dataRoot: string = DATA_ROOT): TemplateBook {
+  return loadJson(
+    join(chronicleRoot(dataRoot), 'templates.json'),
+    TemplateBookSchema,
+    'template book',
+  );
 }
 
 /** Read the families and what they are to each other. */

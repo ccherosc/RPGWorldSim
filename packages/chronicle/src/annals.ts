@@ -266,8 +266,12 @@ const DETAIL: Record<string, Detail> = {
     `child of ${parentOf(data['mother'], data['motherAbsent'], people)} and ` +
     `${parentOf(data['father'], data['fatherAbsent'], people)}`,
 
-  // Locations have no names yet -- the cast that gives them one is slice 4 --
-  // so a refusal says why it was refused and nothing it cannot back up.
+  // `PlaceRegister` could name the destination now, and this line deliberately
+  // does not. The annals are append-only and thirty years long: adding a column
+  // to a detail string means every line written before the change reads
+  // differently from every line written after it, forever, for a gain the blog
+  // and the paper already deliver from the archive. A refusal says why it was
+  // refused, which is the part that cannot be recovered from anywhere else.
   'travel.blocked': (data) => {
     const reason = asString(data['reason']) ?? EMPTY;
     const capacity = asNumber(data['capacity']);
