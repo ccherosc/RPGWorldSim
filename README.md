@@ -106,7 +106,7 @@ packages/
 data/
   world/         what the simulation reads: calendar, village, names
   chronicle/     what the press reads: significance, scoring, selection, templates,
-                 portraits, casting, personas, community
+                 paper, portraits, casting, personas, community
 docs/            architecture and design documents
 .claude/rules/   rules that apply to code in this repository
 ```

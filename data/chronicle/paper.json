@@ -1,0 +1,66 @@
+{
+  "note": "The Towne Publication: one page a day, third person, read off the same events the blog is written from. Wording lives here rather than in code (directive 10) because a turn of phrase should be a line in a JSON file, not a pull request against a module. Every placeholder is either a word the paper claims -- {who}, {place} -- or a key the event itself carries; a wording that asks for something an event has not got is passed over rather than filled in, so a phrase written for a payload that changed goes quiet instead of printing nonsense. A test offers every variant below a real event of its own type and fails if any of them fits nothing.",
+
+  "maxStories": 4,
+
+  "neverPrintNote": "Types the paper refuses whatever their score, as distinct from types it simply has no words for. All four happen inside one person's house and concern nobody but them. Wording may not be added for a listed type -- the schema rejects the file if it is -- so turning one of these into news is a deliberate act with a diff attached, which is the point.",
+  "neverPrint": ["npc.woke", "npc.turning-in", "npc.went-to-bed", "npc.could-not-rest"],
+
+  "coverage": "Eight variants for six types. The set is small because the list of things that can lead a page is small: measured over thirty days of world-zero, the only events clearing the newsworthiness floor are a refusal at a full door (every day), a household founding and the world opening (day one). Wording for a type that cannot yet lead is not written on spec -- it would pass the reachability test and never be read, and the honest place to record a gap is the colophon.",
+
+  "wording": {
+    "world.generated": [
+      {
+        "text": "{village} keeps a record from this day. {people} souls, {households} households, {places} places to stand in."
+      }
+    ],
+
+    "society.household-founded": [
+      {
+        "text": "The {name} household has taken {dwelling}: {size} under one roof, with {head} answering for them."
+      },
+      {
+        "text": "{head} is head of the {name} household now, {size} of them, at {dwelling}."
+      }
+    ],
+
+    "society.parentage-recorded": [
+      {
+        "text": "Set down in the register: {child}, of {mother} and {father}."
+      }
+    ],
+
+    "npc.home-changed": [
+      {
+        "text": "{who} has a roof over them: {to}."
+      }
+    ],
+
+    "place.created": [
+      {
+        "text": "{name} stands, and is counted."
+      }
+    ],
+
+    "travel.blocked": [
+      {
+        "text": "{who} walked to {destination} and got no further. It holds {capacity}; there were {occupancy} inside.",
+        "when": { "reason": ["full"] }
+      },
+      {
+        "text": "{destination} was full again, and {who} turned back at {place}.",
+        "when": { "reason": ["full"] }
+      }
+    ]
+  },
+
+  "colophon": [
+    "This page is compiled from the village record. Every sentence on it stands on a numbered event, and the numbers are printed with it, so anything here can be checked against the day it came from.",
+    "Nobody in Wodenshill writes this. There is no one here yet who can read or write, so the page has no author and takes no view; it reports what the record holds and nothing it was told. When the village has a hand that can hold a pen, this paper will have a name at the top of it, and will thereafter be bound by what that person could actually have known.",
+    "There are no classified notices. Nothing in Wodenshill is yet for sale, hired, wanted or owed, because the village has no economy: no coin, no stock, no wages, no debts. Notices arrive with those.",
+    "Nothing here continues from yesterday. The village has households and no relationships between them that the record can prove, so there are no quarrels to follow, no courtships, no feuds -- only single days, one after another. Continuing stories arrive with relationships.",
+    "Nobody here remembers anything. Villagers act on the hour and the state of their own bodies, not on what happened last winter, so the page can tell you what was done and never why anybody thought it worth doing. Reasons arrive with memory.",
+    "The count of families is a count of family names, not of households. The record keeps the family whose roof a person was created under, and two houses of Barrows both read as Barrow. Households become countable when they become identified things in their own right.",
+    "The count of souls is everyone the record has ever held. Nobody in Wodenshill has died yet, of anything, so for now it is also a count of the living."
+  ]
+}

@@ -102,8 +102,10 @@ export class Community {
   private readonly byFamily = new Map<string, Family>();
   private readonly bySlug = new Map<string, Tie[]>();
   private readonly order: readonly Tie[];
+  private readonly named: string;
 
   constructor(config: CommunityConfig) {
+    this.named = config.village;
     for (const family of config.families) {
       assert(!this.byFamily.has(family.family), 'that family is listed twice', {
         family: family.family,
@@ -120,6 +122,19 @@ export class Community {
         else held.push(tie);
       }
     }
+  }
+
+  /**
+   * What the village is called.
+   *
+   * Kept here rather than read from the village config, because the two files
+   * answer to different things: `data/world/village.json` is what the
+   * simulation is built from and may be regenerated, and this is what the press
+   * prints. A dateline is a masthead, and a masthead belongs with the families
+   * whose paper it is.
+   */
+  get village(): string {
+    return this.named;
   }
 
   get familyCount(): number {

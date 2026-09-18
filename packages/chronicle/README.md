@@ -8,11 +8,11 @@ reproduces it byte for byte, so it can be deleted and rebuilt at will. What
 cannot be rebuilt from a seed is a *judgement* about what mattered. That
 judgement is what this package makes, and it is small enough to keep forever.
 
-**Status: slices 3 to 5 of [CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md) have
+**Status: slices 3 to 6 of [CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md) have
 landed.** Memory is recorded and exported, the record is read back as a scored
-day, and the villagers write posts from it. Nothing in the simulation reads its
-own memory yet — villagers do not act on what they remember until the slice
-after the paper.
+day, the villagers write posts from it, and the Towne Publication writes one page
+a day. Nothing in the simulation reads its own memory yet — villagers do not act
+on what they remember until the slice after the site.
 
 ## What is here
 
@@ -28,7 +28,9 @@ after the paper.
 | `score.ts` | `scoreOf`, `rank`: how newsworthy something is, in whole numbers |
 | `select.ts` | `select`: what leads the edition, and whose turn it is to post |
 | `witness.ts` | `Whereabouts`: where everybody was, and when — the honesty rule |
+| `wording.ts` | `render`, `eligible`: what may be said at all, and what is passed over |
 | `post.ts` | `writePost`, `writePosts`: a villager's day, assembled from event ids |
+| `paper.ts` | `writePaper`: one page a day — dateline, review, glance, colophon |
 | `portraits.ts` | `PortraitCatalog`: the sheets of drawn faces, merged and indexed |
 | `casting.ts` | `Casting`: who wears which face, and whether that is still true |
 | `persona.ts` | `PersonaBook`: how each villager comes across, read off their traits |
@@ -67,7 +69,7 @@ const edition = select({
 });
 ```
 
-`witness.ts` and `post.ts` are what the blog is made of:
+`witness.ts`, `wording.ts` and `post.ts` are what the blog is made of:
 
 ```ts
 const whereabouts = new Whereabouts(today);              // half-open stays, per person
@@ -79,6 +81,21 @@ const posts = writePosts(edition.posters, {
   worldSeed: 'world-zero',
 });
 posts[0]?.lines[0];   // { text: 'Turned away from The Mill.', sources: [41207] }
+```
+
+`paper.ts` is the whole of the Towne Publication:
+
+```ts
+const paper = writePaper({
+  day: today,
+  headlines: edition.headlines,
+  book,          // data/chronicle/paper.json
+  village: 'Wodenshill',
+  calendar,
+  worldSeed: 'world-zero',
+});
+paper.dateline;  // 'Wodenshill, Blossom 1, 1200 (Restday)'
+paper.glance;    // { souls: 86, families: 20, places: 38, abed: 86, journeys: 156, refused: 16 }
 ```
 
 The last four modules are the **press side**: they read the record and give the
@@ -95,7 +112,7 @@ casting.portraitFor('winifred-barrow', '1200-04-02');   // 'P03-F4'
 casting.report(store.people.records(), catalog, '1200-04-02');
 ```
 
-## Five decisions worth knowing before reading the code
+## Ten decisions worth knowing before reading the code
 
 **The simulation never knows it is being watched.** No simulation package may
 import this one, and this one may import only `@rpgsim/shared`,
@@ -220,6 +237,29 @@ because `household:3` in the middle of a sentence is the most embarrassing thing
 this package could do. If nothing the author witnessed has wording, they do not
 post: padding a thin day is lying slowly.
 
+## Two more, for the paper
+
+**"Public" turned out to be the wrong axis, and measurement is what said so.**
+The plan asked the paper to review "the highest-scoring public events", meaning
+events at a place anybody may walk into. Run against thirty real days, that
+filter keeps exactly one kind of story (somebody turned back from a full door)
+and throws away the two most consequential things the world has produced: the
+village being founded, and twenty-four households taking their cottages, both of
+which happen indoors. So the filter is by **kind**, declared in `paper.json`'s
+`neverPrint`: the paper will not print the fact that a named person went to bed,
+and the schema rejects the file outright if it carries wording for a kind it has
+promised to refuse. Refusing a kind is a decision a reader can audit; refusing a
+room is an accident of the spatial model.
+
+**Three of the six numbers at a glance come from the register, not from the day.**
+People, families and places are cumulative facts about the village, and no day of
+events contains them — Oakhanger Wood exists on a day nobody walks into it.
+Today the two agree, because worldgen creates every person and every place on the
+founding day and nothing has been created since. That is not a comment, it is a
+test: **no person and no place comes into existence after the founding**, asserted
+over thirty real days. The first birth turns the suite red, and that is the day
+the glance needs a register scoped to a date rather than to now.
+
 ## Tests
 
 `people.test.ts` and `places.test.ts` cover slugs and the file formats,
@@ -251,9 +291,17 @@ sample, because what would get past a unit test is a rare shape of day rather
 than a systematic fault; and **no shipped wording is dead**, because a misspelt
 placeholder reads as silence instead of as an error.
 
+`paper.test.ts` attacks the page the same way: a kind the book has no words for,
+a wording whose `when` clause the event fails, a payload field that shares a name
+with the paper's own vocabulary, a night slept in four different shapes.
+`apps/simulator/test/paper.test.ts` recomputes **every number in "at a glance"
+independently, from the day's events, on all thirty days**, which is the plan's
+test and the only kind that cannot agree with the code by construction.
+
 A sixteen-mutant sweep over the memory sources, a forty-four-mutant sweep over
-the press side and a twenty-seven-mutant sweep over the blog each leave no
-survivors. A test that passes with the code broken is not a test yet.
+the press side, a twenty-two-mutant sweep over the blog and a twenty-nine-mutant
+sweep over the renderer and the paper each leave no survivors. A test that passes
+with the code broken is not a test yet.
 
 ## Rules it inherits
 

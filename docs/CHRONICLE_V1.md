@@ -756,7 +756,7 @@ budget again, reported rather than papered over: the honesty rule is doing its
 job and there is almost nothing honest to say. Slice 6 does not fix it and
 neither does looser wording; more kinds of thing happening does.
 
-### Slice 6: the Towne Publication — breadth
+### Slice 6: the Towne Publication — breadth — **built**
 
 One page a day. Sections, each omitted when empty:
 
@@ -774,6 +774,92 @@ Tests: every number in "at a glance" is derivable from the day's events and is
 recomputed by the test independently; a day with no public events produces a
 paper with the review section absent, not an empty heading; the paper never
 names an entity absent from the cast.
+
+**Built.** `packages/chronicle/src/paper.ts` writes the page;
+`packages/chronicle/src/wording.ts` was extracted out of `post.ts` first, so the
+blog and the paper share one rule about what may be said and differ only in
+voice; `data/chronicle/paper.json` holds the wording, the refusals and the
+colophon; `loadPaper` in `apps/simulator/src/data.ts` reads it. Twenty-eight
+unit tests and twenty-one over thirty real days. A twenty-nine-mutant sweep over
+the renderer and the paper leaves no survivors.
+
+**"Public events" was the wrong axis, and measurement is what said so.** The
+plan above asks for "the highest-scoring **public** events", meaning events at a
+location anybody may walk into. Measured against thirty real days, that filter
+keeps exactly one kind of story — somebody turned back from a full door — and
+throws away the two most consequential things the world has ever produced: the
+village being founded, and twenty-four households taking their cottages, both of
+which happen indoors. A household founding is a public fact in a private room; a
+villager crossing the green is a private nothing in the open. So the rule became
+the blog's rule plus an explicit refusal: printable if the wording file has words
+for the type (editorial judgement, in the file where it can be read and changed),
+ordered by score, minus a `neverPrint` list that names the four kinds the paper
+will not carry whatever they score — waking, turning in, going to bed, failing to
+rest. That list is enforced twice on purpose: the schema rejects a book that
+carries wording for a listed type, and the page skips the type anyway. The first
+is a promise about the file, the second a promise about the page.
+
+**Who writes it: nobody, and the colophon says so.** A post has an author and
+therefore has to pass the presence test in `witness.ts`. The paper has no author,
+so there is no person whose knowledge it could exceed — it is the record
+speaking, the way a parish register speaks. That is why directive 5 does not
+apply to it, and why the colophon states the absence rather than inventing a
+byline. The day Wodenshill contains somebody who can read and write, the paper
+acquires an author and inherits the presence rule with them. The paper's
+vocabulary is also missing `{me}`, `{first}` and `{others}`, so a first-person
+phrase lifted out of `templates.json` and pasted into `paper.json` does not
+render badly — it never fits, and the reachability test reports it as dead.
+
+**Households are not countable yet, so the paper counts families.** `at a glance`
+asks for households. `PersonRecord.family` is a family *slug*: two Netherby
+houses both read `netherby`, so a household count off the record would be wrong
+by however many families have split. The page prints `families`, the colophon
+says which it is, and the number becomes households when households become
+identified things.
+
+**One deviation from the plan's test, and a tripwire instead of an apology.**
+"Every number in at a glance is derivable from the day's events" holds for three
+of the six — abed, journeys, refusals — and cannot hold for the other three.
+Oakhanger Wood exists on a day nobody walks into it, so `places` has to be read
+off the register, and the register is append-only and holds the village as of the
+last day distilled into it. A page written the day it happens is exactly right; a
+page **rebuilt** years later would credit the founding day with everybody born
+since. Today the two agree, because worldgen creates all eighty-six people and
+all thirty-eight places on day one and nothing has been created since — a fact
+about the simulation, not a property of the paper. So a test asserts that fact
+directly: no person and no place comes into existence after the founding day. The
+first birth turns it red, and that is the day the glance needs a register scoped
+to the day.
+
+**A story cites one event, because that is all its sentence answers for.** The
+first version grouped the day's leading events by kind and cited all of them
+under one sentence. The sentence names a person, though, and it is a sentence
+about *that* refusal at *that* door; a second event underneath it claims support
+the wording has not got. So a story carries the lead event and a count of the
+others, and the count is checked against the day.
+
+**Three survivors and one bad mutation.** The first sweep left four. Three were
+weak tests, all of them for the same reason — Wodenshill is too regular to
+distinguish the readings. Nobody here wakes twice in a day, so first-waking and
+last-waking give the same answer on every real day; `place.created` carries a
+`place` field that agrees with the event's own location, so a payload overruling
+the caller's vocabulary is invisible; and the founding day runs three stories
+where every other day runs one, so it draws three times from the wording stream
+and lands somewhere different however the stream is named — enough on its own to
+make a month of identically worded pages look varied. Each needed a case the
+village does not produce. The fourth was a bad mutation, not a weak test: keying
+the story group by event id also changed the string the wording is looked up
+under, so the mutant found words for nothing and printed the same page. It was
+re-pointed at code that actually emits the duplicate stories.
+
+**What thirty real days of `world-zero` produce.** Thirty papers. The founding
+day runs three stories — the village opening, a household taking its cottage, a
+refusal at the smithy. Every other day runs one, and it is always the smithy:
+capacity six, occupied six, sixteen villagers turned away. The glance reads 86
+souls, 20 families, 38 places, 86 abed, 156 journeys, 16 refused. Seven colophon
+lines, five of which name a thing the paper cannot do and the phase that fixes
+it. That is a thin paper, and it is thin for the reason §7 already gives: almost
+nothing happens in Wodenshill yet. The press is not the bottleneck.
 
 ### Slice 7: `apps/press` and the public link
 

@@ -66,9 +66,17 @@ export type { Candidate, Edition, PublishedDay, SelectOptions, SelectionConfig }
 export { Whereabouts } from './witness.ts';
 export type { Stay } from './witness.ts';
 
+// Turning an event into a sentence
+export { TemplateSchema, eligible, listOf, namesOf, placeOf, render } from './wording.ts';
+export type { Template, WordingContext } from './wording.ts';
+
 // The villagers, in their own words
-export { TemplateBookSchema, TemplateSchema, writePost, writePosts } from './post.ts';
-export type { Post, PostLine, PostOptions, Template, TemplateBook } from './post.ts';
+export { TemplateBookSchema, writePost, writePosts } from './post.ts';
+export type { Post, PostLine, PostOptions, TemplateBook } from './post.ts';
+
+// The Towne Publication
+export { PaperBookSchema, glanceOf, reviewOf, writePaper } from './paper.ts';
+export type { Glance, Paper, PaperBook, PaperOptions, Story } from './paper.ts';
 
 // The faces
 export {

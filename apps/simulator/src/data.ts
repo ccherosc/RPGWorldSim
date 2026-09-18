@@ -6,6 +6,8 @@ import {
   CastingSchema,
   type CommunityConfig,
   CommunitySchema,
+  type PaperBook,
+  PaperBookSchema,
   type PersonaBookConfig,
   PersonaBookSchema,
   type PortraitAtlas,
@@ -178,6 +180,19 @@ export function loadTemplates(dataRoot: string = DATA_ROOT): TemplateBook {
     TemplateBookSchema,
     'template book',
   );
+}
+
+/**
+ * Read the paper's wording, its refusals and its colophon.
+ *
+ * A second wording file rather than a section of the first, because the two are
+ * written in different voices and neither should be able to borrow the other's
+ * by accident. A post says "I walked to the smithy"; the paper says somebody
+ * did. Keeping them apart means a first-person phrase pasted into the paper's
+ * file simply never fits, and the coverage test says so.
+ */
+export function loadPaper(dataRoot: string = DATA_ROOT): PaperBook {
+  return loadJson(join(chronicleRoot(dataRoot), 'paper.json'), PaperBookSchema, 'paper book');
 }
 
 /** Read the families and what they are to each other. */
