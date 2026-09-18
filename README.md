@@ -34,6 +34,7 @@ npm run verify                                   # the five determinism checks
 npm run check                                    # typecheck + full test suite
 npm run sim -- run --seed world-zero --days 30   # build World Zero and run it
 npm run sim -- run --world probe --days 30       # the Phase 0 kernel harness
+npm run sim -- cast --annals ./memory            # check the portraits against the record
 npm run sim -- help
 ```
 
@@ -88,7 +89,7 @@ anything never exercises cancellation.
 
 ```
 apps/
-  simulator/     headless driver: run, resume, verify, annals
+  simulator/     headless driver: run, resume, verify, annals, cast
   observer/      React observer UI               (Phase 8)
 packages/
   shared/        primitives: assert, heap, canonical JSON, hashing, safe math
@@ -96,13 +97,15 @@ packages/
   world/         locations, buildings, routes, occupancy
   npc/           identity now; needs, decisions, memory later
   society/       households and descent now; law and religion later
-  chronicle/     the village's permanent memory, distilled from events
+  chronicle/     the village's permanent memory, and the press side that reads it
   economy/       labor, production, markets, currency      (Phase 3)
   ecology/       crops, animals, seasons                   (Phase 7)
   combat/        injury, fighting, warfare                 (Phase 6+)
   politics/      rulers, factions, diplomacy               (later)
   ai/            optional LLM adapters                     (Phase 9)
-data/            world data and balance values
+data/
+  world/         what the simulation reads: calendar, village, names
+  chronicle/     what the press reads: portraits, casting, personas, community
 docs/            architecture and design documents
 .claude/rules/   rules that apply to code in this repository
 ```

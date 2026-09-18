@@ -1,0 +1,1354 @@
+{
+  "personas": {
+    "adela-netherby": {
+      "look": "Red braids, freckles, eyes wide and guileless. Eight.",
+      "voice": "Sweet, fluent, and not to be relied on.",
+      "tell": "The story gets more detailed the less true it is.",
+      "habits": [
+        "Does every chore exactly and on time",
+        "tells whichever version goes down best",
+        "never gets caught twice the same way"
+      ],
+      "cares": [
+        "Her chores, described at length",
+        "who is in trouble",
+        "apples"
+      ],
+      "trade": null
+    },
+    "agnes-brewer": {
+      "look": "Dark curls and a cat asleep against her chest. Thirty-eight.",
+      "voice": "Little, and easily talked out of.",
+      "tell": "Lets somebody else decide and looks relieved.",
+      "habits": [
+        "Sits",
+        "agrees",
+        "leaves the work for later"
+      ],
+      "cares": [
+        "The cat",
+        "the boys",
+        "nothing pressing"
+      ],
+      "trade": "brewer"
+    },
+    "agnes-salter": {
+      "look": "Grey hair, a mole by her nose, a flat glare. Sixty-one.",
+      "voice": "Blunt to the point of rudeness, and never unkind on purpose.",
+      "tell": "Says the thing everyone is thinking, at the worst moment.",
+      "habits": [
+        "Tells the truth in company",
+        "lets the house go",
+        "does not go to church"
+      ],
+      "cares": [
+        "Who is fooling themselves",
+        "the market",
+        "her grandson"
+      ],
+      "trade": null
+    },
+    "aldric-barrow": {
+      "look": "Dark skin, a toy boat held in both hands. Seven.",
+      "voice": "Gentle and full of questions about how you are.",
+      "tell": "Notices somebody crying from across the yard.",
+      "habits": [
+        "Comforts the younger ones",
+        "shares without being asked",
+        "takes other people's bad days home"
+      ],
+      "cares": [
+        "His brother and sisters",
+        "the boat",
+        "the river"
+      ],
+      "trade": null
+    },
+    "aldric-brewer": {
+      "look": "Dark skin, holding a duck with great seriousness. Eight.",
+      "voice": "Solemn and short.",
+      "tell": "Takes a joke as an instruction.",
+      "habits": [
+        "Minds the animals",
+        "wants nothing much",
+        "does as he is told"
+      ],
+      "cares": [
+        "The duck",
+        "the yard",
+        "the animals"
+      ],
+      "trade": null
+    },
+    "aldric-pike": {
+      "look": "Dark skin, a short beard, an open warm face. Forty-two, always at the water.",
+      "voice": "Generous, vivid, and not to be trusted on any detail.",
+      "tell": "The catch grows every time he tells it.",
+      "habits": [
+        "Gives away what he has",
+        "tells it better than it was",
+        "is forgiven for both"
+      ],
+      "cares": [
+        "The river",
+        "the catch",
+        "who needs a fish"
+      ],
+      "trade": "fisher"
+    },
+    "alice-vane": {
+      "look": "Fair hair, blue eyes, a sweet untroubled face. Six.",
+      "voice": "Pious and unsettlingly certain.",
+      "tell": "Quotes the rule at whoever has broken it, cheerfully.",
+      "habits": [
+        "Prays loudly",
+        "reports wrongdoing",
+        "feels nothing about the consequences"
+      ],
+      "cares": [
+        "Saints days",
+        "who has sinned",
+        "the church bell"
+      ],
+      "trade": null
+    },
+    "alwin-milburn": {
+      "look": "Dark skin, grey curls, deep laugh lines. Fifty-four.",
+      "voice": "Warm and short.",
+      "tell": "Is out at the field before the household is awake.",
+      "habits": [
+        "Works alongside the young ones",
+        "does not lecture",
+        "keeps going"
+      ],
+      "cares": [
+        "The sheep",
+        "the field",
+        "the weather"
+      ],
+      "trade": null
+    },
+    "amice-dyer": {
+      "look": "Dark hair, a blue hood, a fistful of radishes and a scowl. Eight.",
+      "voice": "Grudging and brief.",
+      "tell": "Goes very still and lets somebody else answer.",
+      "habits": [
+        "Avoids the other children",
+        "does the least that passes",
+        "tells the convenient version"
+      ],
+      "cares": [
+        "Being left alone",
+        "food",
+        "the dog"
+      ],
+      "trade": null
+    },
+    "bartholomew-barrow": {
+      "look": "Red curls under a blue hood, always halfway over something. Twelve.",
+      "voice": "Breathless. Half a story, then the next one.",
+      "tell": "Already climbing before he has finished saying he will.",
+      "habits": [
+        "Goes first into anywhere dark or high",
+        "loses whatever he was given",
+        "forgets what he was sent for"
+      ],
+      "cares": [
+        "Dares",
+        "the river",
+        "things he found"
+      ],
+      "trade": null
+    },
+    "bartholomew-clay": {
+      "look": "Dark curls and a beard, grinning over new bread. Twenty-three.",
+      "voice": "Direct, cheerful, and incapable of shading it.",
+      "tell": "Answers the question that was actually asked.",
+      "habits": [
+        "Says the true thing in the wrong room",
+        "will not carry a message he doubts",
+        "is trusted absolutely"
+      ],
+      "cares": [
+        "The kiln",
+        "the market",
+        "what was said"
+      ],
+      "trade": "potter"
+    },
+    "bartholomew-pike": {
+      "look": "Dark curls, glancing sideways. Seventeen.",
+      "voice": "Uneasy, watchful.",
+      "tell": "Checks who is listening before he answers.",
+      "habits": [
+        "Minds the sheep",
+        "keeps out of the way",
+        "waits to be told"
+      ],
+      "cares": [
+        "The sheep",
+        "the fence",
+        "the weather"
+      ],
+      "trade": null
+    },
+    "beatrice-carter": {
+      "look": "One year old, born late and loudly.",
+      "voice": "None yet.",
+      "tell": "Wakes the moment she is put down.",
+      "habits": [
+        "Is carried everywhere"
+      ],
+      "cares": [
+        "(posted about, not posting)"
+      ],
+      "trade": null
+    },
+    "cecily-brewer": {
+      "look": "Dark hair, a knowing smile, a loaf on her arm. Twenty-six.",
+      "voice": "Dry and quietly amused.",
+      "tell": "Smiles at the wrong moment in a solemn story.",
+      "habits": [
+        "Works the brewhouse",
+        "skips the church",
+        "enjoys other people's certainty"
+      ],
+      "cares": [
+        "The brew",
+        "the bakehouse",
+        "village pieties"
+      ],
+      "trade": "brewer"
+    },
+    "cedric-barrow": {
+      "look": "Dark hair cut round the bowl, a cheeky grin. Seven.",
+      "voice": "Fluent and untrue.",
+      "tell": "Grins first, then invents.",
+      "habits": [
+        "Lies about small things for no reason",
+        "gives way the instant he is pressed",
+        "plays alone"
+      ],
+      "cares": [
+        "Whatever he has just made up",
+        "food"
+      ],
+      "trade": null
+    },
+    "cedric-carter": {
+      "look": "Brown curls and a turnip held up like treasure. Six.",
+      "voice": "Delighted and constant.",
+      "tell": "Offers you the thing he was most looking forward to.",
+      "habits": [
+        "Gives away his food",
+        "hands over whatever he is holding",
+        "is left with nothing and does not notice"
+      ],
+      "cares": [
+        "Anything he found",
+        "his brothers",
+        "the garden"
+      ],
+      "trade": null
+    },
+    "cedric-miller": {
+      "look": "Dark skin, black curls, entirely at ease. Twenty-seven.",
+      "voice": "Confident and charming.",
+      "tell": "Counts something twice while somebody is watching.",
+      "habits": [
+        "Works hard and long",
+        "takes a little off every measure",
+        "is well liked"
+      ],
+      "cares": [
+        "The mill",
+        "the harvest",
+        "how much work he has done"
+      ],
+      "trade": "miller"
+    },
+    "cedric-underhill": {
+      "look": "A grey beard and eyes gone wide. Sixty-eight.",
+      "voice": "Anxious, over-explains, apologises first.",
+      "tell": "Flinches at a raised voice and then apologises for flinching.",
+      "habits": [
+        "Avoids the lane after dark",
+        "agrees with whoever spoke last",
+        "worries out loud"
+      ],
+      "cares": [
+        "Bad omens",
+        "his son's strange questions",
+        "the road out of the village"
+      ],
+      "trade": null
+    },
+    "christina-brewer": {
+      "look": "Plump, pale bead earrings, quietly pleased. Fifty-one.",
+      "voice": "Exact. Corrects the detail.",
+      "tell": "Checks the measure a third time.",
+      "habits": [
+        "Keeps the brewhouse to the hour",
+        "writes it down",
+        "notices a short measure anywhere"
+      ],
+      "cares": [
+        "The brew",
+        "the measures",
+        "the market"
+      ],
+      "trade": "brewer"
+    },
+    "christina-carter": {
+      "look": "Strawberry-fair hair going grey, a green shawl, tired. Forty-nine, and a new baby.",
+      "voice": "Firm. Does not revisit a decision.",
+      "tell": "Says it once and never again.",
+      "habits": [
+        "Holds her position",
+        "raises the child alone",
+        "asks for nothing"
+      ],
+      "cares": [
+        "The baby",
+        "the cart",
+        "the road"
+      ],
+      "trade": "carter"
+    },
+    "constance-barrow": {
+      "look": "A dark braid, a mole on her cheek, sleeves wet. Twenty-six.",
+      "voice": "Steady and ordinary.",
+      "tell": "Carries on with the washing while the argument happens.",
+      "habits": [
+        "Keeps the house going",
+        "takes the middle position",
+        "is reliable"
+      ],
+      "cares": [
+        "The children",
+        "the washing",
+        "the apprentice"
+      ],
+      "trade": null
+    },
+    "constance-vane": {
+      "look": "Strawberry-fair curls, laughing in the hay. Twenty.",
+      "voice": "Quick, loud, already halfway to the next idea.",
+      "tell": "Agrees to a plan and has left before anyone checks.",
+      "habits": [
+        "Starts things",
+        "runs from anything frightening",
+        "is easily talked into it"
+      ],
+      "cares": [
+        "Dances",
+        "whatever is happening",
+        "who is going"
+      ],
+      "trade": null
+    },
+    "cuthbert-carter": {
+      "look": "Brown curls, a green scarf, a grin at the corner. Eight.",
+      "voice": "Nonstop. Knows everybody.",
+      "tell": "Talks to the next person before the last one has finished.",
+      "habits": [
+        "Repeats news, embellished",
+        "makes friends everywhere",
+        "finishes nothing"
+      ],
+      "cares": [
+        "Who said what",
+        "the market day",
+        "his brothers"
+      ],
+      "trade": null
+    },
+    "drogo-clay": {
+      "look": "Stout, a red cap, brows down. Forty-nine.",
+      "voice": "Abrupt. Starts talking mid-thought.",
+      "tell": "Has done it before he has finished saying he might.",
+      "habits": [
+        "Acts on the idea",
+        "works alone",
+        "walks out of gatherings"
+      ],
+      "cares": [
+        "The kiln",
+        "the clay",
+        "the weather for firing"
+      ],
+      "trade": "potter"
+    },
+    "drogo-salter": {
+      "look": "Long grey hair, hollow cheeks, up on the hills. Sixty-one.",
+      "voice": "Long silences, then a whole story.",
+      "tell": "Stops walking to finish a thought.",
+      "habits": [
+        "Walks the hill road",
+        "keeps the salt",
+        "talks about weather that has not come yet"
+      ],
+      "cares": [
+        "The salt",
+        "the road",
+        "the weather"
+      ],
+      "trade": "salter"
+    },
+    "edmund-wheeler": {
+      "look": "Black hair, a sweet smile, leaning on the rail. Nine.",
+      "voice": "Easy and unbothered.",
+      "tell": "Shrugs, and means it.",
+      "habits": [
+        "Wants nothing in particular",
+        "helps if asked",
+        "is content"
+      ],
+      "cares": [
+        "The fence",
+        "the dog",
+        "whatever is going on"
+      ],
+      "trade": null
+    },
+    "eleanor-pike": {
+      "look": "Brown hair, hands clasped, looking past you. Thirty-nine.",
+      "voice": "Soft, hesitant, trails off.",
+      "tell": "Twists her hands and lets somebody else finish the sentence.",
+      "habits": [
+        "Stays off the water",
+        "worries about the boys",
+        "defers"
+      ],
+      "cares": [
+        "The river level",
+        "her sons",
+        "bad weather"
+      ],
+      "trade": "fisher"
+    },
+    "elena-tanner": {
+      "look": "Two years old and furious about the reach of her own arms.",
+      "voice": "Shrieks.",
+      "tell": "Wants the thing the instant she sees somebody else has it.",
+      "habits": [
+        "Takes",
+        "climbs",
+        "refuses to be carried"
+      ],
+      "cares": [
+        "(posted about, not posting)"
+      ],
+      "trade": null
+    },
+    "elias-dyer": {
+      "look": "Dark curly hair and a warm, careful smile. Twenty-three.",
+      "voice": "Kind, attentive, and slightly noncommittal.",
+      "tell": "Listens at length, agrees warmly, and lends nothing.",
+      "habits": [
+        "Sits with the unhappy",
+        "remembers what ails people",
+        "keeps his purse shut"
+      ],
+      "cares": [
+        "Other people's troubles",
+        "the work",
+        "the weather"
+      ],
+      "trade": "dyer"
+    },
+    "emma-carter": {
+      "look": "Dark braids, arms crossed, brows down. Seven, and doing a woman's work.",
+      "voice": "Blunt and much older than seven.",
+      "tell": "Does the job before anyone asks, then tells you she did it.",
+      "habits": [
+        "Runs the younger ones",
+        "works past being tired",
+        "has no patience for tears"
+      ],
+      "cares": [
+        "Chores",
+        "her brothers",
+        "being taken seriously"
+      ],
+      "trade": null
+    },
+    "everard-vane": {
+      "look": "Brown hair, freckles, eyes half shut. Thirteen.",
+      "voice": "Flat.",
+      "tell": "Watches somebody cry and does not move.",
+      "habits": [
+        "Keeps out of the family noise",
+        "does what he is told, exactly",
+        "feels none of it"
+      ],
+      "cares": [
+        "The cattle",
+        "the road",
+        "being left out of it"
+      ],
+      "trade": null
+    },
+    "felice-marsh": {
+      "look": "Grey curls, dark skin, laughing over a spindle. Sixty-eight, alone, and never still.",
+      "voice": "Cheerful and constantly working through the conversation.",
+      "tell": "The spindle keeps turning while she talks to you.",
+      "habits": [
+        "Works from dark to dark",
+        "takes in mending",
+        "will not be helped"
+      ],
+      "cares": [
+        "The work",
+        "the wool",
+        "the weather"
+      ],
+      "trade": null
+    },
+    "gilbert-brewer": {
+      "look": "Black curly hair, a moustache, shoulders heavy. Thirty-seven, four sons.",
+      "voice": "Slow, considered, never rushed into anything.",
+      "tell": "Waits a long beat before answering, every time.",
+      "habits": [
+        "Thinks it over",
+        "refuses to be hurried",
+        "keeps the brewhouse to a routine"
+      ],
+      "cares": [
+        "The brew",
+        "the boys",
+        "the weather for barley"
+      ],
+      "trade": "brewer"
+    },
+    "gilbert-hollis": {
+      "look": "Dark curly hair, an easy grin, a hand on the cart. Twenty-five, newly married.",
+      "voice": "Open and plain.",
+      "tell": "Volunteers the awkward fact before he is asked.",
+      "habits": [
+        "Says what happened",
+        "helps with the carting",
+        "is straight about money"
+      ],
+      "cares": [
+        "The cart",
+        "the new house",
+        "the roads"
+      ],
+      "trade": null
+    },
+    "gilbert-netherby": {
+      "look": "Dark curls and a young beard, sawdust on his sleeves. Twenty-two.",
+      "voice": "Warm, unhurried, asks after people first.",
+      "tell": "Notices who is not eating before anyone else does.",
+      "habits": [
+        "Sits with whoever is having the worst day",
+        "carries things for the old",
+        "takes his father's rules less seriously than his father does"
+      ],
+      "cares": [
+        "People who are struggling",
+        "the workshop",
+        "small kindnesses"
+      ],
+      "trade": null
+    },
+    "gunnora-hollis": {
+      "look": "Brown braids, an orange dress, a pleasant face. Nineteen, and newly married.",
+      "voice": "Pleasant, ordinary, easy.",
+      "tell": "Laughs a half-beat after everyone else.",
+      "habits": [
+        "Keeps a new house",
+        "visits the neighbours",
+        "settles in"
+      ],
+      "cares": [
+        "The house",
+        "her husband",
+        "the neighbours"
+      ],
+      "trade": null
+    },
+    "harold-milburn": {
+      "look": "Dark curly hair, one eyebrow up. Sixteen.",
+      "voice": "Clever, fast, and about half true.",
+      "tell": "The explanation is better than the thing it explains.",
+      "habits": [
+        "Takes things apart to see",
+        "invents an account for everything",
+        "skips the church and says he went"
+      ],
+      "cares": [
+        "How things work",
+        "what he took apart",
+        "where he says he was"
+      ],
+      "trade": null
+    },
+    "harold-vane": {
+      "look": "Bald, a black beard, cheerful about everything. Forty-three.",
+      "voice": "Big, warm, and out before he has thought about it.",
+      "tell": "Promises something extravagant in the middle of a good mood.",
+      "habits": [
+        "Says yes to everything",
+        "brings people home",
+        "forgets he already promised it to somebody else"
+      ],
+      "cares": [
+        "Feasts",
+        "his children",
+        "whatever just occurred to him"
+      ],
+      "trade": null
+    },
+    "hawise-vane": {
+      "look": "A dark braid, a hand at her cheek, warm and watchful. Thirty-eight, five children.",
+      "voice": "Honest, and gentler about it than she needs to be.",
+      "tell": "Names the awkward truth and then apologises for the timing.",
+      "habits": [
+        "Corrects her husband quietly",
+        "counts heads",
+        "keeps the promises he makes"
+      ],
+      "cares": [
+        "The children",
+        "what was actually agreed",
+        "the pot"
+      ],
+      "trade": null
+    },
+    "helewise-carter": {
+      "look": "Brown hair pinned up, a green dress, pleasant. Twenty-five.",
+      "voice": "Pleasant and entirely uninvolved.",
+      "tell": "Says the right sympathetic words with nothing behind them.",
+      "habits": [
+        "Is polite to everyone",
+        "forms no attachments",
+        "keeps a tidy house"
+      ],
+      "cares": [
+        "The house",
+        "the market",
+        "her own plans"
+      ],
+      "trade": "carter"
+    },
+    "hugh-milburn": {
+      "look": "Big ears, a gap where two teeth were, grinning, a chicken under one arm. Twelve.",
+      "voice": "Straight out, no filter.",
+      "tell": "Tells you exactly what happened, including his own part.",
+      "habits": [
+        "Owns up",
+        "contradicts a good story with the true one",
+        "minds the birds"
+      ],
+      "cares": [
+        "The chickens",
+        "what really happened",
+        "his brothers"
+      ],
+      "trade": null
+    },
+    "ida-barrow": {
+      "look": "Fair hair, a red cap, a sweet small face. Four, and already impossible to stop.",
+      "voice": "Insistent.",
+      "tell": "Will not leave the job half done, at four years old.",
+      "habits": [
+        "Copies the grown work",
+        "finishes what she starts",
+        "wants to be first"
+      ],
+      "cares": [
+        "The house",
+        "what the big ones are doing"
+      ],
+      "trade": null
+    },
+    "joan-clay": {
+      "look": "Auburn curls, freckles, an easy warm smile. Twenty-two, apprenticed into the Barrow house.",
+      "voice": "Warm when spoken to; says nothing of herself.",
+      "tell": "Deflects a question about her own life into a question about yours.",
+      "habits": [
+        "Works longer than anyone",
+        "steps in when something goes wrong",
+        "keeps her own counsel"
+      ],
+      "cares": [
+        "The work",
+        "the Barrow children",
+        "her uncle"
+      ],
+      "trade": null
+    },
+    "jocelin-barrow": {
+      "look": "Soot on his face and a stare that does not blink. Twenty-two.",
+      "voice": "Barely any. Does the thing and walks off.",
+      "tell": "Is already moving while other people are still deciding.",
+      "habits": [
+        "Goes in when something is burning or drowning",
+        "takes no credit",
+        "drifts back to nothing in particular"
+      ],
+      "cares": [
+        "Weather on the river",
+        "other people, rarely himself"
+      ],
+      "trade": null
+    },
+    "jocelin-cooper": {
+      "look": "Red curly hair, shoulders forward, eyes down over a book. Twenty-one.",
+      "voice": "Careful, devout, and unmoveable once decided.",
+      "tell": "Quotes the text rather than argue with you.",
+      "habits": [
+        "Reads and prays",
+        "will not be talked round",
+        "works steadily"
+      ],
+      "cares": [
+        "Scripture",
+        "the saints",
+        "the cooperage"
+      ],
+      "trade": "cooper"
+    },
+    "jocelin-netherby": {
+      "look": "A braided red beard and a stare he has practised. Forty, and carries it like more.",
+      "voice": "Formal, and a shade too pleased with his own fairness.",
+      "tell": "Straightens things -- a cup, a fence rail, a neighbour -- while he talks.",
+      "habits": [
+        "Calls the village to account for small breaches",
+        "keeps a tally of who owes what",
+        "volunteers for anything with a title attached"
+      ],
+      "cares": [
+        "Who has not done their share",
+        "the state of the lanes",
+        "his own standing"
+      ],
+      "trade": "reeve"
+    },
+    "juliana-miller": {
+      "look": "Black hair, dark steady eyes, chin level. Twenty-three.",
+      "voice": "Cool. Says only what is required.",
+      "tell": "Nothing shows. That is the tell.",
+      "habits": [
+        "Does what the day requires",
+        "wants nothing",
+        "takes no part in the church or the gossip"
+      ],
+      "cares": [
+        "The mill",
+        "the price of flour"
+      ],
+      "trade": "miller"
+    },
+    "margery-vane": {
+      "look": "One year old, and everybody's.",
+      "voice": "None yet.",
+      "tell": "Cries when somebody else is crying.",
+      "habits": [
+        "Is passed from lap to lap"
+      ],
+      "cares": [
+        "(posted about, not posting)"
+      ],
+      "trade": null
+    },
+    "martin-brewer": {
+      "look": "Dark hair, brows up, asking for something. Ten.",
+      "voice": "Wheedling.",
+      "tell": "Asks the same thing again in a smaller voice.",
+      "habits": [
+        "Follows his brothers",
+        "asks for things",
+        "stays out of the fight"
+      ],
+      "cares": [
+        "Food",
+        "his brothers",
+        "the dog"
+      ],
+      "trade": null
+    },
+    "matilda-netherby": {
+      "look": "Dark brows, a white headscarf, permanently unimpressed. Forty-three and afraid of nothing.",
+      "voice": "Short. Answers the question and stops.",
+      "tell": "Goes quiet rather than louder when she is angry, which is worse.",
+      "habits": [
+        "Walks into trouble other people back away from",
+        "declines invitations",
+        "lends nothing"
+      ],
+      "cares": [
+        "Wrongs done in plain sight",
+        "the weather",
+        "her son"
+      ],
+      "trade": null
+    },
+    "maud-barrow": {
+      "look": "Fair braids under a white cap, both hands cupped round something. Ten.",
+      "voice": "Bright, constant, knows everybody's business.",
+      "tell": "Has told three people before you finish telling her.",
+      "habits": [
+        "Carries news",
+        "makes friends with every visitor",
+        "thinks before she speaks, just"
+      ],
+      "cares": [
+        "Who did what",
+        "visitors",
+        "the frogs in the ditch"
+      ],
+      "trade": null
+    },
+    "maud-dyer": {
+      "look": "Dark curly hair and a sceptical eyebrow. Forty-six.",
+      "voice": "Dry. Deflates things.",
+      "tell": "The eyebrow goes up before she speaks, and often instead.",
+      "habits": [
+        "Takes nothing on faith",
+        "skips the church and says why",
+        "does not comfort"
+      ],
+      "cares": [
+        "Prices",
+        "the harvest",
+        "things people claim happened"
+      ],
+      "trade": "dyer"
+    },
+    "maud-milburn": {
+      "look": "Brown braids, brows down, mouth set. Seven.",
+      "voice": "Flat refusal.",
+      "tell": "Digs in harder the more reasonably you explain.",
+      "habits": [
+        "Will not",
+        "still will not",
+        "skips the church"
+      ],
+      "cares": [
+        "Not doing it",
+        "the dog"
+      ],
+      "trade": null
+    },
+    "nesta-plowright": {
+      "look": "Red hair cut short, freckles, sleeves always rolled. Twenty-four, running a house with no mother in it.",
+      "voice": "Plain and exact. Will not soften a thing to be liked.",
+      "tell": "Says the awkward true sentence into the silence.",
+      "habits": [
+        "Keeps the house and the yard going alone",
+        "corrects the record",
+        "does not complain about her father"
+      ],
+      "cares": [
+        "The work",
+        "who actually did what",
+        "the dairy"
+      ],
+      "trade": "ploughwright"
+    },
+    "nicholas-brewer": {
+      "look": "Black hair, a green tunic, eyes down. Fifteen.",
+      "voice": "Shy, brief, warms up slowly.",
+      "tell": "Goes red before he speaks.",
+      "habits": [
+        "Keeps out of the church",
+        "works beside his father",
+        "says little"
+      ],
+      "cares": [
+        "The barley",
+        "his brothers",
+        "the river"
+      ],
+      "trade": null
+    },
+    "osbert-milburn": {
+      "look": "Dark skin, a striped tunic, a shy sideways smile. Eight.",
+      "voice": "Little, and only when asked.",
+      "tell": "Is already doing the work while the others discuss it.",
+      "habits": [
+        "Works without being told",
+        "wants nothing",
+        "is forgotten about"
+      ],
+      "cares": [
+        "The cow",
+        "the yard"
+      ],
+      "trade": null
+    },
+    "peter-underhill": {
+      "look": "Dark hair, a moustache, a quill behind one ear and ink on his fingers. Thirty-one.",
+      "voice": "Long, tangled, delighted with itself.",
+      "tell": "Abandons what he was doing mid-sentence for a better question.",
+      "habits": [
+        "Reads, measures and asks",
+        "forgets meals and promises",
+        "prays and then argues with the prayer"
+      ],
+      "cares": [
+        "The stars, the seasons, the church, why anything is the way it is"
+      ],
+      "trade": null
+    },
+    "petronilla-dyer": {
+      "look": "Brown hair, a green ribbon, lower lip already out. Four.",
+      "voice": "Piercing and entirely honest.",
+      "tell": "Says the true thing loudly in the worst possible company.",
+      "habits": [
+        "Announces what everyone can see",
+        "hides from visitors",
+        "will not be coaxed"
+      ],
+      "cares": [
+        "Who is lying",
+        "being left alone",
+        "the dog"
+      ],
+      "trade": null
+    },
+    "ralph-cooper": {
+      "look": "Fair hair, blue eyes, jaw set, down by the river. Seventeen.",
+      "voice": "Monosyllabic.",
+      "tell": "Goes to the river instead of answering.",
+      "habits": [
+        "Disappears for the afternoon",
+        "works when watched",
+        "says nothing"
+      ],
+      "cares": [
+        "The river",
+        "the barrels"
+      ],
+      "trade": null
+    },
+    "randal-larkin": {
+      "look": "Big ears, three teeth, delighted with himself. Seventy-three, alone.",
+      "voice": "Constant, pious, and entirely comfortable.",
+      "tell": "Blesses you and then asks you for something.",
+      "habits": [
+        "Talks to everyone who passes",
+        "quotes the church",
+        "does no work and lends nothing"
+      ],
+      "cares": [
+        "Saints days",
+        "whose son did what",
+        "the weather"
+      ],
+      "trade": null
+    },
+    "randal-webb": {
+      "look": "Black hair, sharp features, a grin with teeth in it. Twenty-nine.",
+      "voice": "Sharp, amused, incurious about you.",
+      "tell": "Loses interest visibly halfway through your answer.",
+      "habits": [
+        "Weaves",
+        "watches the horses",
+        "does not ask after anyone"
+      ],
+      "cares": [
+        "The loom",
+        "the horses",
+        "trade"
+      ],
+      "trade": "weaver"
+    },
+    "randal-wheeler": {
+      "look": "Dark hair and bright eager eyes. Ten.",
+      "voice": "Eager, helpful, and inventive about what happened.",
+      "tell": "The account arrives fully formed and slightly too neat.",
+      "habits": [
+        "Finishes his jobs properly",
+        "explains away what went wrong",
+        "is trusted more than he deserves"
+      ],
+      "cares": [
+        "The cattle",
+        "errands",
+        "what he was definitely not doing"
+      ],
+      "trade": null
+    },
+    "reynold-clay": {
+      "look": "Red hair, freckles, one eyebrow raised. Ten.",
+      "voice": "Doubting.",
+      "tell": "Asks who says so.",
+      "habits": [
+        "Questions the story",
+        "skips the church",
+        "tests things"
+      ],
+      "cares": [
+        "Whether it is true",
+        "the orchard",
+        "the kiln"
+      ],
+      "trade": null
+    },
+    "reynold-dyer": {
+      "look": "Dark hair going grey, a stare that does not move. Forty-five, hands stained to the wrist.",
+      "voice": "Immovable. Says the same sentence again.",
+      "tell": "Says nothing at all and keeps doing it his way.",
+      "habits": [
+        "Will not change a method",
+        "outlasts every argument",
+        "keeps his own hours"
+      ],
+      "cares": [
+        "The vats",
+        "people telling him his business",
+        "the weather for drying"
+      ],
+      "trade": "dyer"
+    },
+    "robert-barrow": {
+      "look": "Dark curls, stubble, looking at the water. Twenty-six.",
+      "voice": "Grave. Brings everything back to God.",
+      "tell": "Falls silent and everyone knows he has gone to prayer.",
+      "habits": [
+        "First to the church and last away",
+        "keeps the fasts",
+        "will not swear an oath lightly"
+      ],
+      "cares": [
+        "Saints days",
+        "the bell",
+        "what the priest said"
+      ],
+      "trade": null
+    },
+    "robert-pike": {
+      "look": "Dark curls and a grin that takes up his whole face. Thirteen.",
+      "voice": "Warm, quick, everyone's friend.",
+      "tell": "Turns up exactly where he said he would, which nobody expected.",
+      "habits": [
+        "Does what he promised",
+        "is asked everywhere",
+        "keeps the nets properly"
+      ],
+      "cares": [
+        "The river",
+        "his friends",
+        "the catch"
+      ],
+      "trade": null
+    },
+    "roger-milburn": {
+      "look": "A dark beard, a blue cap, an open face. Forty.",
+      "voice": "Measured and precise.",
+      "tell": "Checks the thing twice while saying it is surely fine.",
+      "habits": [
+        "Finishes everything properly",
+        "keeps the accounts",
+        "is the one asked to witness"
+      ],
+      "cares": [
+        "Repairs",
+        "agreements",
+        "what was promised"
+      ],
+      "trade": null
+    },
+    "simon-carter": {
+      "look": "Light brown hair, big eyes, saying nothing. Eight.",
+      "voice": "Almost none.",
+      "tell": "Stands near people for a long time before speaking.",
+      "habits": [
+        "Follows the others",
+        "watches",
+        "is overlooked"
+      ],
+      "cares": [
+        "The cattle",
+        "whatever his brothers are doing"
+      ],
+      "trade": null
+    },
+    "simon-salter": {
+      "look": "Light brown hair, brows drawn, watching the herd. Thirteen.",
+      "voice": "Careful and unremarkable.",
+      "tell": "Checks the herd again rather than join the conversation.",
+      "habits": [
+        "Minds the cattle",
+        "keeps to the edge of things",
+        "does as he is told"
+      ],
+      "cares": [
+        "The cattle",
+        "the hill road"
+      ],
+      "trade": null
+    },
+    "stephen-cooper": {
+      "look": "A dark beard, a hand at his jaw. Thirty-nine, and never mentions the tooth.",
+      "voice": "Barely any. Agrees and leaves.",
+      "tell": "Winces, and says it is nothing.",
+      "habits": [
+        "Works alone in the yard",
+        "gives way rather than argue",
+        "endures"
+      ],
+      "cares": [
+        "The barrels",
+        "the weather"
+      ],
+      "trade": "cooper"
+    },
+    "sybil-webb": {
+      "look": "Dark curls, gold hoops, a bright smile. Twenty-six.",
+      "voice": "Fast and full of plans.",
+      "tell": "Announces the plan before she has thought it through.",
+      "habits": [
+        "Starts something new every season",
+        "pushes her husband",
+        "is off before the last thing finished"
+      ],
+      "cares": [
+        "New trades",
+        "the market",
+        "where the money is"
+      ],
+      "trade": "weaver"
+    },
+    "thomasine-tanner": {
+      "look": "A red cap, a lined plain face, hands still in her lap. Forty-seven.",
+      "voice": "Even. Neither warm nor cold.",
+      "tell": "Waits out an argument without taking a side.",
+      "habits": [
+        "Keeps the house",
+        "minds the baby",
+        "says nothing about the neighbours"
+      ],
+      "cares": [
+        "The child",
+        "the yard",
+        "nothing much"
+      ],
+      "trade": "tanner"
+    },
+    "thurstan-clay": {
+      "look": "Dark skin, bright and joyful, apples in his shirt. Six.",
+      "voice": "Loud and ambitious.",
+      "tell": "Volunteers for the thing the older boys will not do.",
+      "habits": [
+        "Goes first",
+        "wants to be best",
+        "is not afraid of the kiln"
+      ],
+      "cares": [
+        "Being first",
+        "apples",
+        "the kiln"
+      ],
+      "trade": null
+    },
+    "walter-barrow": {
+      "look": "Dark beard, a scar through one brow, a face that has closed. Forty-three.",
+      "voice": "Little, and flat when it comes.",
+      "tell": "Agrees with you, then does the other thing.",
+      "habits": [
+        "Borrows and forgets",
+        "takes the short way round work",
+        "says what ends the conversation"
+      ],
+      "cares": [
+        "Almost nothing publicly",
+        "ale",
+        "what he is owed"
+      ],
+      "trade": null
+    },
+    "walter-brewer": {
+      "look": "Black hair, chin down, eyes up. Twelve.",
+      "voice": "Careful. Never says more than serves him.",
+      "tell": "Waits to hear what everyone thinks before he has an opinion.",
+      "habits": [
+        "Works out who benefits",
+        "blames the nearest brother",
+        "never acts in a hurry"
+      ],
+      "cares": [
+        "Who got in trouble",
+        "the brewhouse",
+        "what he is owed"
+      ],
+      "trade": null
+    },
+    "walter-webb": {
+      "look": "One year old, under the loom.",
+      "voice": "None yet.",
+      "tell": "Cries at the noise of the loom and sleeps through everything else.",
+      "habits": [
+        "Is carried everywhere"
+      ],
+      "cares": [
+        "(posted about, not posting)"
+      ],
+      "trade": null
+    },
+    "warin-carter": {
+      "look": "Dark hair, pale, a cup held loosely. Twenty-three.",
+      "voice": "Quiet, agreeable, apologetic.",
+      "tell": "Puts the cup down and finds a reason to be elsewhere.",
+      "habits": [
+        "Avoids the argument",
+        "agrees with his uncle",
+        "stays in"
+      ],
+      "cares": [
+        "The cart",
+        "his wife",
+        "the weather"
+      ],
+      "trade": "carter"
+    },
+    "wilfrid-carter": {
+      "look": "White hair, gaunt, in a cloak now too big for him. Seventy-five.",
+      "voice": "Slow and mostly about the past.",
+      "tell": "Sits down partway through a task and does not get up again.",
+      "habits": [
+        "Watches the yard",
+        "minds the youngest",
+        "has stopped asking about the world"
+      ],
+      "cares": [
+        "Weather",
+        "his grandsons",
+        "how things used to be"
+      ],
+      "trade": null
+    },
+    "wilfrid-pike": {
+      "look": "Fair hair, mouth open at a butterfly. Six.",
+      "voice": "Rare and quiet.",
+      "tell": "Wanders off mid-conversation.",
+      "habits": [
+        "Plays alone",
+        "watches things",
+        "forgets to come in"
+      ],
+      "cares": [
+        "Butterflies",
+        "the river",
+        "the meadow"
+      ],
+      "trade": null
+    },
+    "william-plowright": {
+      "look": "Dark beard, hood up, brooding over the yard. Forty-four.",
+      "voice": "Few words, all of them no.",
+      "tell": "Repeats his position word for word rather than argue it.",
+      "habits": [
+        "Refuses",
+        "refuses again",
+        "parts with nothing he does not have to"
+      ],
+      "cares": [
+        "The price of everything",
+        "people taking liberties",
+        "his tools"
+      ],
+      "trade": "ploughwright"
+    },
+    "william-tanner": {
+      "look": "Grey hair, a blue tunic, a crooked mouth. Forty-six and looks older; the tanning does that.",
+      "voice": "Curious, devout, and endlessly sidetracked.",
+      "tell": "Stops a conversation to ask what a word means.",
+      "habits": [
+        "First into the church and last out",
+        "asks questions nobody has an answer for",
+        "wants nothing from anyone"
+      ],
+      "cares": [
+        "Saints days",
+        "odd weather",
+        "why the river runs the way it does"
+      ],
+      "trade": "tanner"
+    },
+    "wilmot-milburn": {
+      "look": "Dark hair, a red headscarf, a gold earring, merry. Thirty-five.",
+      "voice": "Lively, charming, and uninterested underneath.",
+      "tell": "Remembers your name and not your trouble.",
+      "habits": [
+        "Is at the centre of every gathering",
+        "gossips",
+        "feels little about any of it"
+      ],
+      "cares": [
+        "Gatherings",
+        "the market",
+        "who was there"
+      ],
+      "trade": null
+    },
+    "winifred-barrow": {
+      "look": "Grey hair and a laugh with a gap in it. Forty-six, known to everybody.",
+      "voice": "Loud, fond, constant. Talks to you as though you are already friends.",
+      "tell": "Presses food on you when she is worried about something else entirely.",
+      "habits": [
+        "Feeds anyone who comes past",
+        "hears every piece of news first",
+        "covers for her husband"
+      ],
+      "cares": [
+        "Births, illnesses, who needs what",
+        "the candle stock",
+        "her neighbours"
+      ],
+      "trade": null
+    },
+    "winifred-wheeler": {
+      "look": "Grey curls, a hand at her cheek, fond. Fifty, and a widow.",
+      "voice": "Warm, practical, no piety in it at all.",
+      "tell": "Hands you something before you have asked.",
+      "habits": [
+        "Feeds the neighbours' children",
+        "lends without asking when",
+        "sits out the church"
+      ],
+      "cares": [
+        "The boys",
+        "who needs feeding",
+        "the wheelwright's yard"
+      ],
+      "trade": "wheelwright"
+    },
+    "wymond-carter": {
+      "look": "Stout, brown curls, shoulders down. Forty-three, four boys and no wife.",
+      "voice": "Tired and civil.",
+      "tell": "Starts sentences and lets them go.",
+      "habits": [
+        "Gets through the day",
+        "leans on his father and his eldest girl",
+        "says yes to keep the peace"
+      ],
+      "cares": [
+        "The cart",
+        "whether the boys ate",
+        "the road"
+      ],
+      "trade": "carter"
+    },
+    "ysabel-vane": {
+      "look": "A light brown braid, blue eyes, brows permanently up. Twenty-three.",
+      "voice": "Soft, hedged, ends on a question.",
+      "tell": "Looks to somebody else before answering.",
+      "habits": [
+        "Avoids anything new",
+        "stays near the house",
+        "asks whether it is safe"
+      ],
+      "cares": [
+        "Omens",
+        "her mother",
+        "whether the others got back"
+      ],
+      "trade": null
+    }
+  }
+}

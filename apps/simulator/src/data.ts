@@ -1,10 +1,21 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { type SignificanceConfig, SignificanceSchema } from '@rpgsim/chronicle';
+import {
+  type CastingConfig,
+  CastingSchema,
+  type CommunityConfig,
+  CommunitySchema,
+  type PersonaBookConfig,
+  PersonaBookSchema,
+  type PortraitAtlas,
+  PortraitAtlasSchema,
+  type SignificanceConfig,
+  SignificanceSchema,
+} from '@rpgsim/chronicle';
 import { type NameBook, makeNameBook } from '@rpgsim/npc';
 import { type CalendarConfig, CalendarSchema } from '@rpgsim/sim-core';
-import type { ZodType } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
 import { type VillageConfig, VillageSchema } from './village-schema.ts';
 
 /**
@@ -32,8 +43,13 @@ export const DATA_ROOT = resolve(HERE, '..', '..', '..', 'data');
  * and a validator that stops at the first problem turns one careless paste into
  * four rounds of run-read-fix. The path is in the message because by the time
  * anybody reads it they are several layers from the call that chose the file.
+ *
+ * The schema's input type is `unknown` rather than `T`, so a schema may fill in
+ * a default the file left out. A portrait cell with nothing in its hands omits
+ * `props` entirely and reads back as an empty list, which keeps the hand-edited
+ * files short without making the parsed type optional everywhere downstream.
  */
-function loadJson<T>(path: string, schema: ZodType<T>, what: string): T {
+function loadJson<T>(path: string, schema: ZodType<T, ZodTypeDef, unknown>, what: string): T {
   const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
   const result = schema.safeParse(parsed);
   if (!result.success) {
@@ -63,7 +79,7 @@ export function loadVillage(dataRoot: string = DATA_ROOT): VillageConfig {
  */
 export function loadSignificance(dataRoot: string = DATA_ROOT): SignificanceConfig {
   return loadJson(
-    join(dataRoot, 'world', 'significance.json'),
+    join(dataRoot, 'chronicle', 'significance.json'),
     SignificanceSchema,
     'significance table',
   );
@@ -79,4 +95,51 @@ export function loadSignificance(dataRoot: string = DATA_ROOT): SignificanceConf
 export function loadNames(dataRoot: string = DATA_ROOT): NameBook {
   const path = join(dataRoot, 'world', 'names.json');
   return makeNameBook(JSON.parse(readFileSync(path, 'utf8')));
+}
+
+/** `<repo>/data/chronicle`: everything the press reads and the simulation does not. */
+function chronicleRoot(dataRoot: string): string {
+  return join(dataRoot, 'chronicle');
+}
+
+/**
+ * Read every portrait sheet in `data/chronicle/portraits`.
+ *
+ * Discovered by listing the directory rather than by a manifest naming each
+ * sheet, because the whole point of one-file-per-sheet is that adding portraits
+ * is adding a file. A manifest would put the list of sheets in two places and
+ * make a new sheet a two-step change that can be half done.
+ *
+ * The listing is sorted before anything reads it. `readdirSync` returns entries
+ * in whatever order the filesystem feels like, and determinism rule 5 forbids
+ * leaning on an order that is not itself deterministic — here it would decide
+ * which sheet a proposed casting drew from.
+ */
+export function loadPortraits(dataRoot: string = DATA_ROOT): PortraitAtlas[] {
+  const directory = join(chronicleRoot(dataRoot), 'portraits');
+  const files = readdirSync(directory)
+    .filter((name) => name.endsWith('.json'))
+    .sort();
+  return files.map((name) => {
+    const atlas = loadJson(join(directory, name), PortraitAtlasSchema, 'portrait atlas');
+    if (`${atlas.atlas}.json` !== name) {
+      throw new Error(`${join(directory, name)} declares atlas "${atlas.atlas}"; rename one or the other`);
+    }
+    return atlas;
+  });
+}
+
+/** Read who wears which face. */
+export function loadCasting(dataRoot: string = DATA_ROOT): CastingConfig {
+  return loadJson(join(chronicleRoot(dataRoot), 'casting.json'), CastingSchema, 'casting');
+}
+
+/** Read how each villager comes across. */
+export function loadPersonas(dataRoot: string = DATA_ROOT): PersonaBookConfig {
+  return loadJson(join(chronicleRoot(dataRoot), 'personas.json'), PersonaBookSchema, 'persona book');
+}
+
+/** Read the families and what they are to each other. */
+export function loadCommunity(dataRoot: string = DATA_ROOT): CommunityConfig {
+  return loadJson(join(chronicleRoot(dataRoot), 'community.json'), CommunitySchema, 'community');
 }

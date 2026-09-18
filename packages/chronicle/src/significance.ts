@@ -9,7 +9,7 @@ import { z } from 'zod';
  * transcript nobody will ever read.
  *
  * So the annals keep a filtered line and the filter is a number per event type,
- * in `data/world/significance.json`, because CLAUDE.md directive 10 puts
+ * in `data/chronicle/significance.json`, because CLAUDE.md directive 10 puts
  * balance values in data. The alternative is a `switch` in the chronicle that
  * grows a case every time somebody has an opinion about what is interesting,
  * and opinions about what is interesting change far more often than code should.

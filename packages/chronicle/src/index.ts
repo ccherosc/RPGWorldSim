@@ -30,3 +30,48 @@ export type { AnnalLine, DistilOptions, DistilledDay } from './annals.ts';
 // The record on disk
 export { ANNALS_DIRECTORY, AnnalsStore, listAnnalYears, yearOf } from './annals-store.ts';
 export type { AnnalsStoreOptions } from './annals-store.ts';
+
+// The faces
+export {
+  AGE_BANDS,
+  PORTRAIT_ID,
+  PORTRAIT_SEXES,
+  PortraitAtlasSchema,
+  PortraitCatalog,
+  PortraitCellSchema,
+  parsePortraitId,
+} from './portraits.ts';
+export type { AgeBand, Portrait, PortraitAtlas, PortraitCell, PortraitSex } from './portraits.ts';
+
+// Who wears which face
+export {
+  AgeBandRuleSchema,
+  Casting,
+  CastingSchema,
+  CastingTakeSchema,
+  portraitSexOf,
+  yearsBetween,
+} from './casting.ts';
+export type {
+  CastingConfig,
+  CastingMismatch,
+  CastingReport,
+  CastingShortage,
+  CastingTake,
+  UncastPerson,
+} from './casting.ts';
+
+// How they come across
+export { PersonaBook, PersonaBookSchema, PersonaSchema } from './persona.ts';
+export type { Persona, PersonaBookConfig } from './persona.ts';
+
+// What the families are to each other
+export {
+  Community,
+  CommunitySchema,
+  FAMILY_KINDS,
+  FamilySchema,
+  TIE_KINDS,
+  TieSchema,
+} from './community.ts';
+export type { CommunityConfig, Family, Tie, TieKind } from './community.ts';

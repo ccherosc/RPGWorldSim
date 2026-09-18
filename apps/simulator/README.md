@@ -16,6 +16,7 @@ runs it.
 npm run sim -- run --days 4 --every 2      # build World Zero and run four days
 npm run sim -- verify                      # the five determinism checks
 npm run sim -- annals --archive ./history --annals ./memory   # distil a record
+npm run sim -- cast --annals ./memory                         # check the portraits
 npm run sim -- help
 ```
 
@@ -52,7 +53,9 @@ have reached — same hash, same events, same pending schedule.
 | `--every <n>` | print a status line every n simulated days, `0` for none |
 | `--archive <path>` | write the durable event history there, one file per simulated day |
 | `--rewrite` | let `--archive` replace days it finds already written |
-| `--annals <path>` | where the permanent record lives, for the `annals` command |
+| `--annals <path>` | where the permanent record lives, for the `annals` and `cast` commands |
+| `--on <YYYY-MM-DD>` | the day `cast` checks ages against; defaults to the record's last day |
+| `--propose` | have `cast` print paste-ready assignments for the people who have no face |
 
 ## Keeping a durable history
 
@@ -113,7 +116,7 @@ memory/
 ```
 
 Both files are tab-separated text and both are append-only. Which events earn a
-line is set by weights in `data/world/significance.json`, not by code, so an
+line is set by weights in `data/chronicle/significance.json`, not by code, so an
 opinion about what is interesting can change without one.
 
 The command is re-runnable: it skips every day the record has already passed and
@@ -127,12 +130,55 @@ that is tested directly in `test/annals.test.ts`, and it is what makes throwing
 the archive away safe. See
 [docs/CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md) slice 3.
 
+## Checking the faces
+
+The blog needs a face for every villager, and those live in `data/chronicle/` —
+sheets of drawn portraits, plus a file saying who wears which. Nothing generates
+them; they are assigned by hand, because a face is a promise to a reader who has
+been looking at Winifred Barrow for a month. What *is* automatic is checking
+that the assignment still describes the village:
+
+```bash
+npm run sim -- cast --annals ./memory
+```
+
+```
+casting for 86 people on 1200-04-02
+  240 portraits on 6 sheets
+  80 cast, 6 uncast, 160 faces spare
+  86 personas, 20 families, 27 ties
+
+no face yet:
+  beatrice-carter        infant/f  Beatrice Carter
+  ...
+
+not enough faces to fix that:
+  child/m: 2 needed, 0 spare
+  infant/f: 3 needed, 0 spare
+  infant/m: 1 needed, 0 spare
+```
+
+A villager with no face is **news, not a failure** — a village gains people
+faster than anybody draws them, and the shortage list is the drawing order for
+the next sheet. The command exits non-zero only for things somebody got wrong:
+a face on a person of the wrong sex or life stage, a persona or a tie naming
+somebody the record has never heard of, or a villager with no persona at all.
+
+`--propose` fills the blanks and prints them ready to paste. It never writes the
+file and never reassigns anybody who already has a face.
+
+Ages are figured against a day, and the default is the last day the record
+holds. That matters more than it sounds: a casting is correct on one day and can
+stop being correct on another, because children grow up. `--on` asks the
+question about any day.
+
+
 ## What is here
 
 | Module | Owns |
 | --- | --- |
-| `cli.ts` | argument parsing, the five commands, and reading `data/` |
-| `data.ts` | the loaders: calendar, village, name book, significance — each validated |
+| `cli.ts` | argument parsing, the six commands, and reading `data/` |
+| `data.ts` | the loaders: calendar, village, name book, and everything under `data/chronicle/` — each validated |
 | `village-schema.ts` | the shape `data/world/village.json` must have |
 | `village-world.ts` | `VillageWorld`: worldgen, and the wiring of five systems |
 | `probe-world.ts` | the Phase 0 kernel harness, still reachable and still run |

@@ -124,6 +124,18 @@ export class PeopleRegister {
   }
 
   /**
+   * Look somebody up by the handle the annals and the blog use.
+   *
+   * The reverse of `find`, and the direction everything downstream of the
+   * record wants: a casting file, a persona book and a post all name people by
+   * slug, because a slug is readable and an entity id is an artefact of the
+   * order worldgen ran in.
+   */
+  findBySlug(slug: string): PersonRecord | undefined {
+    return this.bySlug.get(slug);
+  }
+
+  /**
    * The slug for a person the record knows about.
    *
    * Throws when it does not, rather than inventing a placeholder. A `?` written

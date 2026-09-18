@@ -39,11 +39,21 @@ describe('parseArgs', () => {
       save: false,
       every: 5,
       rewrite: false,
+      propose: false,
     });
     // `archive` has no default on purpose: writing history to disk is a
     // publishing decision, so the absence of the flag has to be distinguishable
     // from a path.
     expect(options.archive).toBeUndefined();
+    // `on` likewise: the day the casting is checked against defaults to the
+    // last day the record actually holds, which parseArgs cannot know.
+    expect(options.on).toBeUndefined();
+  });
+
+  it('reads which day the casting is checked on, and whether to fill the blanks', () => {
+    expect(parseArgs(['cast', '--on', '1212-06-01']).options.on).toBe('1212-06-01');
+    expect(parseArgs(['cast', '--propose']).options.propose).toBe(true);
+    expect(() => parseArgs(['cast', '--on'])).toThrow(/requires a value/);
   });
 
   it('reads where the durable history goes, and whether it may be replaced', () => {

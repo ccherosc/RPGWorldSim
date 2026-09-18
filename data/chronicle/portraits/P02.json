@@ -1,0 +1,343 @@
+{
+  "atlas": "P02",
+  "source": "Portrait Atlas P02, eight rows A-H by five columns 1-5",
+  "cells": {
+    "A1": {
+      "sex": "m",
+      "band": "youth",
+      "look": "fair scruffy hair, squinting into the wind",
+      "mood": "wincing",
+      "setting": "windmill"
+    },
+    "A2": {
+      "sex": "f",
+      "band": "older",
+      "look": "brown hair pinned up, pleased with herself",
+      "mood": "smug",
+      "props": [
+        "beehive"
+      ],
+      "setting": "garden"
+    },
+    "A3": {
+      "sex": "f",
+      "band": "elder",
+      "look": "a grey bun, chin lifted, eyes somewhere else",
+      "mood": "wistful",
+      "setting": "village"
+    },
+    "A4": {
+      "sex": "m",
+      "band": "young",
+      "look": "dark curls, drinking deep with his eyes shut",
+      "mood": "absorbed",
+      "props": [
+        "cup"
+      ],
+      "setting": "tavern"
+    },
+    "A5": {
+      "sex": "f",
+      "band": "young",
+      "look": "fair curls, head back, laughing out loud",
+      "mood": "laughing",
+      "setting": "village"
+    },
+    "B1": {
+      "sex": "m",
+      "band": "older",
+      "look": "bald, grey goatee, salt-cracked hands",
+      "mood": "weary",
+      "props": [
+        "nets"
+      ],
+      "setting": "riverside"
+    },
+    "B2": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark hair cut to the chin, enormous eyes",
+      "mood": "earnest",
+      "props": [
+        "rabbit"
+      ],
+      "setting": "yard"
+    },
+    "B3": {
+      "sex": "m",
+      "band": "adult",
+      "look": "dark hair, moustache, a quill behind one ear",
+      "mood": "wry",
+      "props": [
+        "quill"
+      ],
+      "setting": "indoors"
+    },
+    "B4": {
+      "sex": "f",
+      "band": "adult",
+      "look": "a fair braid, eyes closed, mouth curved",
+      "mood": "content",
+      "setting": "village"
+    },
+    "B5": {
+      "sex": "f",
+      "band": "elder",
+      "look": "dark skin, blue headscarf, laughing warmly",
+      "mood": "warm",
+      "setting": "village"
+    },
+    "C1": {
+      "sex": "m",
+      "band": "adult",
+      "look": "stout and fair, tasting from a spoon and regretting it",
+      "mood": "puckered",
+      "props": [
+        "spoon"
+      ],
+      "setting": "kitchen"
+    },
+    "C2": {
+      "sex": "f",
+      "band": "youth",
+      "look": "dark hair long and loose, eyes red",
+      "mood": "crying",
+      "setting": "indoors"
+    },
+    "C3": {
+      "sex": "m",
+      "band": "elder",
+      "look": "grey beard, eyes gone wide",
+      "mood": "startled",
+      "setting": "village"
+    },
+    "C4": {
+      "sex": "f",
+      "band": "adult",
+      "look": "black hair, red dress, chin level",
+      "mood": "haughty",
+      "setting": "village"
+    },
+    "C5": {
+      "sex": "m",
+      "band": "child",
+      "look": "fair hair, mouth open at a butterfly",
+      "mood": "wondering",
+      "props": [
+        "butterfly"
+      ],
+      "setting": "meadow"
+    },
+    "D1": {
+      "sex": "f",
+      "band": "older",
+      "look": "a dark grey braid, eyes shut over a sprig",
+      "mood": "absorbed",
+      "props": [
+        "herbs"
+      ],
+      "setting": "garden"
+    },
+    "D2": {
+      "sex": "m",
+      "band": "youth",
+      "look": "dark curly hair, one eyebrow up",
+      "mood": "doubtful",
+      "props": [
+        "donkey"
+      ],
+      "setting": "lane"
+    },
+    "D3": {
+      "sex": "f",
+      "band": "elder",
+      "look": "grey hair, teal hood, a soft mouth",
+      "mood": "gentle",
+      "setting": "village"
+    },
+    "D4": {
+      "sex": "m",
+      "band": "young",
+      "look": "red curly hair, shoulders forward, eyes down",
+      "mood": "downcast",
+      "props": [
+        "book"
+      ],
+      "setting": "indoors"
+    },
+    "D5": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark skin, hair in tight braids, a basket on her hip",
+      "mood": "delighted",
+      "props": [
+        "basket"
+      ],
+      "setting": "market"
+    },
+    "E1": {
+      "sex": "m",
+      "band": "adult",
+      "look": "dark beard, a hand at his jaw, mouth open",
+      "mood": "aching",
+      "setting": "village"
+    },
+    "E2": {
+      "sex": "f",
+      "band": "adult",
+      "look": "dark skin, a wrapped headcloth, cheese held out",
+      "mood": "displeased",
+      "props": [
+        "cheese"
+      ],
+      "setting": "market"
+    },
+    "E3": {
+      "sex": "m",
+      "band": "child",
+      "look": "red hair, freckles, one eyebrow raised",
+      "mood": "skeptical",
+      "props": [
+        "apple"
+      ],
+      "setting": "orchard"
+    },
+    "E4": {
+      "sex": "m",
+      "band": "adult",
+      "look": "greying hair, a thin moustache, half a smile",
+      "mood": "amused",
+      "setting": "village"
+    },
+    "E5": {
+      "sex": "f",
+      "band": "older",
+      "look": "stout, fair hair, looking at the sky",
+      "mood": "weary",
+      "setting": "fields"
+    },
+    "F1": {
+      "sex": "m",
+      "band": "young",
+      "look": "dark skin, red tunic, a smile with a plan",
+      "mood": "sly",
+      "setting": "market"
+    },
+    "F2": {
+      "sex": "f",
+      "band": "young",
+      "look": "black curls, blue dress, one eye closed",
+      "mood": "winking",
+      "setting": "village"
+    },
+    "F3": {
+      "sex": "m",
+      "band": "elder",
+      "look": "long grey hair, hands folded",
+      "mood": "sorrowful",
+      "props": [
+        "bell"
+      ],
+      "setting": "church"
+    },
+    "F4": {
+      "sex": "m",
+      "band": "youth",
+      "look": "dark curls, glancing sideways",
+      "mood": "anxious",
+      "props": [
+        "sheep"
+      ],
+      "setting": "fence"
+    },
+    "F5": {
+      "sex": "f",
+      "band": "young",
+      "look": "strawberry-fair curls, a blotched face",
+      "mood": "upset",
+      "setting": "indoors"
+    },
+    "G1": {
+      "sex": "m",
+      "band": "older",
+      "look": "grey topknot and beard, a carving in both hands",
+      "mood": "absorbed",
+      "props": [
+        "carving"
+      ],
+      "setting": "workshop"
+    },
+    "G2": {
+      "sex": "f",
+      "band": "child",
+      "look": "brown braids, brows down, mouth set",
+      "mood": "scowling",
+      "setting": "yard"
+    },
+    "G3": {
+      "sex": "m",
+      "band": "older",
+      "look": "stout, bald, both eyebrows at his hairline",
+      "mood": "alarmed",
+      "setting": "village"
+    },
+    "G4": {
+      "sex": "f",
+      "band": "adult",
+      "look": "dark curls, a cat asleep against her chest",
+      "mood": "content",
+      "props": [
+        "cat"
+      ],
+      "setting": "indoors"
+    },
+    "G5": {
+      "sex": "f",
+      "band": "youth",
+      "look": "light brown hair under a hood, biting her lip",
+      "mood": "worried",
+      "setting": "lane"
+    },
+    "H1": {
+      "sex": "m",
+      "band": "youth",
+      "look": "red hair, freckles, a smile he has not earned",
+      "mood": "smug",
+      "setting": "market"
+    },
+    "H2": {
+      "sex": "f",
+      "band": "elder",
+      "look": "dark skin, grey curls, laughing over a spindle",
+      "mood": "laughing",
+      "props": [
+        "spindle"
+      ],
+      "setting": "indoors"
+    },
+    "H3": {
+      "sex": "m",
+      "band": "older",
+      "look": "long hair, moustache, a scruffy dog in his arms",
+      "mood": "fond",
+      "props": [
+        "dog"
+      ],
+      "setting": "lane"
+    },
+    "H4": {
+      "sex": "f",
+      "band": "older",
+      "look": "grey hair cropped short, a flat hard look",
+      "mood": "glaring",
+      "setting": "village"
+    },
+    "H5": {
+      "sex": "m",
+      "band": "young",
+      "look": "dark curls, stubble, looking at the water",
+      "mood": "thoughtful",
+      "setting": "riverside"
+    }
+  }
+}

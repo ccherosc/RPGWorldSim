@@ -1,5 +1,12 @@
 import { pathToFileURL } from 'node:url';
-import { AnnalsStore, distil } from '@rpgsim/chronicle';
+import {
+  AnnalsStore,
+  Casting,
+  Community,
+  PersonaBook,
+  PortraitCatalog,
+  distil,
+} from '@rpgsim/chronicle';
 import {
   EventArchive,
   JsonFileSaveStore,
@@ -8,7 +15,16 @@ import {
   readArchiveManifest,
   readEventDay,
 } from '@rpgsim/sim-core';
-import { loadCalendar, loadNames, loadSignificance, loadVillage } from './data.ts';
+import {
+  loadCalendar,
+  loadCasting,
+  loadCommunity,
+  loadNames,
+  loadPersonas,
+  loadPortraits,
+  loadSignificance,
+  loadVillage,
+} from './data.ts';
 import { probeWorldFactory } from './probe-world.ts';
 import { villageWorldFactory } from './village-world.ts';
 import { type SimWorld, type WorldFactory, verifyDeterminism } from './verify.ts';
@@ -34,6 +50,7 @@ Usage:
   npm run sim -- resume  [options]   Load a save and keep running
   npm run sim -- verify  [options]   Run the determinism checks
   npm run sim -- annals  [options]   Distil an archive into the village's memory
+  npm run sim -- cast    [options]   Check the portrait casting against the record
   npm run sim -- help                Show this message
 
 Options:
@@ -48,6 +65,8 @@ Options:
   --archive <path>  Write the durable event history there, one file per day
   --rewrite         Let --archive replace days it finds already written
   --annals <path>   Where the permanent record lives, for the annals command
+  --on <date>       The day to check the casting against (default: the record's last)
+  --propose         Suggest a portrait for everyone who has none, and print it
 
 "village" is World Zero, built from data/world/village.json.
 "probe" is the Phase 0 kernel harness: no economy, needs, knowledge or spatial
@@ -70,8 +89,12 @@ interface Options {
   /** Where to write durable history. Undefined means do not write any. */
   archive?: string;
   rewrite: boolean;
-  /** Where the permanent record lives. Only the annals command reads it. */
+  /** Where the permanent record lives. The annals and cast commands read it. */
   annals?: string;
+  /** The day the cast command judges ages against. */
+  on?: string;
+  /** Have cast suggest a face for everybody who has none. */
+  propose: boolean;
 }
 
 export function parseArgs(argv: readonly string[]): { command: string; options: Options } {
@@ -85,6 +108,7 @@ export function parseArgs(argv: readonly string[]): { command: string; options: 
     save: false,
     every: 5,
     rewrite: false,
+    propose: false,
   };
 
   const command = argv[0] ?? 'help';
@@ -127,6 +151,13 @@ export function parseArgs(argv: readonly string[]): { command: string; options: 
       case '--annals':
         options.annals = requireValue(flag, value);
         i++;
+        break;
+      case '--on':
+        options.on = requireValue(flag, value);
+        i++;
+        break;
+      case '--propose':
+        options.propose = true;
         break;
       case '--save':
         options.save = true;
@@ -325,6 +356,114 @@ function commandAnnals(options: Options): number {
   return 0;
 }
 
+/**
+ * Check the faces against the record.
+ *
+ * Judged against `people.txt` rather than against a running world on purpose.
+ * The record is the thing that survives, and whoever is drawing the next sheet
+ * of portraits needs to know what is missing without building a simulation to
+ * find out. It also means the answer cannot drift: two people looking at the
+ * same record get the same list.
+ *
+ * Nothing here writes the casting file. `--propose` prints what it would add
+ * and stops, because a face is a promise to a reader -- somebody who has been
+ * looking at Winifred Barrow for a month knows that face -- and a promise that
+ * a tool can rewrite unattended is not one. Pasting the block in is the step
+ * where a person looks at it.
+ */
+function commandCast(options: Options): number {
+  if (options.annals === undefined) {
+    console.error('cast needs --annals (the record it checks against)\n');
+    console.error(USAGE);
+    return 2;
+  }
+
+  const store = new AnnalsStore({ root: options.annals });
+  if (store.people.size === 0) {
+    console.error(`no people recorded at ${store.root}; run annals first`);
+    return 1;
+  }
+
+  // Ages need a day to be ages on. The record's own last day is the honest
+  // default: it is the latest moment the record can speak about at all.
+  const on = options.on ?? store.lastDate;
+  if (on === null || on === undefined) {
+    console.error('the record holds people but no dated days; pass --on <YYYY-MM-DD>');
+    return 1;
+  }
+
+  const catalog = new PortraitCatalog(loadPortraits());
+  const casting = new Casting(loadCasting());
+  const personas = new PersonaBook(loadPersonas());
+  const community = new Community(loadCommunity());
+  const people = store.people.records();
+  const slugs = people.map((person) => person.slug);
+  const report = casting.report(people, catalog, on);
+
+  console.log(`casting for ${people.length} people on ${on}`);
+  console.log(`  ${catalog.size} portraits on ${loadPortraits().length} sheets`);
+  console.log(`  ${report.cast} cast, ${report.uncast.length} uncast, ${report.unused.length} faces spare`);
+  console.log(`  ${personas.size} personas, ${community.familyCount} families, ${community.tieCount} ties`);
+
+  const missingPersona = personas.missingFor(slugs);
+  const strayPersona = personas.strayFor(slugs);
+  const strayTie = community.strayFor(slugs);
+
+  if (report.uncast.length > 0) {
+    console.log('\nno face yet:');
+    for (const person of report.uncast) {
+      console.log(`  ${person.slug.padEnd(22)} ${person.band}/${person.sex}  ${person.name}`);
+    }
+  }
+  if (report.shortages.length > 0) {
+    console.log('\nnot enough faces to fix that:');
+    for (const gap of report.shortages) {
+      console.log(`  ${gap.band}/${gap.sex}: ${gap.needed} needed, ${gap.available} spare`);
+    }
+  }
+  if (report.mismatched.length > 0) {
+    console.log('\nwearing the wrong face:');
+    for (const bad of report.mismatched) {
+      console.log(`  ${bad.slug.padEnd(22)} ${bad.portrait} is ${bad.got}, wanted ${bad.wanted}`);
+    }
+  }
+  for (const [label, list] of [
+    ['no persona written', missingPersona],
+    ['persona for somebody the record has never heard of', strayPersona],
+    ['tie to somebody the record has never heard of', strayTie],
+  ] as const) {
+    if (list.length === 0) continue;
+    console.log(`\n${label}:`);
+    for (const slug of list) console.log(`  ${slug}`);
+  }
+
+  console.log('\nfaces spare, by kind:');
+  const spare = new Map<string, number>();
+  for (const id of report.unused) {
+    const portrait = catalog.require(id);
+    const key = `${portrait.band}/${portrait.sex}`;
+    spare.set(key, (spare.get(key) ?? 0) + 1);
+  }
+  for (const key of [...spare.keys()].sort()) {
+    console.log(`  ${key.padEnd(14)} ${spare.get(key) as number}`);
+  }
+
+  if (options.propose) {
+    const proposals = casting.propose(people, catalog, on);
+    console.log(`\nproposed (${proposals.size}); paste into data/chronicle/casting.json:`);
+    for (const slug of [...proposals.keys()].sort()) {
+      console.log(`    "${slug}": "${proposals.get(slug) as string}",`);
+    }
+  }
+
+  // Missing faces are news, not a failure: a village acquires people faster
+  // than anybody can draw them. A face on the wrong person, or a name nothing
+  // else knows, is a mistake somebody made and is worth a non-zero exit.
+  const broken =
+    report.mismatched.length + strayPersona.length + strayTie.length + missingPersona.length;
+  return broken > 0 ? 1 : 0;
+}
+
 function commandVerify(options: Options): number {
   const report = verifyDeterminism({
     seed: options.seed,
@@ -360,6 +499,8 @@ export function main(argv: readonly string[]): number {
       return commandVerify(parsed.options);
     case 'annals':
       return commandAnnals(parsed.options);
+    case 'cast':
+      return commandCast(parsed.options);
     case 'help':
     case '--help':
     case '-h':

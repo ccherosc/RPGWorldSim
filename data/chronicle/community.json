@@ -1,0 +1,363 @@
+{
+  "village": "Wodenshill",
+  "families": [
+    {
+      "family": "netherby",
+      "kind": "land",
+      "trade": null,
+      "standing": "The reeve's house, and the first name on any list",
+      "reputation": "Jocelin keeps the village's tally and is honest about it; Matilda frightens people. Proud, upright, and no use to you in a hard winter."
+    },
+    {
+      "family": "barrow",
+      "kind": "land",
+      "trade": null,
+      "standing": "Two houses with the same name and opposite reputations",
+      "reputation": "Winifred's door is open to anyone; Walter's hand is in everyone's pocket. The village forgives the family on her account."
+    },
+    {
+      "family": "plowright",
+      "kind": "trade",
+      "trade": "ploughwright",
+      "standing": "A yard everyone needs and nobody enjoys visiting",
+      "reputation": "William will not lower a price, lend a tool or change his mind. Nesta keeps the place honest single-handed."
+    },
+    {
+      "family": "carter",
+      "kind": "trade",
+      "trade": "carter",
+      "standing": "Three houses, the roads between the villages, and more children than money",
+      "reputation": "Reliable, tired and thin on the ground. If something needs moving, a Carter moves it, eventually."
+    },
+    {
+      "family": "underhill",
+      "kind": "land",
+      "trade": null,
+      "standing": "One strange house on the rise",
+      "reputation": "Peter measures the stars and asks questions the priest cannot answer; his father is frightened of the dark. Tolerated, quoted, not consulted."
+    },
+    {
+      "family": "dyer",
+      "kind": "trade",
+      "trade": "dyer",
+      "standing": "Stained hands and the best colour for three villages",
+      "reputation": "Reynold has not changed a method in twenty years and does not intend to. The whole family takes nothing on trust."
+    },
+    {
+      "family": "tanner",
+      "kind": "trade",
+      "trade": "tanner",
+      "standing": "Downwind, devout, and content with it",
+      "reputation": "William is in the church more than the tanpit and wants nothing from anybody. Harmless, and a little holy."
+    },
+    {
+      "family": "marsh",
+      "kind": "land",
+      "trade": null,
+      "standing": "One old woman and a spindle that never stops",
+      "reputation": "Felice Marsh has outworked everyone in the village for fifty years and will not accept help."
+    },
+    {
+      "family": "vane",
+      "kind": "land",
+      "trade": null,
+      "standing": "The loudest house in Wodenshill, and the fullest",
+      "reputation": "Harold promises the moon in a good mood and Hawise quietly settles what he owes. Warm, chaotic, and always owed a favour."
+    },
+    {
+      "family": "wheeler",
+      "kind": "trade",
+      "trade": "wheelwright",
+      "standing": "A widow, two boys and the only wheel-yard",
+      "reputation": "Winifred feeds other people's children and has not been inside the church in years. Nobody minds."
+    },
+    {
+      "family": "miller",
+      "kind": "trade",
+      "trade": "miller",
+      "standing": "The mill, and the oldest suspicion in any village",
+      "reputation": "Cedric works harder than anyone and takes a little off every measure. Everybody knows. Nobody can prove it."
+    },
+    {
+      "family": "brewer",
+      "kind": "trade",
+      "trade": "brewer",
+      "standing": "Two houses, one trade, and a quiet war over it",
+      "reputation": "Christina measures to the drop; her brother Gilbert will not be hurried. Between them the village is never dry."
+    },
+    {
+      "family": "webb",
+      "kind": "trade",
+      "trade": "weaver",
+      "standing": "A loom, and a wife with plans",
+      "reputation": "Sybil is three schemes ahead of the money and Randal cannot be got to care about any of them."
+    },
+    {
+      "family": "larkin",
+      "kind": "land",
+      "trade": null,
+      "standing": "One old man who has never done a day's work",
+      "reputation": "Randal Larkin blesses you, hears everything, repeats it, and lends nothing. The village's news travels through his door."
+    },
+    {
+      "family": "pike",
+      "kind": "trade",
+      "trade": "fisher",
+      "standing": "The river, and the best stories on it",
+      "reputation": "Aldric gives away half his catch and lies about the other half. Eleanor is afraid of the water. The boys are on it constantly."
+    },
+    {
+      "family": "milburn",
+      "kind": "land",
+      "trade": null,
+      "standing": "A big steady house by the mill stream",
+      "reputation": "Roger writes things down and is asked to witness agreements. Wilmot knows everyone and cares about none of them. Harold is clever and cannot be believed."
+    },
+    {
+      "family": "clay",
+      "kind": "trade",
+      "trade": "potter",
+      "standing": "The kiln at the end of the lane",
+      "reputation": "Drogo acts first and explains later; Bartholomew cannot tell a lie to save his life. An odd pairing that works."
+    },
+    {
+      "family": "cooper",
+      "kind": "trade",
+      "trade": "cooper",
+      "standing": "Barrels, silence and scripture",
+      "reputation": "Stephen says nothing and endures everything; Jocelin reads and will not be argued out of anything."
+    },
+    {
+      "family": "hollis",
+      "kind": "land",
+      "trade": null,
+      "standing": "The newest house in the village",
+      "reputation": "Gunnora and Gilbert married this year. Nothing is known about them yet, which is itself the talk."
+    },
+    {
+      "family": "salter",
+      "kind": "trade",
+      "trade": "salter",
+      "standing": "The hill road and the salt that comes down it",
+      "reputation": "Drogo walks further than men half his age. Agnes says out loud what everyone else is thinking."
+    }
+  ],
+  "ties": [
+    {
+      "kind": "kin",
+      "between": [
+        "wymond-carter",
+        "warin-carter"
+      ],
+      "note": "Warin is Wymond's nephew; the two Carter yards share a horse and argue about it."
+    },
+    {
+      "kind": "kin",
+      "between": [
+        "wymond-carter",
+        "christina-carter"
+      ],
+      "note": "Cousins by marriage. Christina minds Wymond's youngest when the roads take him out overnight."
+    },
+    {
+      "kind": "kin",
+      "between": [
+        "warin-carter",
+        "christina-carter"
+      ],
+      "note": "Cousins. Neither of them mentions the third Carter house if they can help it."
+    },
+    {
+      "kind": "kin",
+      "between": [
+        "winifred-barrow",
+        "robert-barrow"
+      ],
+      "note": "Robert is Winifred's nephew, and the only Barrow the priest speaks well of."
+    },
+    {
+      "kind": "kin",
+      "between": [
+        "gilbert-brewer",
+        "christina-brewer"
+      ],
+      "note": "Brother and sister, and the two best brewers in the village. They have not agreed on a measure in thirty years."
+    },
+    {
+      "kind": "kin",
+      "between": [
+        "drogo-clay",
+        "joan-clay"
+      ],
+      "note": "Joan is Drogo's niece. He got her the place at the Barrow house and has not visited since."
+    },
+    {
+      "kind": "marriage",
+      "between": [
+        "winifred-barrow",
+        "walter-barrow"
+      ],
+      "note": "Everyone likes her and nobody likes him, and she has never once said so."
+    },
+    {
+      "kind": "marriage",
+      "between": [
+        "gunnora-hollis",
+        "gilbert-hollis"
+      ],
+      "note": "Married this spring. The village is still deciding what to make of them."
+    },
+    {
+      "kind": "apprentice",
+      "between": [
+        "joan-clay",
+        "constance-barrow"
+      ],
+      "note": "Joan is apprenticed into the Barrow household and does more of the work than anyone living there."
+    },
+    {
+      "kind": "friendship",
+      "between": [
+        "winifred-barrow",
+        "winifred-wheeler"
+      ],
+      "note": "The two Winifreds. Between them, no child in Wodenshill goes hungry, and no piece of news goes unrepeated."
+    },
+    {
+      "kind": "friendship",
+      "between": [
+        "felice-marsh",
+        "agnes-salter"
+      ],
+      "note": "Two old women who say exactly what they think and find each other restful."
+    },
+    {
+      "kind": "friendship",
+      "between": [
+        "peter-underhill",
+        "harold-milburn"
+      ],
+      "note": "The one man who asks impossible questions and the one boy who wants to hear them. Peter has not noticed the boy lies about everything else."
+    },
+    {
+      "kind": "friendship",
+      "between": [
+        "bartholomew-clay",
+        "hugh-milburn"
+      ],
+      "note": "Hugh follows Bartholomew about. Between them they have ruined three good stories by telling the truth."
+    },
+    {
+      "kind": "friendship",
+      "between": [
+        "robert-pike",
+        "bartholomew-barrow"
+      ],
+      "note": "Thirteen and twelve, and on the river when they should be anywhere else."
+    },
+    {
+      "kind": "friendship",
+      "between": [
+        "robert-barrow",
+        "jocelin-cooper"
+      ],
+      "note": "The two most devout young men in the village, and neither is much fun."
+    },
+    {
+      "kind": "friendship",
+      "between": [
+        "randal-larkin",
+        "robert-barrow"
+      ],
+      "note": "The old man talks and the young man listens, which suits them both."
+    },
+    {
+      "kind": "rivalry",
+      "between": [
+        "jocelin-netherby",
+        "reynold-dyer"
+      ],
+      "note": "The reeve keeps the tally; the dyer has never once accepted it. A standing fixture."
+    },
+    {
+      "kind": "rivalry",
+      "between": [
+        "christina-brewer",
+        "gilbert-brewer"
+      ],
+      "note": "Same trade, same name, two doors apart. Each is certain the other waters it."
+    },
+    {
+      "kind": "rivalry",
+      "between": [
+        "emma-carter",
+        "maud-milburn"
+      ],
+      "note": "Seven and seven, and neither will give way about anything at all."
+    },
+    {
+      "kind": "courtship",
+      "between": [
+        "nesta-plowright",
+        "elias-dyer"
+      ],
+      "note": "He is attentive and sympathetic; she is waiting to see whether any of it costs him something."
+    },
+    {
+      "kind": "courtship",
+      "between": [
+        "cecily-brewer",
+        "bartholomew-clay"
+      ],
+      "note": "She finds his honesty funny. He has not worked out that she is not laughing at the joke."
+    },
+    {
+      "kind": "debt",
+      "between": [
+        "walter-barrow",
+        "aldric-pike"
+      ],
+      "note": "Walter owes for a winter of fish. Aldric tells the story of the debt more often than he asks for the money."
+    },
+    {
+      "kind": "debt",
+      "between": [
+        "walter-barrow",
+        "cedric-miller"
+      ],
+      "note": "Two men who shave a measure, each convinced the other one is worse."
+    },
+    {
+      "kind": "grudge",
+      "between": [
+        "matilda-netherby",
+        "wilmot-milburn"
+      ],
+      "note": "Wilmot holds the gatherings; Matilda has never come to one, and Wilmot has stopped asking loudly."
+    },
+    {
+      "kind": "grudge",
+      "between": [
+        "william-plowright",
+        "harold-vane"
+      ],
+      "note": "Harold promised him a cart-load in a good mood and forgot by morning. That was four years ago."
+    },
+    {
+      "kind": "grudge",
+      "between": [
+        "maud-dyer",
+        "alice-vane"
+      ],
+      "note": "A six-year-old told her she would be judged. Maud has not let it go, which is the funniest thing about it."
+    },
+    {
+      "kind": "grudge",
+      "between": [
+        "agnes-salter",
+        "randal-larkin"
+      ],
+      "note": "She told him to his face that he had never worked a day. He blessed her for it, which made it worse."
+    }
+  ]
+}

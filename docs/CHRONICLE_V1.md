@@ -126,7 +126,7 @@ else; the annals are an **export** of the world's history, never an input to it.
 The arrow points one way, and a layering test will keep it pointing that way.
 
 **Significance is a number in data, not a branch in code.** Which events reach
-the annals is `data/world/significance.json`: a weight per event type and a
+the annals is `data/chronicle/significance.json`: a weight per event type and a
 threshold. Directive 10. The alternative is a `switch` that grows a case every
 time somebody has an opinion about what is interesting, in a file nobody
 reviews as a whole.
@@ -414,8 +414,8 @@ day archive, so every line traces back to the exact event that produced it —
 which is the "every sentence traces to an event id" bar in section 1, met at the
 memory layer rather than only at the page.
 
-**What keeps it small is a filter, and the filter is data.** `data/world/
-significance.json` gives each event type a weight and sets the threshold a line
+**What keeps it small is a filter, and the filter is data.**
+`data/chronicle/significance.json` gives each event type a weight and sets the threshold a line
 must clear to be written. Most of the 1,250 daily events are mechanics — woke,
 walked, ate — and are worth nothing. Births, deaths, arrivals, departures,
 household changes and failures clear it. Prime Directive 10 puts the numbers in
@@ -527,6 +527,76 @@ nothing new has to be invented; it is not built now because the village is
 eleven days old and a collapse pass with nothing to collapse cannot be tested
 against anything real.
 
+### Slice 3b: the faces, the voices and the families — **built**
+
+Slices 5 and 6 write in villagers' voices, and a voice needs somebody to belong
+to. The record holds names, sexes, birth dates, households and twelve trait
+scores, and that is all it should hold: `TRAIT_NAMES` fixes the order the
+generator draws in, so adding an appearance field or nudging a trait value
+rewrites every world built from an existing seed. So the reader-facing half of a
+person lives on the press side, under a new directory.
+
+**`data/world/` is what the simulation reads; `data/chronicle/` is what the
+press reads.** `significance.json` moved across when the line was drawn, and
+four files joined it:
+
+```
+data/chronicle/portraits/P01.json … P06.json   240 drawn faces, 40 to a sheet
+data/chronicle/casting.json                    who wears which face, and from when
+data/chronicle/personas.json                   how each of the 86 villagers comes across
+data/chronicle/community.json                  20 families and 27 ties between them
+```
+
+**A portrait is named by its sheet and its square — `P04-C3`.** Not `#117`.
+Sequential numbering means inserting a sheet renumbers everything after it, and
+every casting then points at a different person while remaining perfectly valid.
+Sheet-plus-cell ids cannot collide and cannot shift, so a new sheet of forty
+faces is a new file and no edit anywhere else; the loader finds it by listing
+the directory, sorted, rather than by a manifest that could be half-updated.
+
+**Casting is keyed by slug and dated.** A slug is a pure function of a name and
+survives the archive being deleted and rebuilt; an entity id is an artefact of
+the order worldgen ran in. An entry is either a bare portrait id — "this face,
+from the beginning" — or a list of takes each dated from the day it applies, so
+the first child who grows up is a one-line edit rather than a migration. Nothing
+in the code reshuffles a casting: `--propose` fills blanks only, never
+reassigns, and never writes the file.
+
+**A persona is a reading of a person, not a replacement for one.** Every line of
+it is derived from traits the generator actually rolled. Walter Barrow agrees
+with you and then does the other thing because his honesty is 17 and his empathy
+18; Bartholomew Clay answers the question that was actually asked because his
+honesty is 100. When Phase 2 makes traits drive behaviour, the blog and the
+simulation will already agree.
+
+**A tie is scenery, not state.** Households are islands in Phase 1 — the
+simulation knows who lives under a roof and nothing about who owes whom — so
+ties are declared, dated and visible in `community.json`, under two rules: a tie
+may never contradict the record, and a tie never moves a person, a coin or an
+object (directive 13). The twenty surnames worldgen drew fall into twelve trades
+(Brewer, Dyer, Miller, Carter…) and eight places (Netherby, Underhill, Marsh…),
+which is the ordinary shape of an English village and is read from the data
+rather than invented.
+
+**`npm run sim -- cast` is the check.** Every way these hand-written files can
+be wrong is silent on the page: a misspelled slug shows nothing, a face cast
+twice puts one head on two people. So the command reports coverage, shortages,
+mismatches and strays against the record, and `apps/simulator/test/cast.test.ts`
+runs the same comparison against a real World Zero run in CI.
+
+A villager with no face is **news, not a failure**. Of 86 villagers, 80 are cast
+and 6 are not — three infant girls, one infant boy and two twelve-year-old boys
+— because no sheet holds a baby and the last child/m face was spent. Everything
+else is in surplus: 26 spare older men, 25 spare young women. The shortage list
+is the drawing order for the next sheet, and it is short and specific by design.
+
+A forty-four-mutant sweep over `portraits.ts`, `casting.ts`, `persona.ts` and
+`community.ts` leaves no survivors. The first pass left one — `PersonaBook`
+sorted its keys in the constructor *and* on the way out, so breaking either one
+alone changed nothing — and the answer was to delete the redundant sort rather
+than to add a test for it: two guarantees of the same thing is one place for it
+to quietly stop being true.
+
 ### Slice 4: `packages/chronicle` — the read model and the score
 
 New package. Depends on `sim-core` read-only and on the archive. Never imported
@@ -633,7 +703,7 @@ manual dispatch:
 
 1. `npm ci`, then `npm run check` — a broken build never publishes.
 2. Compute the day count: `days = today − firstPublished`, from
-   `data/world/publication.json`. **The wall clock is read here and nowhere
+   `data/chronicle/publication.json`. **The wall clock is read here and nowhere
    else.** It is an input to the publisher, exactly like `--days` typed by hand;
    no simulation code ever sees it.
 3. Run the village forward that many days from the seed, archiving as it goes.
@@ -649,7 +719,7 @@ only the new day — the manifest already makes that safe, because a committed d
 hash proves the resumed world matches the regenerated one. That fallback is not
 built until the number says it is needed.
 
-`data/world/publication.json` is new: the masthead, the first village day, the
+`data/chronicle/publication.json` is new: the masthead, the first village day, the
 real date of first publication, and `frozenThrough` (null until launch).
 
 Tests: the site builds into a temp directory and every internal link resolves; a
