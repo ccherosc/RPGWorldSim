@@ -223,8 +223,8 @@ describe('the day in review', () => {
       'travel.blocked',
       'society.household-founded',
     ]);
-    expect(review[0]?.text).toBe('Winifred Hargrave got no further than The Mill.');
-    expect(review[1]?.text).toBe('The Hargrave household has taken A cottage on Mill Lane.');
+    expect(review[0]?.text).toBe('Winifred Hargrave got no further than the Mill.');
+    expect(review[1]?.text).toBe('The Hargrave household has taken a cottage on Mill Lane.');
   });
 
   it('cites the one event its sentence answers for, and counts the rest', () => {
@@ -268,7 +268,7 @@ describe('the day in review', () => {
       wording: { ...BOOK.wording, 'npc.woke': [{ text: 'Somebody woke up.' }] },
     };
     const events = [woke(npc(0), 100), blocked(npc(1), 200), blocked(npc(2), 300)];
-    expect(storiesOf(events, smuggled)).toEqual(['Godric Netherby got no further than The Mill.']);
+    expect(storiesOf(events, smuggled)).toEqual(['Godric Netherby got no further than the Mill.']);
   });
 
   it('passes over a kind it has no words for', () => {
@@ -430,7 +430,7 @@ describe('one day’s paper', () => {
       wording: { 'society.household-founded': [{ text: 'At {dwelling}: {who}.' }] },
     };
     expect(storiesOf([founding], named)).toEqual([
-      'At A cottage on Mill Lane: Winifred Hargrave, Walter Hargrave and Alditha Salter.',
+      'At a cottage on Mill Lane: Winifred Hargrave, Walter Hargrave and Alditha Salter.',
     ]);
   });
 
@@ -448,7 +448,7 @@ describe('one day’s paper', () => {
       ...BOOK,
       wording: { 'place.created': [{ text: '{name}, at {place}.' }] },
     };
-    expect(storiesOf([created], both)).toEqual(['The Mill, at The Green.']);
+    expect(storiesOf([created], both)).toEqual(['The Mill, at the Green.']);
   });
 
   it('has no first person in its vocabulary to borrow', () => {

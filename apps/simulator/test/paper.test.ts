@@ -10,6 +10,7 @@ import {
   type PublishedDay,
   type Template,
   glanceOf,
+  midSentence,
   reviewOf,
   scoreOf,
   select,
@@ -145,6 +146,14 @@ const dataOf = (event: SimEvent): Record<string, unknown> =>
  * street `Church Lane` is a substring of the cottages that stand on it, so a
  * reader looking for names in a sentence has to take the cottage before the
  * street or find a street that was never mentioned.
+ *
+ * Two spellings per place, because a place name is a whole noun phrase -- `A
+ * cottage on Church Lane` -- and a sentence that sets one mid-sentence lowers
+ * the article. Registering only the record's spelling would strike nothing out
+ * of `Abed at a cottage on Church Lane`, leave the longest reading unmatched,
+ * and then match the street sitting inside it -- so this guard would accuse the
+ * paper of naming a place the event never involved. Both spellings answer to the
+ * same ids, so a story is judged the same either way it was written.
  */
 function knownNames(): readonly (readonly [string, readonly EntityId[]])[] {
   const byName = new Map<string, EntityId[]>();
@@ -154,7 +163,11 @@ function knownNames(): readonly (readonly [string, readonly EntityId[]])[] {
     else held.push(id);
   };
   for (const person of store.people.records()) add(person.name, person.id);
-  for (const place of store.places.records()) add(place.name, place.id);
+  for (const place of store.places.records()) {
+    add(place.name, place.id);
+    const written = midSentence(place.name);
+    if (written !== place.name) add(written, place.id);
+  }
   return [...byName].sort((a, b) => b[0].length - a[0].length || a[0].localeCompare(b[0]));
 }
 

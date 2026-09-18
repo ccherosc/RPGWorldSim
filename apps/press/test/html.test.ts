@@ -95,7 +95,7 @@ describe('joining', () => {
 });
 
 describe('pictures', () => {
-  const image = { name: 'mill', alt: 'A mill', root: '../' };
+  const image = { name: 'mill', alt: 'A mill', root: '../', width: 1600, height: 900 };
 
   it('offers the small file to small screens', () => {
     const out = picture(image);
@@ -117,6 +117,16 @@ describe('pictures', () => {
 
   it('always carries alt text, because every picture here is decoration of a fact', () => {
     expect(picture(image)).toContain('alt="A mill"');
+  });
+
+  // Not a layout instruction: the stylesheet decides the drawn width. These are
+  // the file's own dimensions, and a browser uses their ratio to leave a hole
+  // of the right height before the picture arrives, which is what stops the
+  // text below it jumping down as the page loads.
+  it('states the size of the file itself, so the page does not jump while it loads', () => {
+    const out = picture(image);
+    expect(out).toContain('width="1600"');
+    expect(out).toContain('height="900"');
   });
 });
 

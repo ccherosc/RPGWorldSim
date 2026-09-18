@@ -26,7 +26,7 @@ const bare = {
   firstVillageDay: '1200-04-01',
   firstPublished: '2026-09-18',
   daysAtFirstPublished: 30,
-  images: [{ name: 'hero', alt: 'A village', caption: 'The village' }],
+  images: [{ name: 'hero', alt: 'A village', caption: 'The village', width: 1600, height: 900 }],
   pages: Object.fromEntries(
     ['home', 'towne', 'people', 'paper', 'blog', 'about'].map((name) => [
       name,
@@ -116,8 +116,8 @@ describe('the wording file, as prose the pages ask for', () => {
   it('refuses two illustrations with the same name', () => {
     const config = parse({
       images: [
-        { name: 'hero', alt: 'a', caption: 'b' },
-        { name: 'hero', alt: 'c', caption: 'd' },
+        { name: 'hero', alt: 'a', caption: 'b', width: 1600, height: 900 },
+        { name: 'hero', alt: 'c', caption: 'd', width: 1600, height: 900 },
       ],
     });
     expect(() => new Publication(config)).toThrow(/share a name/);

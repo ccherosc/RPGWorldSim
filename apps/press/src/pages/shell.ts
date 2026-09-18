@@ -75,12 +75,22 @@ export function sheet(chrome: Chrome, spec: Sheet): Built {
 export const opening = (title: string, lead: string): string =>
   tag('div', lines([el('h1', title), el('p', lead, { class: 'lead' })]), { class: 'opening' });
 
-/** One prose section out of `publication.json`, with its illustration if it has one. */
+/**
+ * One prose section out of `publication.json`, with its illustration if it has one.
+ *
+ * The words are wrapped in their own element even though nothing styles that
+ * element directly. An illustrated section lays out as two grid columns, and a
+ * grid places *children*: left unwrapped, the heading and each paragraph would
+ * each take a cell of their own, which puts a heading in one column and its
+ * first sentence in the other with a hole underneath it. One wrapper makes the
+ * section exactly two children -- the reading column and the picture -- which
+ * is what the two columns were for.
+ */
 export function prose(chrome: Chrome, section: Section, root: string): string {
   const words = lines([el('h2', section.heading), ...section.body.map((one) => el('p', one))]);
   if (section.image === undefined) return tag('section', words, { class: 'passage' });
   const image = chrome.publication.image(section.image);
-  return tag('section', lines([words, picture({ ...image, root })]), {
+  return tag('section', lines([tag('div', words, { class: 'words' }), picture({ ...image, root })]), {
     class: 'passage illustrated',
   });
 }

@@ -24,17 +24,72 @@ const HERE = 'people/index.html';
 const titled = (slug: string): string =>
   `The ${slug.charAt(0).toUpperCase()}${slug.slice(1)}${slug.endsWith('s') ? '' : 's'}`;
 
-const SEXES: ReadonlyMap<string, string> = new Map([
-  ['m', 'man'],
-  ['f', 'woman'],
+/**
+ * A person's age and sex, in English.
+ *
+ * Neither of the two things this is made from is English. The people file
+ * spells sex `male` and `female`, and the age bands come out of
+ * `casting.json`, where they are art direction for the portrait sheets --
+ * `infant`, `child`, `youth` and four grades of grown -- and exist so a drawn
+ * face can be matched to an age, not so a reader can be told one. Printed raw
+ * and side by side they read `7, child female`, which is what stood under a
+ * seven-year-old's name on this page, in her page description, and on her card
+ * on the roll.
+ *
+ * So the two are read together into a single noun, keyed the way
+ * `casting.ts` keys the same pair. A band that is not listed here, or a sex
+ * the record spells some other way, prints the age by itself: the number is
+ * still true, and there is no word for somebody worth guessing at.
+ */
+const NOUNS: ReadonlyMap<string, string> = new Map([
+  ['infant/male', 'boy'],
+  ['infant/female', 'girl'],
+  ['child/male', 'boy'],
+  ['child/female', 'girl'],
+  ['youth/male', 'young man'],
+  ['youth/female', 'young woman'],
+  ['young/male', 'man'],
+  ['young/female', 'woman'],
+  ['adult/male', 'man'],
+  ['adult/female', 'woman'],
+  ['older/male', 'man'],
+  ['older/female', 'woman'],
+  ['elder/male', 'man'],
+  ['elder/female', 'woman'],
 ]);
 
-/** `woman`, `girl`, `boy` -- what the record can say and no more. */
+/**
+ * `7, a girl`. `42, a man`. `a baby boy`. What the record can say and no more.
+ *
+ * The one age that is not said as a number is the first one. A person born
+ * inside the last village year is nought years old, and `0, a boy` under a
+ * photograph of a baby reads as a form somebody forgot to fill in rather than
+ * as a fact about Walter Webb. Every other age is printed as the number it is.
+ */
 function describe(chrome: Chrome, person: PersonRecord): string {
   const age = ageOn(person, chrome.today.key);
   const band = chrome.village.casting.bandFor(age);
-  const sex = SEXES.get(person.sex) ?? person.sex;
-  return `${age}, ${band} ${sex}`;
+  const noun = NOUNS.get(`${band}/${person.sex.trim().toLowerCase()}`);
+  if (noun === undefined) return age === 0 ? 'under a year old' : `${age} years old`;
+  return age === 0 ? `a baby ${noun}` : `${age}, a ${noun}`;
+}
+
+/**
+ * A run of phrases read back as the one sentence they were written as.
+ *
+ * Every `habits` and `cares` entry in the persona book was authored as a
+ * single sentence about a person and then stored split on its commas, which is
+ * why the first phrase carries a capital and none of the others do. Set out as
+ * bullets they looked like the halves of something cut up -- `tells whichever
+ * version goes down best` on a line of its own, under a mark, starting
+ * lower-case. Joined they read as they were written, and they sit beside the
+ * three sentences above them instead of arguing with them.
+ */
+export function sentence(parts: readonly string[]): string {
+  const last = parts.at(-1) ?? '';
+  if (last === '') return '';
+  const before = parts.slice(0, -1).join(', ');
+  return before === '' ? `${last}.` : `${before} and ${last}.`;
 }
 
 /** One card on the roll. */
@@ -168,15 +223,15 @@ export function personPage(chrome: Chrome, person: PersonRecord): Built {
       el('h2', 'What the record knows'),
       tag(
         'dl',
+        // Not the age: it is already the line under the name, and printing it
+        // twice forty pixels apart read as a mistake. Not the slug either --
+        // that is this page's file name, which is a fact about the website and
+        // not about the person, and the site publishes world state only.
         lines([
-          el('dt', 'Age'),
-          el('dd', describe(chrome, person)),
           el('dt', 'Born'),
           el('dd', born.long),
           el('dt', 'Family'),
           el('dd', person.family === null ? 'None recorded' : titled(person.family)),
-          el('dt', 'Slug'),
-          el('dd', person.slug),
         ]),
         { class: 'ledger' },
       ),
@@ -195,9 +250,9 @@ export function personPage(chrome: Chrome, person: PersonRecord): Built {
             el('p', persona.voice),
             el('p', persona.tell),
             el('h3', 'Habits'),
-            tag('ul', persona.habits.map((one) => el('li', one)).join('\n'), { class: 'plain' }),
+            el('p', sentence(persona.habits)),
             el('h3', 'Cares about'),
-            tag('ul', persona.cares.map((one) => el('li', one)).join('\n'), { class: 'plain' }),
+            el('p', sentence(persona.cares)),
             persona.trade === null ? '' : el('p', `Trade: ${persona.trade}. Not simulated yet.`, { class: 'note' }),
           ]),
           { class: 'passage' },

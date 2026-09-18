@@ -56,7 +56,7 @@ export function homePage(chrome: Chrome): Built {
           tag('li', lines([el('strong', String(glance.families)), el('span', 'families')])),
           tag('li', lines([el('strong', String(glance.places)), el('span', 'places')])),
           tag('li', lines([el('strong', String(glance.journeys)), el('span', 'journeys walked')])),
-          tag('li', lines([el('strong', String(glance.refused)), el('span', 'turned away at the door')])),
+          tag('li', lines([el('strong', String(glance.refused)), el('span', 'turned away')])),
         ]),
         { class: 'counts' },
       ),
@@ -126,7 +126,7 @@ export function homePage(chrome: Chrome): Built {
                   ),
                 )
                 .join('\n'),
-              { class: 'roll' },
+              { class: 'roll faced' },
             ),
             links([
               { href: `${root}blog/index.html`, label: 'Read the villagers' },
@@ -140,7 +140,7 @@ export function homePage(chrome: Chrome): Built {
     'section',
     lines([
       el('h2', 'Where all this happens'),
-      picture({ ...chrome.publication.image('map'), root }),
+      picture({ ...chrome.publication.image('map'), root, wide: true }),
       links([
         { href: `${root}map.html`, label: 'See the map full size' },
         { href: `${root}towne.html`, label: 'Every place in the village' },

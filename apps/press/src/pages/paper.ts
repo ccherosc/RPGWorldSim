@@ -145,10 +145,15 @@ function body(chrome: Chrome, issue: Issue, root: string, near: Neighbours): str
               'p',
               'The villagers below kept their own notes on this day. Their posts are on the blog.',
             ),
-            links([
-              ...wrote,
-              { href: `${root}blog/${issueFile(issue.day.key)}`, label: 'Read the day on the blog' },
-            ]),
+            // The list is the five people and nothing else. The blog link used
+            // to be a sixth row of it, indented and ruled exactly like a name,
+            // which read as a villager called "Read the day on the blog" -- and
+            // the list is a roster, so anything standing in it is claiming to be
+            // somebody. A way off the page is not somebody.
+            links(wrote),
+            tag('p', el('a', 'Read the day on the blog', {
+              href: `${root}blog/${issueFile(issue.day.key)}`,
+            })),
           ]),
           { class: 'passage' },
         ),

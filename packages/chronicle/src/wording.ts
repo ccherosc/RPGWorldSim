@@ -89,8 +89,44 @@ export function eligible(
   );
 }
 
+/** `A cottage on Bridge Row`, `The mill`. A name that opens with an article. */
+const ARTICLE = /^(?:A|An|The) /;
+
+/** Nothing before it, or a finished sentence. Anything else is mid-sentence. */
+const OPENS_A_SENTENCE = /(?:^|[.!?]\s+)$/;
+
+/**
+ * A name set into a sentence, in the case that sentence needs.
+ *
+ * Places are named on the record as whole noun phrases -- `A cottage on Bridge
+ * Row`, `The mill` -- because that is what a heading and a table row want, and
+ * it is what the record itself calls them. Dropped into a wording they arrive
+ * with the capital they were stored with, and the site published eighty-five
+ * sentences reading `Abed at A cottage on Bridge Row.` and `Heading back to A
+ * cottage on Bridge Row.` Every one of them was a true sentence about a real
+ * event, which is why nothing caught it: the fault is entirely in the seam.
+ *
+ * So the article is lowered -- only the article, and only where the name is not
+ * opening a sentence. `{place}. Warm enough.` keeps its capital, because there
+ * the name *is* the sentence. Names that do not start with an article, which is
+ * every person in the record, are handed back untouched.
+ *
+ * The lowering half is exported because anything checking what the paper said
+ * against what the record holds has to know a name has two spellings. A guard
+ * that knew only the record's would find no `A cottage on Mill Lane` inside
+ * `Abed at a cottage on Mill Lane`, go on to match the shorter `Mill Lane` that
+ * is sitting inside it, and report a place the paper never mentioned.
+ */
+export function midSentence(name: string): string {
+  return ARTICLE.test(name) ? `${name.charAt(0).toLowerCase()}${name.slice(1)}` : name;
+}
+
+function inSentence(value: string, before: string): string {
+  return OPENS_A_SENTENCE.test(before) ? value : midSentence(value);
+}
+
 export function render(text: string, event: SimEvent, context: WordingContext): string {
-  return text.replace(PLACEHOLDER, (_whole, key: string) => {
+  return text.replace(PLACEHOLDER, (_whole, key: string, at: number) => {
     const value = resolve(key, event, context);
     // Unreachable through `eligible`, and worth a loud death anyway: the one way
     // a reader ever sees `{place}` in print is if this returns when it should not.
@@ -98,7 +134,7 @@ export function render(text: string, event: SimEvent, context: WordingContext): 
       event: event.id,
       placeholder: key,
     });
-    return value as string;
+    return inSentence(value as string, text.slice(0, at));
   });
 }
 

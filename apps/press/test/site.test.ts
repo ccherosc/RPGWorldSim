@@ -52,6 +52,12 @@ const pages = new Map<string, string>();
 
 const TEXT = /\.(html|css|svg|json|txt|xml)$/;
 
+/** Any tag: group 1 is the slash of a closing tag, group 2 the element name. */
+const TAG = /<(\/?)([a-z0-9]+)[^>]*>/g;
+
+/** Elements that never close, so they never open a level of nesting. */
+const VOID = new Set(['meta', 'link', 'img', 'br', 'hr', 'input', 'source']);
+
 beforeAll(() => {
   root = mkdtempSync(join(tmpdir(), 'press-site-'));
   archive = join(root, 'archive');
@@ -368,7 +374,7 @@ describe('the numbers and the citations', () => {
       families: truth.families,
       places: truth.places,
       'journeys walked': truth.journeys,
-      'turned away at the door': truth.refused,
+      'turned away': truth.refused,
     });
   });
 
@@ -474,11 +480,30 @@ describe('the markup', () => {
     }
   });
 
+  it('never prints a tag as words a reader can see', () => {
+    // The other half of the test above, and the one that actually fired. There
+    // are two helpers: `el` escapes its content, because a village that names a
+    // place `The Hare & Mug` must not be able to open a hole in the page, and
+    // `tag` does not, because its content is already markup. Hand a finished
+    // `<a>` to `el` and the escaping does exactly what it promises -- the link
+    // is printed, correctly escaped, as the visible sentence `<a
+    // href="../blog/1200-04-30.html">Read the day on the blog</a>`.
+    //
+    // Nothing above sees it. The markup is well-formed, every tag closes, the
+    // stray-bracket test finds `&lt;` rather than `<`, and the link checker has
+    // no link to check because there is no longer a link. It is only wrong to a
+    // reader, so it is caught by reading: an escaped angle bracket with a tag
+    // name behind it is a tag that should have been markup.
+    for (const [path, body] of pages) {
+      const printed = [...body.matchAll(/&lt;[/]?[a-z]+[ &>]/g)];
+      expect(printed.map((one) => body.slice(one.index, (one.index ?? 0) + 50)), path).toEqual([]);
+    }
+  });
+
   it('closes every element it opens', () => {
-    const VOID = new Set(['meta', 'link', 'img', 'br', 'hr', 'input', 'source']);
     for (const [path, body] of pages) {
       const stack: string[] = [];
-      for (const match of body.matchAll(/<(\/?)([a-z0-9]+)[^>]*>/g)) {
+      for (const match of body.matchAll(TAG)) {
         const [, closing, name] = match as unknown as [string, string, string];
         if (name === '!doctype' || VOID.has(name)) continue;
         if (closing === '') stack.push(name);
@@ -501,6 +526,241 @@ describe('the markup', () => {
         expect(img[0], path).toMatch(/ alt="[^"]/);
       }
     }
+  });
+
+  it('keeps an illustrated section to two children, so a heading cannot be stranded', () => {
+    // `.passage.illustrated` is a two-column grid, and a grid lays out the
+    // *children* of the element it is set on. A section whose children are a
+    // heading, two paragraphs and a figure therefore fills those columns in
+    // reading order -- heading top-left, first sentence top-right, a hole
+    // under the heading -- which is what the page did before the words were
+    // wrapped. Nothing about that is a CSS bug and nothing in the stylesheet
+    // can fix it, so the rule belongs to the markup: exactly two children, the
+    // reading column and the picture.
+    const OPEN = /<section class="passage illustrated">/g;
+    let seen = 0;
+    for (const [path, body] of pages) {
+      for (const open of body.matchAll(OPEN)) {
+        seen += 1;
+        const children: string[] = [];
+        let depth = 0;
+        for (const match of body.slice((open.index ?? 0) + open[0].length).matchAll(TAG)) {
+          const [, closing, name] = match as unknown as [string, string, string];
+          if (VOID.has(name)) continue;
+          if (closing !== '') {
+            if (depth === 0) break; // the section's own closing tag
+            depth -= 1;
+          } else {
+            if (depth === 0) children.push(name);
+            depth += 1;
+          }
+        }
+        expect(children, `${path}: section at ${open.index}`).toEqual(['div', 'figure']);
+      }
+    }
+    expect(seen, 'no page has an illustrated section, so this scanned nothing').toBe(7);
+  });
+});
+
+describe('the sentences', () => {
+  it('never sets a capitalised article inside a sentence', () => {
+    // `Abed at A cottage on Bridge Row.` -- eighty-five times, on the day this
+    // was written. The record names a place as a whole noun phrase, article and
+    // all, because that is what a heading and a table row want, and every one of
+    // those lines was a true sentence about a real event. Nothing else could have
+    // caught it: the fault is in the seam between a stored name and a sentence,
+    // and no test of either half looks at the join.
+    //
+    // `packages/chronicle` tests the seam itself, one wording at a time. This
+    // asks the finished pages, which is the only place the other way it happens
+    // shows up -- somebody typing `Market day on The Green.` into a caption by
+    // hand, which is exactly what the first run of this scan found, twice.
+    //
+    // Attributes are scanned as well as text. An `alt` line and a page
+    // description are prose a reader can meet, and they are assembled by the same
+    // code from the same names.
+    //
+    // Every tag ends a sentence, including an inline one. Reading across tags
+    // instead was tried and is worse: the navigation is four links in a row, so
+    // dropping the `<a>`s reads the menu as the sentence `Welcome The Chronicle
+    // The Villagers The People` and the scan accuses the nav bar. Breaking
+    // everywhere costs a sentence with a link in the middle of it, and the
+    // sentences this is aimed at have no markup inside them -- a villager's post
+    // is one text run inside one `span`, a paper story is one text run inside one
+    // paragraph -- so nothing this was written for is read in halves.
+
+    // A title the village gave something keeps its capital wherever it sits:
+    // `every issue of The Pennycroft Chronicle`. Taken from the record rather
+    // than spelt out here, so renaming the paper does not need this edited.
+    const titles = [site.publication.masthead];
+
+    const MID = /[a-z,;:)] (?:A|An|The) [A-Za-z]/;
+    const READS = /[a-z] [a-z]/;
+
+    // The shape, checked against the lines that prompted it before it is turned
+    // on the site. A scan like this is a trap and not an assertion: once the
+    // fault is fixed, narrowing the shape to half of what it should catch
+    // changes nothing about a clean site, so nothing below would notice. These
+    // five sentences notice.
+    expect(MID.test('Abed at A cottage on Bridge Row.')).toBe(true);
+    expect(MID.test('Market day on The Green.')).toBe(true);
+    expect(MID.test('a lane, The Green and a mill')).toBe(true);
+    expect(MID.test('Abed at a cottage on Bridge Row.')).toBe(false);
+    expect(MID.test('The Green. Warm enough.')).toBe(false);
+
+    // An exception has to be a name and not a word, or it excuses the fault
+    // everywhere: `The` on this list turns the whole scan off.
+    for (const title of titles) expect(title, 'not a whole name').toMatch(/^(?:A|An|The) \S+ /);
+    let scanned = 0;
+    let described = 0;
+    let summarised = 0;
+    for (const [path, body] of pages) {
+      const alt = [...body.matchAll(/ alt="([^"]*)"/g)].map((one) => one[1] as string);
+      const summary = [...body.matchAll(/ content="([^"]*)"/g)].map((one) => one[1] as string);
+      described += alt.filter((one) => READS.test(one)).length;
+      summarised += summary.filter((one) => READS.test(one)).length;
+      for (const chunk of [...body.split(/<[^>]*>/), ...alt, ...summary]) {
+        let words = chunk.replace(/\s+/g, ' ').trim();
+        for (const title of titles) words = words.split(title).join(' ');
+        if (READS.test(words)) scanned += 1;
+        const found = MID.exec(words);
+        const context =
+          found === null ? undefined : words.slice(Math.max(0, found.index - 40), found.index + 40);
+        expect(context, path).toBeUndefined();
+      }
+    }
+    // Counted as well as scanned, and the two halves counted apart. Tag-stripping
+    // that went wrong would hand this loop nothing to read and every assertion
+    // above would pass; and nothing on the site has this fault in an attribute
+    // today, so without a count of its own the attribute half could quietly read
+    // nothing and no mutant would ever prove otherwise.
+    expect(scanned, 'no prose anywhere, so this scanned nothing').toBeGreaterThan(pages.size * 5);
+    expect(described, 'no alt text was read').toBeGreaterThan(pages.size);
+    expect(summarised, 'no page description was read').toBeGreaterThanOrEqual(pages.size);
+  });
+});
+
+describe('how the site writes about people', () => {
+  /** An age band and a recorded sex, printed side by side and untranslated. */
+  const RAW = /\d+, (infant|child|youth|young|adult|older|elder) (male|female)/;
+
+  it('never prints an age band or the record spelling of sex', () => {
+    // Both are the site's own working vocabulary and neither is English. The
+    // bands are art direction for the portrait sheets and `female` is how the
+    // people file spells it, and side by side they read `7, child female` --
+    // which is what stood under every name on this site until the lookup
+    // meant to translate them was found to be keyed on `m` and `f`, values
+    // the record has never used. Nothing failed, because nothing looked.
+    for (const [path, body] of pages) {
+      expect(body.match(RAW)?.[0], path).toBeUndefined();
+    }
+  });
+
+  it('gives every person a description a reader would say out loud', () => {
+    const people = [...pages].filter(([path]) => path.startsWith('people/') && path !== 'people/index.html');
+    expect(people.length, 'no person pages to check').toBeGreaterThan(20);
+    // `[1-9]\d*` rather than `\d+`, which is the other half of this test: an
+    // age of nought is a real age -- Walter Webb was born inside the last
+    // village year -- and `0, a boy` reads as a form nobody filled in. The
+    // youngest people on the roll are described without a number instead.
+    const SAID = /<p class="lead">(?:[1-9]\d*, a (?:boy|girl|young man|young woman|man|woman)|a baby (?:boy|girl))<\/p>/;
+    for (const [path, body] of people) {
+      expect(body, path).toMatch(SAID);
+    }
+  });
+
+  it('sets out habits and cares as the sentences they were written as', () => {
+    // The persona book stores each of them split on its commas, which is why
+    // the first phrase carries a capital and none of the rest do. Printed as
+    // separate lines they read as fragments of something cut in half. Joined
+    // back up each one is a sentence, and a sentence ends like one.
+    const asked = /<h3>(Habits|Cares about)<\/h3>/g;
+    const written = /<h3>(Habits|Cares about)<\/h3>\s*<p>([^<]+)<\/p>/g;
+    let seen = 0;
+    for (const [path, body] of pages) {
+      for (const match of body.matchAll(written)) {
+        seen += 1;
+        const [, heading, words] = match as unknown as [string, string, string];
+        expect(words, `${path}: ${heading}`).toMatch(/[^,]\.$/);
+      }
+      // Counted as well as matched: a page that went back to setting these out
+      // as a list would match nothing here and pass a test that only counted
+      // what it found.
+      expect([...body.matchAll(written)], `${path}: a heading with no sentence under it`).toHaveLength(
+        [...body.matchAll(asked)].length,
+      );
+    }
+    expect(seen, 'no persona described anywhere, so this scanned nothing').toBeGreaterThan(40);
+  });
+
+  it('keeps the website out of the record it prints', () => {
+    // A person's page is named after their slug, so the slug is in the URL of
+    // every link to them and cannot be scanned for. What it must not be is a
+    // row in `What the record knows`, beside their birth and their family, as
+    // though the village had given them a file name.
+    for (const [path, body] of pages) {
+      expect(body, path).not.toContain('<dt>Slug</dt>');
+    }
+  });
+
+  it('never lets the persona prose state an age, because the record states it', () => {
+    // Every persona was written against a drawn face, so every `look` line
+    // ended by saying how old the face looked -- `Red braids, freckles, eyes
+    // wide and guileless. Eight.` The record says it too, worked out from a
+    // birth date on the newest published day, and it said `7, a girl` two
+    // inches above. Fifty-seven of the eighty-six pages printed two different
+    // ages, every one of them off by exactly one, and the disagreement was
+    // going to spread to all of them and then keep growing: the village ages a
+    // day per real day and a sentence in a JSON file does not.
+    //
+    // Directive 12 settles which one is wrong. The record is authoritative and
+    // the persona book is advisory, so the prose is what gives way. It says
+    // what somebody looks like and the record says how old they are.
+    //
+    // Counts survive, which is why this does not simply ban number words:
+    // `Four sons.`, `three teeth` and `one eyebrow up` are facts about a
+    // person that do not rot. Two things separate those from an age.
+    //
+    // A count in this book is always small -- nobody has thirteen of anything
+    // -- so any number from thirteen up is an age wherever it sits, which is
+    // what catches `Forty-two, always at the water` and would catch it woven
+    // anywhere else in the sentence. Below thirteen a count and an age look
+    // alike, so what is banned there is the shapes only an age is written in:
+    // a number opening a sentence, a number handed straight to `and`, the
+    // spelled-out `four years old`, and a comparison against one, which is
+    // where `much older than seven` was hiding in a `voice` line.
+    const SECTION = /<h2>How they come across<\/h2>([\s\S]*?)<\/section>/g;
+    const SMALL =
+      '(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)';
+    const BIG =
+      '(?:thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen' +
+      '|(?:twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(?:[- ](?:one|two|three|four|five|six|seven|eight|nine))?)';
+    const AGE = [
+      `\\b(${BIG})\\b`,
+      `^(${SMALL})[.,]`,
+      `^(${SMALL}) and\\b`,
+      `\\b(${SMALL}|${BIG})[- ]years?[- ]old\\b`,
+      `\\b(?:older|younger|more) than (${SMALL}|${BIG})\\b`,
+    ];
+    const shapes = AGE.map((one) => new RegExp(one, 'i'));
+
+    let seen = 0;
+    for (const [path, body] of pages) {
+      for (const [, inner] of body.matchAll(SECTION)) {
+        seen += 1;
+        // Read as prose, not as markup: `<p>` between two sentences is a
+        // sentence boundary, and a shape is only an age if it opens one.
+        const words = (inner as string).replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        for (const sentence of words.split(/(?<=\.) /)) {
+          for (const shape of shapes) {
+            expect(shape.exec(sentence.trim())?.[1], `${path}: ${sentence}`).toBeUndefined();
+          }
+        }
+      }
+    }
+    // Counted as well as scanned: a page that stopped printing the persona at
+    // all would satisfy every check above without anybody noticing.
+    expect(seen, 'no persona prose anywhere, so this scanned nothing').toBeGreaterThan(80);
   });
 });
 

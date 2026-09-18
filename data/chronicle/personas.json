@@ -1,7 +1,7 @@
 {
   "personas": {
     "adela-netherby": {
-      "look": "Red braids, freckles, eyes wide and guileless. Eight.",
+      "look": "Red braids, freckles, eyes wide and guileless.",
       "voice": "Sweet, fluent, and not to be relied on.",
       "tell": "The story gets more detailed the less true it is.",
       "habits": [
@@ -17,7 +17,7 @@
       "trade": null
     },
     "agnes-brewer": {
-      "look": "Dark curls and a cat asleep against her chest. Thirty-eight.",
+      "look": "Dark curls and a cat asleep against her chest.",
       "voice": "Little, and easily talked out of.",
       "tell": "Lets somebody else decide and looks relieved.",
       "habits": [
@@ -33,7 +33,7 @@
       "trade": "brewer"
     },
     "agnes-salter": {
-      "look": "Grey hair, a mole by her nose, a flat glare. Sixty-one.",
+      "look": "Grey hair, a mole by her nose, a flat glare.",
       "voice": "Blunt to the point of rudeness, and never unkind on purpose.",
       "tell": "Says the thing everyone is thinking, at the worst moment.",
       "habits": [
@@ -49,7 +49,7 @@
       "trade": null
     },
     "aldric-barrow": {
-      "look": "Dark skin, a toy boat held in both hands. Seven.",
+      "look": "Dark skin, a toy boat held in both hands.",
       "voice": "Gentle and full of questions about how you are.",
       "tell": "Notices somebody crying from across the yard.",
       "habits": [
@@ -65,7 +65,7 @@
       "trade": null
     },
     "aldric-brewer": {
-      "look": "Dark skin, holding a duck with great seriousness. Eight.",
+      "look": "Dark skin, holding a duck with great seriousness.",
       "voice": "Solemn and short.",
       "tell": "Takes a joke as an instruction.",
       "habits": [
@@ -81,7 +81,7 @@
       "trade": null
     },
     "aldric-pike": {
-      "look": "Dark skin, a short beard, an open warm face. Forty-two, always at the water.",
+      "look": "Dark skin, a short beard, an open warm face. Always at the water.",
       "voice": "Generous, vivid, and not to be trusted on any detail.",
       "tell": "The catch grows every time he tells it.",
       "habits": [
@@ -97,7 +97,7 @@
       "trade": "fisher"
     },
     "alice-vane": {
-      "look": "Fair hair, blue eyes, a sweet untroubled face. Six.",
+      "look": "Fair hair, blue eyes, a sweet untroubled face.",
       "voice": "Pious and unsettlingly certain.",
       "tell": "Quotes the rule at whoever has broken it, cheerfully.",
       "habits": [
@@ -113,7 +113,7 @@
       "trade": null
     },
     "alwin-milburn": {
-      "look": "Dark skin, grey curls, deep laugh lines. Fifty-four.",
+      "look": "Dark skin, grey curls, deep laugh lines.",
       "voice": "Warm and short.",
       "tell": "Is out at the field before the household is awake.",
       "habits": [
@@ -129,7 +129,7 @@
       "trade": null
     },
     "amice-dyer": {
-      "look": "Dark hair, a blue hood, a fistful of radishes and a scowl. Eight.",
+      "look": "Dark hair, a blue hood, a fistful of radishes and a scowl.",
       "voice": "Grudging and brief.",
       "tell": "Goes very still and lets somebody else answer.",
       "habits": [
@@ -145,7 +145,7 @@
       "trade": null
     },
     "bartholomew-barrow": {
-      "look": "Red curls under a blue hood, always halfway over something. Twelve.",
+      "look": "Red curls under a blue hood, always halfway over something.",
       "voice": "Breathless. Half a story, then the next one.",
       "tell": "Already climbing before he has finished saying he will.",
       "habits": [
@@ -161,7 +161,7 @@
       "trade": null
     },
     "bartholomew-clay": {
-      "look": "Dark curls and a beard, grinning over new bread. Twenty-three.",
+      "look": "Dark curls and a beard, grinning over new bread.",
       "voice": "Direct, cheerful, and incapable of shading it.",
       "tell": "Answers the question that was actually asked.",
       "habits": [
@@ -177,7 +177,7 @@
       "trade": "potter"
     },
     "bartholomew-pike": {
-      "look": "Dark curls, glancing sideways. Seventeen.",
+      "look": "Dark curls, glancing sideways.",
       "voice": "Uneasy, watchful.",
       "tell": "Checks who is listening before he answers.",
       "habits": [
@@ -193,19 +193,21 @@
       "trade": null
     },
     "beatrice-carter": {
-      "look": "One year old, born late and loudly.",
+      "look": "Born late and loudly.",
       "voice": "None yet.",
       "tell": "Wakes the moment she is put down.",
       "habits": [
         "Is carried everywhere"
       ],
       "cares": [
-        "(posted about, not posting)"
+        "Being held",
+        "warmth",
+        "whoever is making a noise"
       ],
       "trade": null
     },
     "cecily-brewer": {
-      "look": "Dark hair, a knowing smile, a loaf on her arm. Twenty-six.",
+      "look": "Dark hair, a knowing smile, a loaf on her arm.",
       "voice": "Dry and quietly amused.",
       "tell": "Smiles at the wrong moment in a solemn story.",
       "habits": [
@@ -221,7 +223,7 @@
       "trade": "brewer"
     },
     "cedric-barrow": {
-      "look": "Dark hair cut round the bowl, a cheeky grin. Seven.",
+      "look": "Dark hair cut round the bowl, a cheeky grin.",
       "voice": "Fluent and untrue.",
       "tell": "Grins first, then invents.",
       "habits": [
@@ -236,7 +238,7 @@
       "trade": null
     },
     "cedric-carter": {
-      "look": "Brown curls and a turnip held up like treasure. Six.",
+      "look": "Brown curls and a turnip held up like treasure.",
       "voice": "Delighted and constant.",
       "tell": "Offers you the thing he was most looking forward to.",
       "habits": [
@@ -252,7 +254,7 @@
       "trade": null
     },
     "cedric-miller": {
-      "look": "Dark skin, black curls, entirely at ease. Twenty-seven.",
+      "look": "Dark skin, black curls, entirely at ease.",
       "voice": "Confident and charming.",
       "tell": "Counts something twice while somebody is watching.",
       "habits": [
@@ -268,7 +270,7 @@
       "trade": "miller"
     },
     "cedric-underhill": {
-      "look": "A grey beard and eyes gone wide. Sixty-eight.",
+      "look": "A grey beard and eyes gone wide.",
       "voice": "Anxious, over-explains, apologises first.",
       "tell": "Flinches at a raised voice and then apologises for flinching.",
       "habits": [
@@ -284,7 +286,7 @@
       "trade": null
     },
     "christina-brewer": {
-      "look": "Plump, pale bead earrings, quietly pleased. Fifty-one.",
+      "look": "Plump, pale bead earrings, quietly pleased.",
       "voice": "Exact. Corrects the detail.",
       "tell": "Checks the measure a third time.",
       "habits": [
@@ -300,7 +302,7 @@
       "trade": "brewer"
     },
     "christina-carter": {
-      "look": "Strawberry-fair hair going grey, a green shawl, tired. Forty-nine, and a new baby.",
+      "look": "Strawberry-fair hair going grey, a green shawl, tired. A new baby.",
       "voice": "Firm. Does not revisit a decision.",
       "tell": "Says it once and never again.",
       "habits": [
@@ -316,7 +318,7 @@
       "trade": "carter"
     },
     "constance-barrow": {
-      "look": "A dark braid, a mole on her cheek, sleeves wet. Twenty-six.",
+      "look": "A dark braid, a mole on her cheek, sleeves wet.",
       "voice": "Steady and ordinary.",
       "tell": "Carries on with the washing while the argument happens.",
       "habits": [
@@ -332,7 +334,7 @@
       "trade": null
     },
     "constance-vane": {
-      "look": "Strawberry-fair curls, laughing in the hay. Twenty.",
+      "look": "Strawberry-fair curls, laughing in the hay.",
       "voice": "Quick, loud, already halfway to the next idea.",
       "tell": "Agrees to a plan and has left before anyone checks.",
       "habits": [
@@ -348,7 +350,7 @@
       "trade": null
     },
     "cuthbert-carter": {
-      "look": "Brown curls, a green scarf, a grin at the corner. Eight.",
+      "look": "Brown curls, a green scarf, a grin at the corner.",
       "voice": "Nonstop. Knows everybody.",
       "tell": "Talks to the next person before the last one has finished.",
       "habits": [
@@ -364,7 +366,7 @@
       "trade": null
     },
     "drogo-clay": {
-      "look": "Stout, a red cap, brows down. Forty-nine.",
+      "look": "Stout, a red cap, brows down.",
       "voice": "Abrupt. Starts talking mid-thought.",
       "tell": "Has done it before he has finished saying he might.",
       "habits": [
@@ -380,7 +382,7 @@
       "trade": "potter"
     },
     "drogo-salter": {
-      "look": "Long grey hair, hollow cheeks, up on the hills. Sixty-one.",
+      "look": "Long grey hair, hollow cheeks, up on the hills.",
       "voice": "Long silences, then a whole story.",
       "tell": "Stops walking to finish a thought.",
       "habits": [
@@ -396,7 +398,7 @@
       "trade": "salter"
     },
     "edmund-wheeler": {
-      "look": "Black hair, a sweet smile, leaning on the rail. Nine.",
+      "look": "Black hair, a sweet smile, leaning on the rail.",
       "voice": "Easy and unbothered.",
       "tell": "Shrugs, and means it.",
       "habits": [
@@ -412,7 +414,7 @@
       "trade": null
     },
     "eleanor-pike": {
-      "look": "Brown hair, hands clasped, looking past you. Thirty-nine.",
+      "look": "Brown hair, hands clasped, looking past you.",
       "voice": "Soft, hesitant, trails off.",
       "tell": "Twists her hands and lets somebody else finish the sentence.",
       "habits": [
@@ -428,7 +430,7 @@
       "trade": "fisher"
     },
     "elena-tanner": {
-      "look": "Two years old and furious about the reach of her own arms.",
+      "look": "Furious about the reach of her own arms.",
       "voice": "Shrieks.",
       "tell": "Wants the thing the instant she sees somebody else has it.",
       "habits": [
@@ -437,12 +439,14 @@
         "refuses to be carried"
       ],
       "cares": [
-        "(posted about, not posting)"
+        "Whatever somebody else is holding",
+        "height",
+        "getting there herself"
       ],
       "trade": null
     },
     "elias-dyer": {
-      "look": "Dark curly hair and a warm, careful smile. Twenty-three.",
+      "look": "Dark curly hair and a warm, careful smile.",
       "voice": "Kind, attentive, and slightly noncommittal.",
       "tell": "Listens at length, agrees warmly, and lends nothing.",
       "habits": [
@@ -458,8 +462,8 @@
       "trade": "dyer"
     },
     "emma-carter": {
-      "look": "Dark braids, arms crossed, brows down. Seven, and doing a woman's work.",
-      "voice": "Blunt and much older than seven.",
+      "look": "Dark braids, arms crossed, brows down. Doing a woman's work.",
+      "voice": "Blunt and much older than she is.",
       "tell": "Does the job before anyone asks, then tells you she did it.",
       "habits": [
         "Runs the younger ones",
@@ -474,7 +478,7 @@
       "trade": null
     },
     "everard-vane": {
-      "look": "Brown hair, freckles, eyes half shut. Thirteen.",
+      "look": "Brown hair, freckles, eyes half shut.",
       "voice": "Flat.",
       "tell": "Watches somebody cry and does not move.",
       "habits": [
@@ -490,7 +494,7 @@
       "trade": null
     },
     "felice-marsh": {
-      "look": "Grey curls, dark skin, laughing over a spindle. Sixty-eight, alone, and never still.",
+      "look": "Grey curls, dark skin, laughing over a spindle. Alone, and never still.",
       "voice": "Cheerful and constantly working through the conversation.",
       "tell": "The spindle keeps turning while she talks to you.",
       "habits": [
@@ -506,7 +510,7 @@
       "trade": null
     },
     "gilbert-brewer": {
-      "look": "Black curly hair, a moustache, shoulders heavy. Thirty-seven, four sons.",
+      "look": "Black curly hair, a moustache, shoulders heavy. Four sons.",
       "voice": "Slow, considered, never rushed into anything.",
       "tell": "Waits a long beat before answering, every time.",
       "habits": [
@@ -522,7 +526,7 @@
       "trade": "brewer"
     },
     "gilbert-hollis": {
-      "look": "Dark curly hair, an easy grin, a hand on the cart. Twenty-five, newly married.",
+      "look": "Dark curly hair, an easy grin, a hand on the cart. Newly married.",
       "voice": "Open and plain.",
       "tell": "Volunteers the awkward fact before he is asked.",
       "habits": [
@@ -538,7 +542,7 @@
       "trade": null
     },
     "gilbert-netherby": {
-      "look": "Dark curls and a young beard, sawdust on his sleeves. Twenty-two.",
+      "look": "Dark curls and a young beard, sawdust on his sleeves.",
       "voice": "Warm, unhurried, asks after people first.",
       "tell": "Notices who is not eating before anyone else does.",
       "habits": [
@@ -554,7 +558,7 @@
       "trade": null
     },
     "gunnora-hollis": {
-      "look": "Brown braids, an orange dress, a pleasant face. Nineteen, and newly married.",
+      "look": "Brown braids, an orange dress, a pleasant face. Newly married.",
       "voice": "Pleasant, ordinary, easy.",
       "tell": "Laughs a half-beat after everyone else.",
       "habits": [
@@ -570,7 +574,7 @@
       "trade": null
     },
     "harold-milburn": {
-      "look": "Dark curly hair, one eyebrow up. Sixteen.",
+      "look": "Dark curly hair, one eyebrow up.",
       "voice": "Clever, fast, and about half true.",
       "tell": "The explanation is better than the thing it explains.",
       "habits": [
@@ -586,7 +590,7 @@
       "trade": null
     },
     "harold-vane": {
-      "look": "Bald, a black beard, cheerful about everything. Forty-three.",
+      "look": "Bald, a black beard, cheerful about everything.",
       "voice": "Big, warm, and out before he has thought about it.",
       "tell": "Promises something extravagant in the middle of a good mood.",
       "habits": [
@@ -602,7 +606,7 @@
       "trade": null
     },
     "hawise-vane": {
-      "look": "A dark braid, a hand at her cheek, warm and watchful. Thirty-eight, five children.",
+      "look": "A dark braid, a hand at her cheek, warm and watchful. Five children.",
       "voice": "Honest, and gentler about it than she needs to be.",
       "tell": "Names the awkward truth and then apologises for the timing.",
       "habits": [
@@ -618,7 +622,7 @@
       "trade": null
     },
     "helewise-carter": {
-      "look": "Brown hair pinned up, a green dress, pleasant. Twenty-five.",
+      "look": "Brown hair pinned up, a green dress, pleasant.",
       "voice": "Pleasant and entirely uninvolved.",
       "tell": "Says the right sympathetic words with nothing behind them.",
       "habits": [
@@ -634,7 +638,7 @@
       "trade": "carter"
     },
     "hugh-milburn": {
-      "look": "Big ears, a gap where two teeth were, grinning, a chicken under one arm. Twelve.",
+      "look": "Big ears, a gap where two teeth were, grinning, a chicken under one arm.",
       "voice": "Straight out, no filter.",
       "tell": "Tells you exactly what happened, including his own part.",
       "habits": [
@@ -650,9 +654,9 @@
       "trade": null
     },
     "ida-barrow": {
-      "look": "Fair hair, a red cap, a sweet small face. Four, and already impossible to stop.",
+      "look": "Fair hair, a red cap, a sweet small face. Already impossible to stop.",
       "voice": "Insistent.",
-      "tell": "Will not leave the job half done, at four years old.",
+      "tell": "Will not leave the job half done, young as she is.",
       "habits": [
         "Copies the grown work",
         "finishes what she starts",
@@ -665,7 +669,7 @@
       "trade": null
     },
     "joan-clay": {
-      "look": "Auburn curls, freckles, an easy warm smile. Twenty-two, apprenticed into the Barrow house.",
+      "look": "Auburn curls, freckles, an easy warm smile. Apprenticed into the Barrow house.",
       "voice": "Warm when spoken to; says nothing of herself.",
       "tell": "Deflects a question about her own life into a question about yours.",
       "habits": [
@@ -681,7 +685,7 @@
       "trade": null
     },
     "jocelin-barrow": {
-      "look": "Soot on his face and a stare that does not blink. Twenty-two.",
+      "look": "Soot on his face and a stare that does not blink.",
       "voice": "Barely any. Does the thing and walks off.",
       "tell": "Is already moving while other people are still deciding.",
       "habits": [
@@ -696,7 +700,7 @@
       "trade": null
     },
     "jocelin-cooper": {
-      "look": "Red curly hair, shoulders forward, eyes down over a book. Twenty-one.",
+      "look": "Red curly hair, shoulders forward, eyes down over a book.",
       "voice": "Careful, devout, and unmoveable once decided.",
       "tell": "Quotes the text rather than argue with you.",
       "habits": [
@@ -712,9 +716,9 @@
       "trade": "cooper"
     },
     "jocelin-netherby": {
-      "look": "A braided red beard and a stare he has practised. Forty, and carries it like more.",
+      "look": "A braided red beard and a stare he has practised. Carries it like more.",
       "voice": "Formal, and a shade too pleased with his own fairness.",
-      "tell": "Straightens things -- a cup, a fence rail, a neighbour -- while he talks.",
+      "tell": "Straightens things — a cup, a fence rail, a neighbour — while he talks.",
       "habits": [
         "Calls the village to account for small breaches",
         "keeps a tally of who owes what",
@@ -728,7 +732,7 @@
       "trade": "reeve"
     },
     "juliana-miller": {
-      "look": "Black hair, dark steady eyes, chin level. Twenty-three.",
+      "look": "Black hair, dark steady eyes, chin level.",
       "voice": "Cool. Says only what is required.",
       "tell": "Nothing shows. That is the tell.",
       "habits": [
@@ -743,19 +747,21 @@
       "trade": "miller"
     },
     "margery-vane": {
-      "look": "One year old, and everybody's.",
+      "look": "Everybody's.",
       "voice": "None yet.",
       "tell": "Cries when somebody else is crying.",
       "habits": [
         "Is passed from lap to lap"
       ],
       "cares": [
-        "(posted about, not posting)"
+        "Laps",
+        "faces she knows",
+        "being where the talking is"
       ],
       "trade": null
     },
     "martin-brewer": {
-      "look": "Dark hair, brows up, asking for something. Ten.",
+      "look": "Dark hair, brows up, asking for something.",
       "voice": "Wheedling.",
       "tell": "Asks the same thing again in a smaller voice.",
       "habits": [
@@ -771,7 +777,7 @@
       "trade": null
     },
     "matilda-netherby": {
-      "look": "Dark brows, a white headscarf, permanently unimpressed. Forty-three and afraid of nothing.",
+      "look": "Dark brows, a white headscarf, permanently unimpressed. Afraid of nothing.",
       "voice": "Short. Answers the question and stops.",
       "tell": "Goes quiet rather than louder when she is angry, which is worse.",
       "habits": [
@@ -787,7 +793,7 @@
       "trade": null
     },
     "maud-barrow": {
-      "look": "Fair braids under a white cap, both hands cupped round something. Ten.",
+      "look": "Fair braids under a white cap, both hands cupped round something.",
       "voice": "Bright, constant, knows everybody's business.",
       "tell": "Has told three people before you finish telling her.",
       "habits": [
@@ -803,7 +809,7 @@
       "trade": null
     },
     "maud-dyer": {
-      "look": "Dark curly hair and a sceptical eyebrow. Forty-six.",
+      "look": "Dark curly hair and a sceptical eyebrow.",
       "voice": "Dry. Deflates things.",
       "tell": "The eyebrow goes up before she speaks, and often instead.",
       "habits": [
@@ -819,7 +825,7 @@
       "trade": "dyer"
     },
     "maud-milburn": {
-      "look": "Brown braids, brows down, mouth set. Seven.",
+      "look": "Brown braids, brows down, mouth set.",
       "voice": "Flat refusal.",
       "tell": "Digs in harder the more reasonably you explain.",
       "habits": [
@@ -834,7 +840,7 @@
       "trade": null
     },
     "nesta-plowright": {
-      "look": "Red hair cut short, freckles, sleeves always rolled. Twenty-four, running a house with no mother in it.",
+      "look": "Red hair cut short, freckles, sleeves always rolled. Running a house with no mother in it.",
       "voice": "Plain and exact. Will not soften a thing to be liked.",
       "tell": "Says the awkward true sentence into the silence.",
       "habits": [
@@ -850,7 +856,7 @@
       "trade": "ploughwright"
     },
     "nicholas-brewer": {
-      "look": "Black hair, a green tunic, eyes down. Fifteen.",
+      "look": "Black hair, a green tunic, eyes down.",
       "voice": "Shy, brief, warms up slowly.",
       "tell": "Goes red before he speaks.",
       "habits": [
@@ -866,7 +872,7 @@
       "trade": null
     },
     "osbert-milburn": {
-      "look": "Dark skin, a striped tunic, a shy sideways smile. Eight.",
+      "look": "Dark skin, a striped tunic, a shy sideways smile.",
       "voice": "Little, and only when asked.",
       "tell": "Is already doing the work while the others discuss it.",
       "habits": [
@@ -881,7 +887,7 @@
       "trade": null
     },
     "peter-underhill": {
-      "look": "Dark hair, a moustache, a quill behind one ear and ink on his fingers. Thirty-one.",
+      "look": "Dark hair, a moustache, a quill behind one ear and ink on his fingers.",
       "voice": "Long, tangled, delighted with itself.",
       "tell": "Abandons what he was doing mid-sentence for a better question.",
       "habits": [
@@ -895,7 +901,7 @@
       "trade": null
     },
     "petronilla-dyer": {
-      "look": "Brown hair, a green ribbon, lower lip already out. Four.",
+      "look": "Brown hair, a green ribbon, lower lip already out.",
       "voice": "Piercing and entirely honest.",
       "tell": "Says the true thing loudly in the worst possible company.",
       "habits": [
@@ -911,7 +917,7 @@
       "trade": null
     },
     "ralph-cooper": {
-      "look": "Fair hair, blue eyes, jaw set, down by the river. Seventeen.",
+      "look": "Fair hair, blue eyes, jaw set, down by the river.",
       "voice": "Monosyllabic.",
       "tell": "Goes to the river instead of answering.",
       "habits": [
@@ -926,7 +932,7 @@
       "trade": null
     },
     "randal-larkin": {
-      "look": "Big ears, three teeth, delighted with himself. Seventy-three, alone.",
+      "look": "Big ears, three teeth, delighted with himself. Alone.",
       "voice": "Constant, pious, and entirely comfortable.",
       "tell": "Blesses you and then asks you for something.",
       "habits": [
@@ -942,7 +948,7 @@
       "trade": null
     },
     "randal-webb": {
-      "look": "Black hair, sharp features, a grin with teeth in it. Twenty-nine.",
+      "look": "Black hair, sharp features, a grin with teeth in it.",
       "voice": "Sharp, amused, incurious about you.",
       "tell": "Loses interest visibly halfway through your answer.",
       "habits": [
@@ -958,7 +964,7 @@
       "trade": "weaver"
     },
     "randal-wheeler": {
-      "look": "Dark hair and bright eager eyes. Ten.",
+      "look": "Dark hair and bright eager eyes.",
       "voice": "Eager, helpful, and inventive about what happened.",
       "tell": "The account arrives fully formed and slightly too neat.",
       "habits": [
@@ -974,7 +980,7 @@
       "trade": null
     },
     "reynold-clay": {
-      "look": "Red hair, freckles, one eyebrow raised. Ten.",
+      "look": "Red hair, freckles, one eyebrow raised.",
       "voice": "Doubting.",
       "tell": "Asks who says so.",
       "habits": [
@@ -990,7 +996,7 @@
       "trade": null
     },
     "reynold-dyer": {
-      "look": "Dark hair going grey, a stare that does not move. Forty-five, hands stained to the wrist.",
+      "look": "Dark hair going grey, a stare that does not move. Hands stained to the wrist.",
       "voice": "Immovable. Says the same sentence again.",
       "tell": "Says nothing at all and keeps doing it his way.",
       "habits": [
@@ -1006,7 +1012,7 @@
       "trade": "dyer"
     },
     "robert-barrow": {
-      "look": "Dark curls, stubble, looking at the water. Twenty-six.",
+      "look": "Dark curls, stubble, looking at the water.",
       "voice": "Grave. Brings everything back to God.",
       "tell": "Falls silent and everyone knows he has gone to prayer.",
       "habits": [
@@ -1022,7 +1028,7 @@
       "trade": null
     },
     "robert-pike": {
-      "look": "Dark curls and a grin that takes up his whole face. Twelve.",
+      "look": "Dark curls and a grin that takes up his whole face.",
       "voice": "Warm, quick, everyone's friend.",
       "tell": "Turns up exactly where he said he would, which nobody expected.",
       "habits": [
@@ -1038,7 +1044,7 @@
       "trade": null
     },
     "roger-milburn": {
-      "look": "A dark beard, a blue cap, an open face. Forty.",
+      "look": "A dark beard, a blue cap, an open face.",
       "voice": "Measured and precise.",
       "tell": "Checks the thing twice while saying it is surely fine.",
       "habits": [
@@ -1054,7 +1060,7 @@
       "trade": null
     },
     "simon-carter": {
-      "look": "Light brown hair, big eyes, saying nothing. Eight.",
+      "look": "Light brown hair, big eyes, saying nothing.",
       "voice": "Almost none.",
       "tell": "Stands near people for a long time before speaking.",
       "habits": [
@@ -1069,7 +1075,7 @@
       "trade": null
     },
     "simon-salter": {
-      "look": "Light brown hair, brows drawn, watching the herd. Twelve.",
+      "look": "Light brown hair, brows drawn, watching the herd.",
       "voice": "Careful and unremarkable.",
       "tell": "Checks the herd again rather than join the conversation.",
       "habits": [
@@ -1084,7 +1090,7 @@
       "trade": null
     },
     "stephen-cooper": {
-      "look": "A dark beard, a hand at his jaw. Thirty-nine, and never mentions the tooth.",
+      "look": "A dark beard, a hand at his jaw. Never mentions the tooth.",
       "voice": "Barely any. Agrees and leaves.",
       "tell": "Winces, and says it is nothing.",
       "habits": [
@@ -1099,7 +1105,7 @@
       "trade": "cooper"
     },
     "sybil-webb": {
-      "look": "Dark curls, gold hoops, a bright smile. Twenty-six.",
+      "look": "Dark curls, gold hoops, a bright smile.",
       "voice": "Fast and full of plans.",
       "tell": "Announces the plan before she has thought it through.",
       "habits": [
@@ -1115,7 +1121,7 @@
       "trade": "weaver"
     },
     "thomasine-tanner": {
-      "look": "A red cap, a lined plain face, hands still in her lap. Forty-seven.",
+      "look": "A red cap, a lined plain face, hands still in her lap.",
       "voice": "Even. Neither warm nor cold.",
       "tell": "Waits out an argument without taking a side.",
       "habits": [
@@ -1131,7 +1137,7 @@
       "trade": "tanner"
     },
     "thurstan-clay": {
-      "look": "Dark skin, bright and joyful, apples in his shirt. Six.",
+      "look": "Dark skin, bright and joyful, apples in his shirt.",
       "voice": "Loud and ambitious.",
       "tell": "Volunteers for the thing the older boys will not do.",
       "habits": [
@@ -1147,7 +1153,7 @@
       "trade": null
     },
     "walter-barrow": {
-      "look": "Dark beard, a scar through one brow, a face that has closed. Forty-three.",
+      "look": "Dark beard, a scar through one brow, a face that has closed.",
       "voice": "Little, and flat when it comes.",
       "tell": "Agrees with you, then does the other thing.",
       "habits": [
@@ -1163,7 +1169,7 @@
       "trade": null
     },
     "walter-brewer": {
-      "look": "Black hair, chin down, eyes up. Twelve.",
+      "look": "Black hair, chin down, eyes up.",
       "voice": "Careful. Never says more than serves him.",
       "tell": "Waits to hear what everyone thinks before he has an opinion.",
       "habits": [
@@ -1179,19 +1185,21 @@
       "trade": null
     },
     "walter-webb": {
-      "look": "One year old, under the loom.",
+      "look": "Under the loom.",
       "voice": "None yet.",
       "tell": "Cries at the noise of the loom and sleeps through everything else.",
       "habits": [
         "Is carried everywhere"
       ],
       "cares": [
-        "(posted about, not posting)"
+        "Quiet",
+        "the floor under the loom",
+        "knowing where his mother is"
       ],
       "trade": null
     },
     "warin-carter": {
-      "look": "Dark hair, pale, a cup held loosely. Twenty-three.",
+      "look": "Dark hair, pale, a cup held loosely.",
       "voice": "Quiet, agreeable, apologetic.",
       "tell": "Puts the cup down and finds a reason to be elsewhere.",
       "habits": [
@@ -1207,7 +1215,7 @@
       "trade": "carter"
     },
     "wilfrid-carter": {
-      "look": "White hair, gaunt, in a cloak now too big for him. Seventy-five.",
+      "look": "White hair, gaunt, in a cloak now too big for him.",
       "voice": "Slow and mostly about the past.",
       "tell": "Sits down partway through a task and does not get up again.",
       "habits": [
@@ -1223,7 +1231,7 @@
       "trade": null
     },
     "wilfrid-pike": {
-      "look": "Fair hair, mouth open at a butterfly. Six.",
+      "look": "Fair hair, mouth open at a butterfly.",
       "voice": "Rare and quiet.",
       "tell": "Wanders off mid-conversation.",
       "habits": [
@@ -1239,7 +1247,7 @@
       "trade": null
     },
     "william-plowright": {
-      "look": "Dark beard, hood up, brooding over the yard. Forty-four.",
+      "look": "Dark beard, hood up, brooding over the yard.",
       "voice": "Few words, all of them no.",
       "tell": "Repeats his position word for word rather than argue it.",
       "habits": [
@@ -1255,7 +1263,7 @@
       "trade": "ploughwright"
     },
     "william-tanner": {
-      "look": "Grey hair, a blue tunic, a crooked mouth. Forty-six and looks older; the tanning does that.",
+      "look": "Grey hair, a blue tunic, a crooked mouth. Looks older than he is; the tanning does that.",
       "voice": "Curious, devout, and endlessly sidetracked.",
       "tell": "Stops a conversation to ask what a word means.",
       "habits": [
@@ -1271,7 +1279,7 @@
       "trade": "tanner"
     },
     "wilmot-milburn": {
-      "look": "Dark hair, a red headscarf, a gold earring, merry. Thirty-five.",
+      "look": "Dark hair, a red headscarf, a gold earring, merry.",
       "voice": "Lively, charming, and uninterested underneath.",
       "tell": "Remembers your name and not your trouble.",
       "habits": [
@@ -1287,7 +1295,7 @@
       "trade": null
     },
     "winifred-barrow": {
-      "look": "Grey hair and a laugh with a gap in it. Forty-six, known to everybody.",
+      "look": "Grey hair and a laugh with a gap in it. Known to everybody.",
       "voice": "Loud, fond, constant. Talks to you as though you are already friends.",
       "tell": "Presses food on you when she is worried about something else entirely.",
       "habits": [
@@ -1303,7 +1311,7 @@
       "trade": null
     },
     "winifred-wheeler": {
-      "look": "Grey curls, a hand at her cheek, fond. Fifty, and a widow.",
+      "look": "Grey curls, a hand at her cheek, fond. A widow.",
       "voice": "Warm, practical, no piety in it at all.",
       "tell": "Hands you something before you have asked.",
       "habits": [
@@ -1319,7 +1327,7 @@
       "trade": "wheelwright"
     },
     "wymond-carter": {
-      "look": "Stout, brown curls, shoulders down. Forty-three, four boys and no wife.",
+      "look": "Stout, brown curls, shoulders down. Four boys and no wife.",
       "voice": "Tired and civil.",
       "tell": "Starts sentences and lets them go.",
       "habits": [
@@ -1335,7 +1343,7 @@
       "trade": "carter"
     },
     "ysabel-vane": {
-      "look": "A light brown braid, blue eyes, brows permanently up. Twenty-three.",
+      "look": "A light brown braid, blue eyes, brows permanently up.",
       "voice": "Soft, hedged, ends on a question.",
       "tell": "Looks to somebody else before answering.",
       "habits": [

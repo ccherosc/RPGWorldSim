@@ -80,6 +80,10 @@ export interface Picture {
   readonly name: string;
   readonly alt: string;
   readonly caption?: string;
+  /** The file's own pixel width, so the browser can reserve the right shape. */
+  readonly width: number;
+  /** The file's own pixel height. */
+  readonly height: number;
   /** Relative depth of the page below the site root, for the `src` prefix. */
   readonly root: string;
   /** Rendered at full width rather than inset. */
@@ -95,6 +99,14 @@ export interface Picture {
  * that downloads the 1600 wastes most of it, and `srcset` is the only way to
  * say so that works with no JavaScript. Everything below the fold is
  * `loading="lazy"`, which is the whole of the site's performance strategy.
+ *
+ * `width` and `height` are the file's real dimensions, not the drawn size. The
+ * stylesheet overrides both, but a browser reads them first and uses their
+ * ratio to reserve the space, so the text below a picture stops where it is
+ * going to stay instead of being shoved down when the picture arrives. Both
+ * files behind one `srcset` have to share that ratio or the reserved hole is
+ * the wrong shape for whichever file wins; the test beside this module checks
+ * that they do.
  */
 export function picture(image: Picture): string {
   const base = `${image.root}assets/images/${image.name}`;
@@ -102,6 +114,8 @@ export function picture(image: Picture): string {
     src: `${base}.webp`,
     srcset: `${base}-small.webp 800w, ${base}.webp 1600w`,
     sizes: image.wide ? '100vw' : '(min-width: 48rem) 40rem, 100vw',
+    width: image.width,
+    height: image.height,
     alt: image.alt,
     loading: image.eager === true ? undefined : 'lazy',
     decoding: 'async',

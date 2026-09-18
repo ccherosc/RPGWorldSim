@@ -339,9 +339,13 @@ describe('the same world, written twice', () => {
     // re-pin it here in the same commit and say why -- or it is a wording
     // change nobody asked for.
     //
-    // Last pinned when slice 5 first shipped.
+    // Re-pinned for the sentence seam: a place is named on the record as a
+    // whole noun phrase, `A cottage on Bridge Row`, and eighty-five posts read
+    // `Abed at A cottage on Bridge Row.` The article is now lowered where the
+    // name sits inside a sentence, so the wording of those lines moved and this
+    // moved with it. First pinned when slice 5 shipped.
     const posts = dayOf(ORDINARY).posts;
     expect(posts.length).toBeGreaterThan(0);
-    expect(fnv1a64Hex(printed(posts))).toBe('99601c43c270104f');
+    expect(fnv1a64Hex(printed(posts))).toBe('2e987b03c457370f');
   });
 });

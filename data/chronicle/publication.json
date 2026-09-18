@@ -11,46 +11,64 @@
   "images": [
     {
       "name": "hero",
+      "width": 1600,
+      "height": 900,
       "alt": "Villagers standing around the well outside the tavern, talking",
       "caption": "Argument at the well. Nobody in Pennycroft has anywhere else to be at this hour."
     },
     {
       "name": "map",
+      "width": 1449,
+      "height": 1086,
       "alt": "A drawn map of Pennycroft showing the green, the lanes, the church, the mill and the fields",
       "caption": "Pennycroft, drawn from the village file. Every lane and building on this map is a real place in the simulation, and people walk between them at a real cost in minutes."
     },
     {
       "name": "mill",
+      "width": 1600,
+      "height": 900,
       "alt": "Women washing linen in the mill stream while sacks of flour are carried into the mill",
       "caption": "The Mill and the Mill Stream. The mill holds eight people, and when it is full the ninth has to come back later."
     },
     {
       "name": "lane",
+      "width": 1600,
+      "height": 900,
       "alt": "A muddy village lane at dusk with a basket weaver, a woman carrying carrots and two neighbours arguing over a fence",
       "caption": "Church Lane at dusk. Twenty-four households live along the lanes, and the record knows which cottage each of them sleeps in."
     },
     {
       "name": "market",
+      "width": 1600,
+      "height": 900,
       "alt": "A crowded market day on the village green with stalls of herbs, eggs, bread and cheese",
-      "caption": "Market day on The Green. Buying and selling is not simulated yet, so no notice on this site claims a price."
+      "caption": "Market day on the Green. Buying and selling is not simulated yet, so no notice on this site claims a price."
     },
     {
       "name": "chickens",
+      "width": 1600,
+      "height": 900,
       "alt": "A grinning man running off with two hens under his arms while a woman shouts and points",
       "caption": "Not every villager is going to turn out well."
     },
     {
       "name": "boar",
+      "width": 1600,
+      "height": 900,
       "alt": "A laughing man riding a boar through the mud outside the tavern while drinkers cheer",
       "caption": "The Ploughshare holds thirty. On a good evening it needs to."
     },
     {
       "name": "window",
+      "width": 1600,
+      "height": 900,
       "alt": "An old woman and a girl listening at a tavern window while the drinkers inside talk",
       "caption": "How news travels. In the simulation it does not travel yet, and the paper says so on every page."
     },
     {
       "name": "quarrel",
+      "width": 1600,
+      "height": 900,
       "alt": "A woman shouting at a man in a muddy lane while the neighbours watch and enjoy it",
       "caption": "Quarrels are coming. The village needs to be able to hold a grudge first, and that is a later phase."
     }
@@ -95,10 +113,10 @@
         {
           "heading": "Getting about",
           "body": [
-            "The village is a set of places and the roads between them. Walking from The Green to Mill Lane takes three minutes. Walking out to the North Gate takes longer. Nobody in Pennycroft can be in two places at once, and nobody arrives anywhere without walking the distance first.",
+            "The village is a set of places and the roads between them. Walking from the Green to Mill Lane takes three minutes. Walking out to the North Gate takes longer. Nobody in Pennycroft can be in two places at once, and nobody arrives anywhere without walking the distance first.",
             "Most buildings have a limit on how many people fit inside. That is not decoration. It is the single most common thing that goes wrong in the village, and the paper reports it more than anything else."
           ],
-          "image": "mill"
+          "image": "lane"
         },
         {
           "heading": "Who owns the map",
@@ -116,7 +134,7 @@
         {
           "heading": "How they got their names",
           "body": [
-            "The families were written by hand -- the Netherbys, the Hargraves, the Barrows, the Carters and the rest -- and then the program handed out the children. A person's family is the roof they were first recorded under. Two houses of Hargraves both count as Hargraves, which is why this site counts family names and not households.",
+            "The families were written by hand — the Netherbys, the Hargraves, the Barrows, the Carters and the rest — and then the program handed out the children. A person's family is the roof they were first recorded under. Two houses of Hargraves both count as Hargraves, which is why this site counts family names and not households.",
             "The faces are drawn, and each one is assigned to a person whose age and sex actually match it. A face is checked against the record rather than trusted: nobody wears a face of the wrong sex or the wrong stage of life, and no two people wear the same one."
           ],
           "image": "quarrel"
@@ -150,7 +168,7 @@
           "heading": "One second at a time",
           "body": [
             "The simulation keeps a clock and a queue of things waiting to happen. A villager decides what to do, the program works out how long it takes, and puts them down for that many seconds later. A day is eighty-six thousand four hundred ticks, and a tick is a second.",
-            "Every change of any importance is written down as a numbered event: who did it, where, when, and what caused it. A month of the village is about eighty megabytes of those events. That pile is a cache, not a record -- it can be deleted and rebuilt from the starting word whenever it is wanted."
+            "Every change of any importance is written down as a numbered event: who did it, where, when, and what caused it. A month of the village is about eighty megabytes of those events. That pile is a cache, not a record — it can be deleted and rebuilt from the starting word whenever it is wanted."
           ],
           "image": "boar"
         },
@@ -165,7 +183,7 @@
           "heading": "The rules it holds itself to",
           "body": [
             "A villager may only act on something they could actually know. Money, food, goods and people cannot appear out of nowhere. Nothing crosses the map without walking it. The program never uses the computer's clock or an unseeded coin flip, because either one would mean the same village could not be rebuilt twice.",
-            "There is no artificial intelligence in the simulation. None of the villagers' decisions are made by a language model, and the village runs with no internet connection at all. The pictures on this site were drawn with an image model and are illustrations, not evidence -- everything with a number next to it came out of the record."
+            "There is no artificial intelligence in the simulation. None of the villagers' decisions are made by a language model, and the village runs with no internet connection at all. The pictures on this site were drawn with an image model and are illustrations, not evidence — everything with a number next to it came out of the record."
           ]
         },
         {

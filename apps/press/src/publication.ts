@@ -30,6 +30,22 @@ export const SiteImageSchema = z
     name: z.string().regex(/^[a-z][a-z0-9-]*$/, 'an image name is lowercase letters and dashes'),
     alt: line,
     caption: line,
+    /**
+     * The file's own pixel dimensions, printed on the `<img>`.
+     *
+     * Not a layout instruction -- the stylesheet decides how wide a plate is
+     * drawn. These two numbers let the browser work out the picture's shape
+     * before the file arrives and leave a hole of the right height for it,
+     * which is the difference between a page that settles and a page where
+     * every paragraph jumps down as each illustration loads.
+     *
+     * They are declared here rather than measured at build time so the press
+     * stays a pure function of the archive and this file, and
+     * `test/illustrations.test.ts` reads the real files and fails if either
+     * number drifts from the image it describes.
+     */
+    width: z.number().int().positive(),
+    height: z.number().int().positive(),
     ...NOTE,
   })
   .strip();

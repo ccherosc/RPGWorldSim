@@ -53,6 +53,7 @@ const household = (index: number): EntityId => makeEntityId(EntityKind.Household
 const GREEN = place(0);
 const COTTAGE = place(1);
 const MILL = place(2);
+const LANE = place(3);
 
 const SCORING: ScoringConfig = {
   rarity: 120,
@@ -113,6 +114,7 @@ function village(): { people: PeopleRegister; places: PlaceRegister } {
   places.add({ id: GREEN, name: 'The Green', type: 'square', access: 'public' });
   places.add({ id: COTTAGE, name: 'A cottage on Mill Lane', type: 'dwelling', access: 'private' });
   places.add({ id: MILL, name: 'The Mill', type: 'workshop', access: 'private' });
+  places.add({ id: LANE, name: 'Church Lane', type: 'lane', access: 'public' });
   return { people, places };
 }
 
@@ -161,6 +163,55 @@ describe('the shipped wording', () => {
   });
 });
 
+describe('putting a name into a sentence', () => {
+  /**
+   * The record names a place as a whole noun phrase, article and all: `A
+   * cottage on Mill Lane`, `The Mill`. That is right for a heading and right
+   * for a table row, and it was being dropped into the middle of sentences
+   * untouched, so the site published eighty-five lines reading `Abed at A
+   * cottage on Bridge Row.` Each of those was a true sentence about a real
+   * event, which is exactly why nothing caught it -- the fault was in the seam
+   * between a name and a sentence, and it is the seam that is tested here.
+   */
+  const named = (text: string, location: EntityId, actors: readonly EntityId[] = [npc(0)]): string => {
+    const book: TemplateBook = { maxLines: 1, wording: { 'npc.woke': [{ text }] } };
+    const woke = event('npc.woke', 100, { actors, location });
+    return textOf([woke], 0, book)[0] ?? '';
+  };
+
+  it('lowers the article when the name is inside a sentence', () => {
+    expect(named('Abed at {place}.', COTTAGE)).toBe('Abed at a cottage on Mill Lane.');
+  });
+
+  it('keeps the article when the name opens the line', () => {
+    expect(named('{place}. Warm enough.', COTTAGE)).toBe('A cottage on Mill Lane. Warm enough.');
+  });
+
+  it('keeps it after a full stop, because that is a new sentence too', () => {
+    expect(named('Another morning. {place}, same as ever.', COTTAGE)).toBe(
+      'Another morning. A cottage on Mill Lane, same as ever.',
+    );
+  });
+
+  it('lowers only the article, so a name keeps the capitals it earned', () => {
+    // `the Mill` is right and `the mill` would be wrong: the article belongs to
+    // the sentence and the rest of the name belongs to the place.
+    expect(named('Abed at {place}.', MILL)).toBe('Abed at the Mill.');
+  });
+
+  it('leaves a name alone that has no article to lower', () => {
+    expect(named('Abed at {place}.', LANE)).toBe('Abed at Church Lane.');
+  });
+
+  it('does not touch a person, whose name is not a noun phrase', () => {
+    // The rule is about articles and knows nothing about what kind of thing it
+    // is naming, so the check that it cannot mangle a person belongs here.
+    expect(named('Awake, and so is {others}.', COTTAGE, [npc(0), npc(1)])).toBe(
+      'Awake, and so is Godric Netherby.',
+    );
+  });
+});
+
 describe('what a post is made of', () => {
   it('gives one line per moment, each carrying the event it came from', () => {
     const woke = event('npc.woke', 100, { actors: [npc(0)], location: COTTAGE });
@@ -186,7 +237,7 @@ describe('what a post is made of', () => {
     });
     const bed = event('npc.went-to-bed', 60_000, { actors: [npc(0)], location: COTTAGE });
 
-    expect(textOf([woke, blocked, bed])).toEqual(['Awake.', 'No room at The Mill.', 'Bed.']);
+    expect(textOf([woke, blocked, bed])).toEqual(['Awake.', 'No room at the Mill.', 'Bed.']);
   });
 
   it('says one thing per kind of thing, however often it happened', () => {
@@ -203,7 +254,7 @@ describe('what a post is made of', () => {
     // business -- asserting that too would pin a coin toss.
     const lines = textOf(blocks);
     expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain('The Mill');
+    expect(lines[0]).toContain('the Mill');
   });
 
   it('runs no longer than the book allows', () => {
@@ -292,7 +343,7 @@ describe('what a post refuses to say', () => {
       data: { traveller: npc(0), destination: MILL, reason: 'forbidden' },
     });
     // Only the unconditional wording fits, so the specific one cannot fire.
-    expect(textOf([forbidden])).toEqual(['Could not get to The Mill.']);
+    expect(textOf([forbidden])).toEqual(['Could not get to the Mill.']);
 
     // And with the unconditional wording taken away there is nothing left to
     // hide behind. The book above offers two wordings for a refusal, so an
@@ -309,7 +360,7 @@ describe('what a post refuses to say', () => {
       actors: [npc(0)],
       data: { traveller: npc(0), destination: MILL, reason: 'full' },
     });
-    expect(textOf([full], 0, only)).toEqual(['No room at The Mill.']);
+    expect(textOf([full], 0, only)).toEqual(['No room at the Mill.']);
   });
 
   it('will not turn a yes-or-no into a sentence', () => {

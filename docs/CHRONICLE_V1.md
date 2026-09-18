@@ -1062,13 +1062,153 @@ exactly one event. Both are real mutations the day somebody is born, and the
 site test carries a comment saying which of its assertions are weaker than they
 read for this reason.
 
-**One content hazard, left standing and written down.** The illustrations were
-drawn before the village had a tavern name, and two of them show signs reading
-"The Stag & Muddler" and "The Hare & Mug" while Pennycroft's tavern is The
-Ploughshare. The captions in `publication.json` avoid quoting sign text, so
-nothing the site *says* is false, but the pictures disagree with the record and
-a reader with sharp eyes will notice. Redrawing them is cheap and is not part of
-this slice.
+**One content hazard, investigated and left standing.** The illustrations were
+drawn before the village had a tavern name, and they do not agree with each
+other about it. Three pictures name the building three ways: `map.webp` labels
+it The Ploughshare, `window.webp` hangs a sign reading "The Hare & Mug", and
+`quarrel.webp` hangs one reading "The Stag & Muddler". One of those is right by
+accident.
+
+The village file keeps The Ploughshare, and the deciding argument is the map.
+It is the only illustration the site treats as a document rather than as
+decoration: `map.html` prints it beside a table of the very place names it
+labels, so a disagreement there is a disagreement a reader can see in one
+glance, inches apart. The two signs are background detail in pictures whose
+captions are about something else. "Muddler" is no help either way -- it is not
+a word for anything a medieval village had, and is the kind of almost-word that
+generated artwork produces.
+
+So two illustrations disagree with the record, which is recorded here rather
+than hidden: no caption quotes sign text, nothing the site *says* is false, and
+the remaining fix is to those two images and not to the world. Moving the world
+instead was considered and rejected, and the cost of rejecting it is worth
+naming: a building's name is worldgen input, so renaming the tavern changes
+every day hash after it. Today that is free because nothing is frozen. Once the
+archive is published it is exactly the change the freeze exists to refuse, which
+makes "agree with the pictures before launch, or never" the real deadline on
+this note.
+
+**The site was then read as a site, which found twenty faults no test was going
+to.** Every page was photographed in headless Chrome at 1100px and again
+at 390px and read. That is worth saying plainly, because the suite was green the
+whole time: every defect below is well-formed markup carrying true statements,
+and a page can be right in every particular and still read as unmade.
+
+Six were layout. An `.illustrated` section is a two-column grid and a grid lays
+out its own children, so a section holding a heading, two paragraphs and a
+figure filled the columns in reading order and left a hole under the heading --
+fixed in the markup, because no stylesheet can fix it, and now guarded by a test
+that counts an illustrated section's children. Plates were declared at one width
+beside prose measured at another. The mill appeared twice on one page. A
+full-width picture was upscaled past its own pixels, and one page jumped as its
+images arrived. And the archive's dates were a ragged left-hand column, because
+a date is a link and a link is as wide as its own words -- so the notes beside
+them started in a different place on every row. The column is now held to the
+width of the longest label there can be, which was measured rather than guessed:
+`Greenreach 30` sets at 111.1px, so `7.5rem` clears it and nothing wider exists.
+
+Six were the record spoken badly. `7, child female` stood under a child's name,
+which is a sex field and an art-direction band printed raw: the age bands exist
+so a drawn face can be matched to an age, not so a reader can be told one, and
+the two are now read together into a noun. `0, a boy` under a photograph of a
+baby reads as a form somebody forgot to finish, so the one age not printed as a
+number is the first one. A persona's `habits` are stored split on their commas
+and were set out as bullets, so one sentence appeared as its own halves; they
+are joined back into the sentence they were written as. A page printed its own
+file name, which is a fact about the website and not about the person. The paper
+credited an author's note to four babies. And `--` was reaching the page as two
+hyphens.
+
+**The largest was two different ages on fifty-seven of eighty-six pages.** Every
+persona was written against a drawn face, so every `look` line ended by saying
+how old the face looked -- `Red braids, freckles, eyes wide and guileless.
+Eight.` The record says it too, worked out from a birth date on the newest
+published day, and it said `7, a girl` two inches above. Directive 12 settles
+which one gives way: the record is authoritative and the persona book is
+advisory. Sixty-two lines had the trailing age struck out mechanically and
+twenty-four were rewritten by hand, plus two ages found hiding in `voice` and
+`tell`. The disagreement was not stable, either -- the village ages a day per
+real day and a sentence in a JSON file does not -- so it was going to reach all
+eighty-six pages and then keep going.
+
+The guard against its return does not simply ban number words, because counts
+survive: `Four sons.`, `three teeth` and `one eyebrow up` are facts about a
+person that do not rot. Two things separate a count from an age. A count in this
+book is always small, so any number from thirteen up is an age wherever it sits,
+which catches `Forty-two, always at the water` and would catch it woven into the
+middle of a sentence. Below thirteen the two look alike, so what is banned there
+is the shapes only an age is written in: a number opening a sentence, a number
+handed to `and`, the spelled-out `four years old`, and a comparison against one,
+which is where `much older than seven` was hiding. Eight mutants, eight deaths.
+
+**One fault was in a seam, and it had printed eighty-five times.** The record
+names a place as a whole noun phrase, article and all -- `A cottage on Bridge
+Row`, `The Mill` -- because that is what a heading and a table row want, and it
+is what the record itself calls the place. Dropped into a wording the name
+arrived with the capital it was stored with, and the site published `Abed at A
+cottage on Bridge Row.` and `Heading back to A cottage on Bridge Row.` Every one
+of those was a true sentence about a real event, which is exactly why nothing
+caught it.
+
+It is fixed at the substitution seam in `render` rather than in the three
+templates or in the data, so `{place}`, `{home}`, `{dwelling}` and every
+placeholder added later are covered by one rule: the article is lowered, only
+the article, and only where the name is not opening a sentence. `{place}. Warm
+enough.` keeps its capital, because there the name *is* the sentence. Seven
+mutants, seven deaths.
+
+The lowering half is exported, which is not tidiness. The simulator's guard
+against the paper naming somebody the event never involved strikes known names
+out of a story longest-first, and a guard that knew only the record's spelling
+would find no `A cottage on Mill Lane` inside `Abed at a cottage on Mill Lane`,
+match the shorter `Mill Lane` sitting inside it, and then accuse the paper of
+naming a place the event never involved. A name now has two spellings and both
+answer to the same place.
+
+**The site-wide scan for that shape then found two more of it, typed by hand.**
+`Market day on The Green.` in a caption and `Walking from The Green to Mill
+Lane` in a page description -- the same fault arriving by the other route, which
+is the argument for scanning finished pages and not only the seam. The scan
+reads text runs and `alt` and `content` attributes, excuses a title the village
+gave something, and checks its own shape against the five sentences that
+prompted it before it is turned on the site. A scan like that is a trap and not
+an assertion: on a clean site, narrowing it to half of what it should catch
+changes nothing, so nothing else would ever notice. Eleven mutants, and the two
+that survived were both the scan failing to prove it had read anything -- one
+half of it reading no attribute at all, and the shape narrowed to a single
+article. Both are dead now, the first by counting alt text and page descriptions
+apart, the second by those five sentences.
+
+**Two lists were not lists, and one rule was separating nothing.** `.stack` put
+a border under every row including the last, where it has nothing to separate:
+it then reads as the bottom edge of the section, except that a list is held to
+`--column` and a section rule runs the full `--page`, so it was a short line
+floating a third of the way in, an inch above the long one that really does
+close the section. `The same day in the paper` was a heading above a single
+ruled row, which is the shape of a table that lost the rest of itself. And `Read
+the day on the blog` was the sixth row of a list of five villagers, ruled and
+indented exactly like a name -- and that list is a roster, so anything standing
+in it is claiming to be somebody.
+
+**The last fault was created by fixing one of those, and it is the reason the
+suite gained a test it did not have.** Moving that link out of the roster,
+`el('p', el('a', ...))` handed a finished anchor to the helper that escapes its
+content -- which is there so a village naming a place `The Hare & Mug` cannot
+open a hole in a page, and which did exactly what it promises: it printed the
+link, correctly escaped, as the visible sentence `<a
+href="../blog/1200-04-30.html">Read the day on the blog</a>`. Nothing in 1118
+tests saw it. The markup was well-formed, every tag closed, the stray-bracket
+test found `&lt;` rather than `<`, and the link checker had no link to check
+because there was no longer a link. It is wrong only to a reader, so it is now
+caught by reading: an escaped angle bracket with a tag name behind it is markup
+that should not have become words.
+
+**None of this moved the world.** The archive rebuilds to `fc238578b5964a64`
+after all of it, which is the proof that the persona rewrite, the seam and the
+stylesheet are press-side changes and nothing else. One golden hash did move and
+had to: `posts.test.ts` pins the printed text of an ordinary day, the seam
+changed that text, and the pin is re-set in the same commit with the reason
+written beside it.
 
 ---
 

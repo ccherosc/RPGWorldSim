@@ -91,7 +91,7 @@ function body(chrome: Chrome, issue: Issue, root: string, near: Neighbours): str
       ]),
       { class: 'opening' },
     ),
-    picture({ ...chrome.publication.image('chickens'), root }),
+    picture({ ...chrome.publication.image('chickens'), root, wide: true }),
     quiet
       ? tag(
           'section',
@@ -109,12 +109,13 @@ function body(chrome: Chrome, issue: Issue, root: string, near: Neighbours): str
       'section',
       lines([
         el('h2', 'The same day in the paper'),
-        links([
-          {
-            href: `${root}paper/${issueFile(issue.day.key)}`,
-            label: `The Chronicle for ${when.short}`,
-          },
-        ]),
+        // A cross-reference and not a list. Set as one it was a heading above a
+        // single row with a rule under it, which is the shape of a table that
+        // lost the rest of itself: a reader counts rows, and one row asks where
+        // the others went.
+        tag('p', el('a', `The Chronicle for ${when.short}`, {
+          href: `${root}paper/${issueFile(issue.day.key)}`,
+        })),
       ]),
       { class: 'passage' },
     ),

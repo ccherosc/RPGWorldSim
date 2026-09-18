@@ -67,7 +67,7 @@ export { Whereabouts } from './witness.ts';
 export type { Stay } from './witness.ts';
 
 // Turning an event into a sentence
-export { TemplateSchema, eligible, listOf, namesOf, placeOf, render } from './wording.ts';
+export { TemplateSchema, eligible, listOf, midSentence, namesOf, placeOf, render } from './wording.ts';
 export type { Template, WordingContext } from './wording.ts';
 
 // The villagers, in their own words
