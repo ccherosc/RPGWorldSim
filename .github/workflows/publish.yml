@@ -45,9 +45,13 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      # Pinned to a major rather than "lts/*": the publish runs unattended and
+      # the world hash is only meaningful if the engine under it stays put.
+      # 26 is what the village is developed on, and Vitest 5 refuses anything
+      # older than 22.12.
       - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 26
           cache: npm
 
       - run: npm ci
