@@ -75,6 +75,10 @@ Deliverables:
 Exit criteria:
 - 30-day simulation without obvious impossible state
 - deaths, if any, have valid causal explanations
+- **forks per villager per day**, measured from the archive and stated. Every
+  phase from here carries this number. A phase that adds state without adding
+  decision points has made the world larger, not more interesting; see
+  [CHRONICLE_V1.md](CHRONICLE_V1.md) section 7 for the fork budget.
 
 ## Phase 3 — Work and Economy
 

@@ -1,0 +1,343 @@
+{
+  "atlas": "P07",
+  "source": "Portrait Atlas P07, eight rows A-H by five columns 1-5",
+  "cells": {
+    "A1": {
+      "sex": "m",
+      "band": "infant",
+      "look": "wisps of pale hair, wide blue eyes, mouth open on a sound that has not arrived",
+      "mood": "startled",
+      "props": [
+        "swaddling"
+      ],
+      "setting": "indoors"
+    },
+    "A2": {
+      "sex": "f",
+      "band": "infant",
+      "look": "dark skin, black curls, laughing with her whole face",
+      "mood": "delighted",
+      "props": [
+        "swaddling"
+      ],
+      "setting": "indoors"
+    },
+    "A3": {
+      "sex": "f",
+      "band": "infant",
+      "look": "soft brown hair, enormous dark eyes, wrapped in green and set down in a basket",
+      "mood": "watchful",
+      "props": [
+        "basket"
+      ],
+      "setting": "indoors"
+    },
+    "A4": {
+      "sex": "m",
+      "band": "infant",
+      "look": "fair and pink, thin blond hair, brows drawn together over something",
+      "mood": "fretful",
+      "props": [
+        "swaddling"
+      ],
+      "setting": "indoors"
+    },
+    "A5": {
+      "sex": "m",
+      "band": "child",
+      "look": "black hair, two front teeth missing, grinning about it",
+      "mood": "gleeful",
+      "setting": "yard"
+    },
+    "B1": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark skin, cropped hair, a green tunic and a smile that is up to something",
+      "mood": "sly",
+      "setting": "barn"
+    },
+    "B2": {
+      "sex": "f",
+      "band": "child",
+      "look": "a mass of red curls, blue eyes, caught in the middle of being amazed",
+      "mood": "astonished",
+      "setting": "field"
+    },
+    "B3": {
+      "sex": "f",
+      "band": "youth",
+      "look": "olive skin, dark hair pulled back hard, a gold dress and a level, unimpressed look",
+      "mood": "guarded",
+      "setting": "yard"
+    },
+    "B4": {
+      "sex": "m",
+      "band": "child",
+      "look": "straw-blond, freckled, gap-toothed, laughing at nothing in particular",
+      "mood": "merry",
+      "setting": "yard"
+    },
+    "B5": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark skin, hair in tight braids, purple tunic, deciding whether to trust you",
+      "mood": "wary",
+      "setting": "yard"
+    },
+    "C1": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark hair and darker eyes, a green tunic, the picture of an injustice endured",
+      "mood": "sulking",
+      "setting": "yard"
+    },
+    "C2": {
+      "sex": "f",
+      "band": "child",
+      "look": "brown hair under a white cap, blue eyes, a smile with nothing behind it but goodwill",
+      "mood": "sweet",
+      "props": [
+        "linen cap"
+      ],
+      "setting": "lane"
+    },
+    "C3": {
+      "sex": "m",
+      "band": "child",
+      "look": "shaggy fair hair, a grey hood, standing by a horse and wishing he were elsewhere",
+      "mood": "sullen",
+      "props": [
+        "horse"
+      ],
+      "setting": "pasture"
+    },
+    "C4": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark skin, black curls, laughing so hard his eyes have shut",
+      "mood": "joyful",
+      "setting": "yard"
+    },
+    "C5": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark wavy hair, a worm held up for inspection, delighted and slightly appalled",
+      "mood": "curious",
+      "props": [
+        "worm"
+      ],
+      "setting": "garden"
+    },
+    "D1": {
+      "sex": "f",
+      "band": "child",
+      "look": "light brown hair cut blunt at the jaw, freckles, looking straight at you",
+      "mood": "direct",
+      "setting": "yard"
+    },
+    "D2": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark skin, hair shorn close, a gold tunic, entirely serious about everything",
+      "mood": "solemn",
+      "setting": "yard"
+    },
+    "D3": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark braids under a blue hood, a mole on one cheek, plainly planning something",
+      "mood": "mischievous",
+      "props": [
+        "hood"
+      ],
+      "setting": "lane"
+    },
+    "D4": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark hair, a red tunic, holding up a bowl as though he had made it himself",
+      "mood": "triumphant",
+      "props": [
+        "small bowl"
+      ],
+      "setting": "yard"
+    },
+    "D5": {
+      "sex": "m",
+      "band": "infant",
+      "look": "blond curls, blue eyes, bundled in a pale scarf and looking at everything at once",
+      "mood": "wide-eyed",
+      "props": [
+        "scarf"
+      ],
+      "setting": "indoors"
+    },
+    "E1": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark curls, olive skin, a leather jerkin, thinking about something he will not say",
+      "mood": "pensive",
+      "setting": "yard"
+    },
+    "E2": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark hair in two braids, cows behind her, unbothered by any of it",
+      "mood": "steady",
+      "props": [
+        "cattle"
+      ],
+      "setting": "pasture"
+    },
+    "E3": {
+      "sex": "m",
+      "band": "child",
+      "look": "red hair, freckles, juice on his chin, standing under a tree he has been robbing",
+      "mood": "greedy",
+      "props": [
+        "apples"
+      ],
+      "setting": "orchard"
+    },
+    "E4": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark skin, black curls, a basket on his arm and a smile the width of his face",
+      "mood": "beaming",
+      "props": [
+        "basket"
+      ],
+      "setting": "garden"
+    },
+    "E5": {
+      "sex": "m",
+      "band": "child",
+      "look": "sandy hair, a split lip, a purple tunic and the grin of someone who started it",
+      "mood": "rueful",
+      "setting": "yard"
+    },
+    "F1": {
+      "sex": "f",
+      "band": "child",
+      "look": "a white cloth over her hair, laughing out loud, a mauve tunic",
+      "mood": "laughing",
+      "props": [
+        "headcloth"
+      ],
+      "setting": "yard"
+    },
+    "F2": {
+      "sex": "f",
+      "band": "infant",
+      "look": "brown curls, very round blue eyes, at the age where everything is new",
+      "mood": "uncertain",
+      "setting": "indoors"
+    },
+    "F3": {
+      "sex": "f",
+      "band": "child",
+      "look": "brown hair tied back, autumn trees behind, worried about something she has not said",
+      "mood": "anxious",
+      "setting": "orchard"
+    },
+    "F4": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark skin, black curls, a green tunic, the friendliest face on the lane",
+      "mood": "warm",
+      "setting": "orchard"
+    },
+    "F5": {
+      "sex": "f",
+      "band": "child",
+      "look": "black hair cut straight, holding two cherries by the stem like a prize",
+      "mood": "pleased",
+      "props": [
+        "cherries"
+      ],
+      "setting": "garden"
+    },
+    "G1": {
+      "sex": "m",
+      "band": "child",
+      "look": "brown hair, a rust tunic, a scowl he has been working on all morning",
+      "mood": "furious",
+      "setting": "yard"
+    },
+    "G2": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark braids, holding a hedgehog against her chest, entirely content",
+      "mood": "fond",
+      "props": [
+        "hedgehog"
+      ],
+      "setting": "garden"
+    },
+    "G3": {
+      "sex": "m",
+      "band": "child",
+      "look": "dark skin, head shaved close, standing in the wheat and grinning at the sun",
+      "mood": "radiant",
+      "setting": "field"
+    },
+    "G4": {
+      "sex": "f",
+      "band": "child",
+      "look": "blonde hair pinned up, freckles across the nose, laughing with her eyes shut",
+      "mood": "laughing",
+      "setting": "field"
+    },
+    "G5": {
+      "sex": "m",
+      "band": "child",
+      "look": "reddish curls, a green tunic, a smirk that says he knows what you did",
+      "mood": "smug",
+      "setting": "yard"
+    },
+    "H1": {
+      "sex": "f",
+      "band": "youth",
+      "look": "dark curls under a cloth, olive skin, a steady look that does not move first",
+      "mood": "formidable",
+      "props": [
+        "headcloth"
+      ],
+      "setting": "yard"
+    },
+    "H2": {
+      "sex": "m",
+      "band": "child",
+      "look": "shaggy fair hair, head back, laughing at something that was not that funny",
+      "mood": "hooting",
+      "setting": "yard"
+    },
+    "H3": {
+      "sex": "f",
+      "band": "child",
+      "look": "dark skin, braided hair, holding folded cloth, carrying it like a duty",
+      "mood": "grave",
+      "props": [
+        "folded linen"
+      ],
+      "setting": "yard"
+    },
+    "H4": {
+      "sex": "m",
+      "band": "youth",
+      "look": "black hair, dark eyes, a grey tunic, meeting your eye and saying nothing",
+      "mood": "level",
+      "setting": "lane"
+    },
+    "H5": {
+      "sex": "f",
+      "band": "child",
+      "look": "red hair, freckles, a grasshopper on her shoulder and no intention of moving",
+      "mood": "thrilled",
+      "props": [
+        "grasshopper"
+      ],
+      "setting": "field"
+    }
+  }
+}

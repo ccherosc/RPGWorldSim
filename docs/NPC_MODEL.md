@@ -91,6 +91,27 @@ Avoid:
 
 Instead derive those behaviors from lower-level traits plus current circumstances.
 
+### Traits are not the constraint; forks are
+
+Do not add traits in order to make personality visible. A trait cannot create a
+behavior -- it can only choose a branch at a decision point that already exists.
+Twelve traits scored 0-100 is already about 10^24 distinct personalities, and
+adding a thirteenth multiplies a number that is not scarce.
+
+What is scarce is decision points. Count them, not traits:
+
+    visible personality  ~=  forks per day  x  branches per fork
+
+A fork is a real choice with a real cost -- going to the alehouse means not being
+home when the child wakes. A weighted die roll named after a trait is not a fork,
+and it is the same error as `propensityToSteal` in a different costume.
+
+The target is a large base: dozens of forks reachable in an ordinary day. A
+thirteenth trait is earned only when a fork is being built and two people who
+should obviously behave differently score the same on everything that fork
+reads. The audit of where the current twelve can and cannot bite is in
+[CHRONICLE_V1.md](CHRONICLE_V1.md) section 7.
+
 ### 3. Capabilities and Skills
 
 Examples:

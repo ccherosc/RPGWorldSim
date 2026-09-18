@@ -794,6 +794,65 @@ to its own slice because it changes how every villager acts and therefore resets
 every golden hash in the project, and because the record it reads has to exist
 first.
 
+**The fork budget, and why it is the real constraint.** Before any of that lands,
+one number has to be understood, because getting it wrong wastes the whole
+personality layer.
+
+A trait cannot create behaviour. It can only choose between branches at a fork
+that already exists. There are twelve traits scored 0-100, which is about 10^24
+distinct personalities -- more than enough for a thousand villagers, let alone
+eighty-six. But nothing in the codebase reads a trait value to decide anything,
+and the village currently passes through roughly **one** real fork in a day:
+when to turn in, and whether rest was possible. Twelve traits arguing over one
+fork produces one visible difference between two people. The scarce resource is
+not personality. It is decision points.
+
+    outcomes  ~=  forks per day  x  branches per fork
+
+So the rule from here on: **every system that lands must declare the forks it
+adds**, and a system that adds state without adding a fork has made the world
+bigger without making it more legible. The target is deliberately large -- dozens
+of forks reachable in an ordinary day, not three. A villager who faces three
+decisions a day has an invisible personality no matter how finely it is scored,
+and a blog written about them reads as weather.
+
+What counts as a fork is strict: a real choice with a real cost. "Does she go to
+the alehouse" is a fork, because going means not being home when the child wakes.
+"Does she feel sociable" is not a fork; it is a die roll wearing a trait's name,
+and it is the same mistake NPC_MODEL.md warns about when it forbids
+`propensityToSteal`.
+
+Where the twelve stand today, audited against what actually exists:
+
+| Trait | Fork it would read | Blocked on |
+| --- | --- | --- |
+| `sociability` | where the evening is spent: home, the green, The Ploughshare | nothing — buildable now |
+| `curiosity` | whether an odd thing two streets over is worth the walk | nothing — buildable now |
+| `religiosity` | whether the bell is answered | nothing — buildable now |
+| `conscientiousness` | whether a plan survives a nicer alternative | a goal system |
+| `impulsiveness` | whether the first idea is the one acted on | a goal system |
+| `empathy` | whether another's distress becomes your problem | the needs system |
+| `workEthic` | whether work is done because it is there | Phase 3 |
+| `generosity` | whether what you have is shared | Phase 3 (inventory) |
+| `ambition` | whether your present station is acceptable | Phase 3 |
+| `honesty` | whether you say the true thing when a lie would serve | Phase 5 |
+| `stubbornness` | whether a position, once taken, is given up | Phase 5 |
+| `courage` | whether fear stops you | Phase 6 |
+
+Three of the twelve have somewhere to bite today; the village already has a
+church, an alehouse, a green, a mill, a smithy, a common field, a pasture, a wood
+and a stream, with travel time between them. Nine are waiting on systems that do
+not exist. That ratio is the plan: **build forks, not traits.** A thirteenth
+trait is only earned when a fork is being built and two people who should
+obviously differ score the same on everything that fork reads.
+
+This changes two things about how later slices are written. Each states the forks
+it adds in its own section, with the branches and the cost of each. And every
+phase exit criterion from Phase 2 on carries a measured number alongside the
+correctness checks: **forks per villager per day**, counted from the archive. It
+is the one figure that says whether the world got more interesting or merely
+larger.
+
 Then Phase 2 — survival — which is the first system that gives a villager something
 to want and therefore gives the paper something to report. The order was set by
 [PHASE_1.md](PHASE_1.md) section 5 and has not changed: build the reader first,
