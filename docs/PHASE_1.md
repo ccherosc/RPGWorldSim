@@ -486,6 +486,7 @@ under the names the packages that own them use — `npc.created`, which carries 
 | Event | Emitted when |
 | --- | --- |
 | `world.generated` | Worldgen completes; carries the seed and the counts |
+| `place.created` | Somewhere comes into being; carries its name, kind and access |
 | `npc.created` | An NPC enters the world; `origin` says whether by founding |
 | `npc.household-changed` | An NPC joins or leaves a household |
 | `npc.home-changed` | An NPC is given a roof, or loses one |

@@ -357,7 +357,10 @@ describe('the village under way', () => {
   it('reproduces the pinned hash for the shipped data and seed', () => {
     const world = village('world-zero');
     world.sim.runUntil(world.sim.tick + 3 * TICKS_PER_DAY);
-    expect(world.sim.hash()).toBe('14b554c818b3bc74');
+    // Last re-pinned when `place.created` was added: thirty-eight new events on
+    // the founding day shift every event id after them, and the hash is over
+    // the whole log.
+    expect(world.sim.hash()).toBe('dd9fd928fd408244');
   });
 });
 
@@ -380,6 +383,7 @@ describe('every event says what caused it', () => {
   const UNCAUSED = new Set([
     // The village did not come from anywhere.
     'world.generated',
+    'place.created',
     'npc.created',
     'society.household-founded',
     // The clock came round. `npc.turning-in` is caused only when the walk home

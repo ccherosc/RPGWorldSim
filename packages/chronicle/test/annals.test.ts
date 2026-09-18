@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   PeopleRegister,
+  PlaceRegister,
   type SignificanceConfig,
   distil,
   formatAnnalLine,
@@ -70,13 +71,18 @@ const SIGNIFICANCE: SignificanceConfig = {
   },
 };
 
-function fresh(): { people: PeopleRegister } {
+function fresh(): { people: PeopleRegister; places: PlaceRegister } {
   nextId = 1;
-  return { people: new PeopleRegister() };
+  return { people: new PeopleRegister(), places: new PlaceRegister() };
 }
 
-function day(events: readonly SimEvent[], people: PeopleRegister, significance = SIGNIFICANCE) {
-  return distil({ key: KEY, events, calendar: CALENDAR, significance, people });
+function day(
+  events: readonly SimEvent[],
+  people: PeopleRegister,
+  significance = SIGNIFICANCE,
+  places = new PlaceRegister(),
+) {
+  return distil({ key: KEY, events, calendar: CALENDAR, significance, people, places });
 }
 
 describe('what the village bothers to remember', () => {

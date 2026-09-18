@@ -10,6 +10,10 @@ import {
   PersonaBookSchema,
   type PortraitAtlas,
   PortraitAtlasSchema,
+  type ScoringConfig,
+  ScoringSchema,
+  type SelectionConfig,
+  SelectionSchema,
   type SignificanceConfig,
   SignificanceSchema,
 } from '@rpgsim/chronicle';
@@ -137,6 +141,25 @@ export function loadCasting(dataRoot: string = DATA_ROOT): CastingConfig {
 /** Read how each villager comes across. */
 export function loadPersonas(dataRoot: string = DATA_ROOT): PersonaBookConfig {
   return loadJson(join(chronicleRoot(dataRoot), 'personas.json'), PersonaBookSchema, 'persona book');
+}
+
+/**
+ * Read the weights that decide how newsworthy something is.
+ *
+ * Separate from the significance table on purpose, though both are weights over
+ * event types. Significance decides what is *kept forever* and is answerable to
+ * the archive's size; this decides what *leads today* and is answerable to
+ * whether the page reads well. Those two judgements disagree — a birth is worth
+ * keeping for a century and is not necessarily today's headline — and one file
+ * serving both would force every future change to be a compromise between them.
+ */
+export function loadScoring(dataRoot: string = DATA_ROOT): ScoringConfig {
+  return loadJson(join(chronicleRoot(dataRoot), 'scoring.json'), ScoringSchema, 'scoring table');
+}
+
+/** Read how long the edition is and how the posting rota turns. */
+export function loadSelection(dataRoot: string = DATA_ROOT): SelectionConfig {
+  return loadJson(join(chronicleRoot(dataRoot), 'selection.json'), SelectionSchema, 'selection');
 }
 
 /** Read the families and what they are to each other. */

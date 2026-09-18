@@ -1,0 +1,10 @@
+{
+  "rarity": 120,
+  "refusals": ["travel.blocked", "npc.could-not-rest"],
+  "refusal": 40,
+  "crowd": 8,
+  "crowdCap": 40,
+  "stage": 12,
+  "consequence": 10,
+  "consequenceCap": 30
+}

@@ -184,6 +184,7 @@ export class VillageWorld {
           ...(place.access !== undefined ? { access: place.access } : {}),
         }),
       );
+      this.record(id);
     }
 
     for (const road of this.config.roads) {
@@ -191,6 +192,38 @@ export class VillageWorld {
     }
 
     return places;
+  }
+
+  /**
+   * `place.created`: the village saying, once, that somewhere exists.
+   *
+   * Directive 8 asks every significant state change to emit an event, and a
+   * place coming into being is the one every other event depends on -- all of
+   * them happen somewhere. Without this the archive names each of eighty-six
+   * people and merely numbers thirty-eight places, so anything reading it back
+   * would have to map `location:3` onto the third entry of `village.json` by
+   * counting. That is an assumption about the order worldgen ran in dressed up
+   * as a fact, and it silently becomes wrong the day a system allocates an id
+   * earlier -- which is the same trap the press side avoids by keying on slugs.
+   *
+   * Read back out of the map rather than copied from the config, so the event
+   * reports what the place *is* once `makeLocation` has applied its defaults,
+   * not what the file happened to ask for. The cottages go through here too,
+   * which is why it takes an id and not a config entry: they are built from
+   * arithmetic and have no config entry to take.
+   */
+  private record(id: EntityId): void {
+    const place = this.map.location(id);
+    this.sim.emit({
+      type: 'place.created',
+      location: id,
+      data: {
+        place: id,
+        name: place.name,
+        type: place.type,
+        access: place.access,
+      },
+    });
   }
 
   /**
@@ -236,6 +269,7 @@ export class VillageWorld {
           access: Access.Private,
         }),
       );
+      this.record(location);
       this.map.connect(lane.id, location, spec.walkFromLane);
 
       const building = makeBuilding({

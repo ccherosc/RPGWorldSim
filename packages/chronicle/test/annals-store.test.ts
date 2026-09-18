@@ -57,6 +57,7 @@ describe('the record on disk', () => {
       key: '1200-04-01',
       lines: [line('1200-04-01', 1)],
       people: [person(0, 'Agnes Hargrave')],
+      places: [],
     });
 
     expect(read(join(where, PEOPLE_FILE)).split('\n')[0]).toBe('# slug\tid\tname\tsex\tborn\tfamily');
@@ -78,6 +79,7 @@ describe('the record on disk', () => {
       key: '1200-04-01',
       lines: [line('1200-04-01', 1), line('1200-04-01', 2)],
       people: [person(0, 'Agnes Hargrave')],
+      places: [],
     });
     const annalsBefore = read(annals);
     const peopleBefore = read(people);
@@ -86,6 +88,7 @@ describe('the record on disk', () => {
       key: '1200-04-02',
       lines: [line('1200-04-02', 3)],
       people: [person(1, 'Rob Tomlin')],
+      places: [],
     });
 
     expect(read(annals).startsWith(annalsBefore)).toBe(true);
@@ -96,25 +99,25 @@ describe('the record on disk', () => {
   it('refuses a day the record has already passed', () => {
     const where = root();
     const store = new AnnalsStore({ root: where });
-    store.record({ key: '1200-04-02', lines: [line('1200-04-02', 1)], people: [] });
+    store.record({ key: '1200-04-02', lines: [line('1200-04-02', 1)], people: [], places: [] });
 
     expect(() =>
-      store.record({ key: '1200-04-01', lines: [line('1200-04-01', 2)], people: [] }),
+      store.record({ key: '1200-04-01', lines: [line('1200-04-01', 2)], people: [], places: [] }),
     ).toThrow(/already hold a day at or after/);
     expect(() =>
-      store.record({ key: '1200-04-02', lines: [line('1200-04-02', 3)], people: [] }),
+      store.record({ key: '1200-04-02', lines: [line('1200-04-02', 3)], people: [], places: [] }),
     ).toThrow(/already hold a day at or after/);
   });
 
   it('lets a day with nothing to say pass through, because it changes nothing', () => {
     const where = root();
     const store = new AnnalsStore({ root: where });
-    store.record({ key: '1200-04-02', lines: [line('1200-04-02', 1)], people: [] });
+    store.record({ key: '1200-04-02', lines: [line('1200-04-02', 1)], people: [], places: [] });
     const before = read(join(where, ANNALS_DIRECTORY, '1200.txt'));
 
     // A silent day does not move the record forward, so it is offered again on
     // the next run -- which has to be harmless or the command is not re-runnable.
-    store.record({ key: '1200-04-01', lines: [], people: [] });
+    store.record({ key: '1200-04-01', lines: [], people: [], places: [] });
     expect(read(join(where, ANNALS_DIRECTORY, '1200.txt'))).toBe(before);
     expect(store.lastDate).toBe('1200-04-02');
   });
@@ -122,8 +125,8 @@ describe('the record on disk', () => {
   it('files each year separately', () => {
     const where = root();
     const store = new AnnalsStore({ root: where });
-    store.record({ key: '1200-12-30', lines: [line('1200-12-30', 1)], people: [] });
-    store.record({ key: '1201-01-01', lines: [line('1201-01-01', 2)], people: [] });
+    store.record({ key: '1200-12-30', lines: [line('1200-12-30', 1)], people: [], places: [] });
+    store.record({ key: '1201-01-01', lines: [line('1201-01-01', 2)], people: [], places: [] });
 
     expect(listAnnalYears(where)).toEqual(['1200', '1201']);
     expect(read(join(where, ANNALS_DIRECTORY, '1201.txt'))).not.toContain('1200-12-30');
@@ -136,6 +139,7 @@ describe('the record on disk', () => {
       key: '1200-04-01',
       lines: [line('1200-04-01', 1)],
       people: [person(0, 'Agnes Hargrave')],
+      places: [],
     });
 
     const second = new AnnalsStore({ root: where });

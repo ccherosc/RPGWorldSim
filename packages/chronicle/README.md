@@ -19,8 +19,12 @@ villagers do not act on what they remember until the slice after the paper.
 | `significance.ts` | the weights schema, `weightOf`, `isNotable` — the filter, as data |
 | `table.ts` | the one formatting decision both files share: tab-separated cells, `-` for empty |
 | `people.ts` | `PeopleRegister`: slug allocation and the people file |
+| `places.ts` | `PlaceRegister`: the same, for everywhere that exists |
 | `annals.ts` | `distil`: one archived day in, one day's worth of memory out |
 | `annals-store.ts` | the only thing that touches the disk |
+| `day.ts` | `ChronicleDay`: one day, indexed by actor, place and type |
+| `score.ts` | `scoreOf`, `rank`: how newsworthy something is, in whole numbers |
+| `select.ts` | `select`: what leads the edition, and whose turn it is to post |
 | `portraits.ts` | `PortraitCatalog`: the sheets of drawn faces, merged and indexed |
 | `casting.ts` | `Casting`: who wears which face, and whether that is still true |
 | `persona.ts` | `PersonaBook`: how each villager comes across, read off their traits |
@@ -34,15 +38,29 @@ const day = distil({
   calendar,
   significance,          // loaded by the app from data/chronicle/significance.json
   people: store.people,  // advanced in place; new people are handed slugs
+  places: store.places,  // the same, for everywhere `place.created` announced
 });
 store.record(day);
 ```
 
-Two files come out, and nothing else:
+Three files come out, and nothing else:
 
 ```
 memory/people.txt        everyone who has ever existed, one line each
+memory/places.txt        everywhere that exists, one line each
 memory/annals/1200.txt   everything worth remembering, one line each
+```
+
+Reading the record back is `ChronicleDay` plus the two picks:
+
+```ts
+const today = new ChronicleDay({ key, events, people: store.people, places: store.places });
+const edition = select({
+  day: today,
+  scoring,     // data/chronicle/scoring.json
+  selection,   // data/chronicle/selection.json
+  published,   // every day already on the site: the rota reads nothing else
+});
 ```
 
 The last four modules are the **press side**: they read the record and give the
@@ -97,6 +115,33 @@ founded afterwards — so the family column can only be filled once the whole da
 has been read. A one-pass version writes every founding villager down as
 belonging to nobody, which is a mutation the tests now catch.
 
+**Newsworthiness is five whole numbers added up, and it never reads a word.**
+Rarity against *this day* rather than against a table, a bonus for a refusal, a
+bonus per extra actor, a bonus for a public place, a bonus per cause — all of
+them in `scoring.json` (directive 10), all of them integers, because a score
+with a fraction in it is a page order that can differ between two machines that
+agree on everything else. The score sees an event's type, actors, location and
+causes and never its `data`, which is where any wording would live: rewriting a
+headline cannot silently reorder the front page.
+
+**The two picks are separate because a front page and a rota are different
+things.** Headlines are merit alone, with a floor (a quiet day gets a short
+edition, not a padded one) and a cap per event type (sixteen people turned back
+from full cottages score identically, and without the cap the page is one story
+printed five times — which is how a filter looks when it is working perfectly
+and reading terribly). Posting villagers are merit *minus a rotation penalty*.
+
+**The rotation penalty is derived, never stored.** It is computed by reading the
+days already published and seeing who wrote them. A `last-posted.json` advanced
+each day would be a second source of truth that can disagree with the first, and
+it makes the site unrebuildable: delete it and every villager looks equally
+overdue. Reading the published days back means a rebuild from an empty directory
+reproduces the same rota, in the same order, every time.
+
+**A villager is represented by their best moment, not by a sum.** Somebody who
+arrived somewhere four hundred times had a dull day, and summing would make them
+the most interesting person in the village.
+
 ## Four more, for the press side
 
 **A portrait is named by its sheet and its square: `P04-C3`.** Not `#117`.
@@ -133,12 +178,16 @@ is still unmodelled.
 
 ## Tests
 
-`people.test.ts` covers slugs and the file format, `annals.test.ts` the
-judgement, `annals-store.test.ts` the promise about the bytes, and
-`layering.test.ts` the dependency direction. The whole-village checks live in
+`people.test.ts` and `places.test.ts` cover slugs and the file formats,
+`annals.test.ts` the judgement, `annals-store.test.ts` the promise about the
+bytes, `day.test.ts` the read model, `score.test.ts` and `select.test.ts` the
+arithmetic and the two picks, and `layering.test.ts` the dependency direction. The whole-village checks live in
 `apps/simulator/test/annals.test.ts`, including the one that decides whether the
 design is right: **delete the day archive, rebuild it from the seed, re-distil,
-and get byte-identical annals.**
+and get byte-identical annals.** `apps/simulator/test/edition.test.ts` does the
+same for the page: two villages built from one seed into different directories
+produce identical editions, and every name a headline prints comes out of the
+record rather than off an id.
 
 `portraits.test.ts`, `casting.test.ts` and `persona.test.ts` cover the press
 side, and `apps/simulator/test/cast.test.ts` checks the **real** files in

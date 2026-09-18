@@ -327,7 +327,8 @@ function commandAnnals(options: Options): number {
   const calendar = loadCalendar();
   const significance = loadSignificance();
   const store = new AnnalsStore({ root: options.annals });
-  const before = store.people.size;
+  const knownPeople = store.people.size;
+  const knownPlaces = store.places.size;
 
   let days = 0;
   let lines = 0;
@@ -343,6 +344,7 @@ function commandAnnals(options: Options): number {
       calendar,
       significance,
       people: store.people,
+      places: store.places,
     });
     store.record(distilled);
     days++;
@@ -351,7 +353,10 @@ function commandAnnals(options: Options): number {
 
   console.log(`annals at ${store.root}`);
   console.log(`  read ${manifest.days.length} archived days, distilled ${days}`);
-  console.log(`  ${lines} lines written, ${store.people.size - before} people newly recorded`);
+  console.log(
+    `  ${lines} lines written, ${store.people.size - knownPeople} people and ` +
+      `${store.places.size - knownPlaces} places newly recorded`,
+  );
   console.log(`  the record now runs to ${store.lastDate ?? 'nothing at all'}`);
   return 0;
 }

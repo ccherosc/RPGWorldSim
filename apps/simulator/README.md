@@ -112,10 +112,11 @@ npm run sim -- annals --archive ./history --annals ./memory
 ```
 memory/
   people.txt         everyone who has ever existed, one line each
+  places.txt         everywhere that exists, one line each
   annals/1200.txt    everything worth remembering, one line each
 ```
 
-Both files are tab-separated text and both are append-only. Which events earn a
+All three files are tab-separated text and all three are append-only. Which events earn a
 line is set by weights in `data/chronicle/significance.json`, not by code, so an
 opinion about what is interesting can change without one.
 
@@ -129,6 +130,13 @@ rebuilding it from the seed and re-distilling produces byte-identical annals —
 that is tested directly in `test/annals.test.ts`, and it is what makes throwing
 the archive away safe. See
 [docs/CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md) slice 3.
+
+`places.txt` exists because the record used to name every person and merely
+number every place. `npc.created` carries a name; nothing said what `location:3`
+was, so the only way to find out was to count entries in `village.json` and hope
+worldgen had allocated ids in file order. Worldgen now emits `place.created` for
+each of the thirty-eight places as it builds them, which directive 8 asked for
+anyway, and the record keeps what it said.
 
 ## Checking the faces
 

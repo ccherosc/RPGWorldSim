@@ -10,6 +10,7 @@ import {
   tickToDateTime,
 } from '@rpgsim/sim-core';
 import { type PeopleRegister, type PersonRecord, familySlug } from './people.ts';
+import { type PlaceRecord, type PlaceRegister } from './places.ts';
 import { type SignificanceConfig, isNotable } from './significance.ts';
 import { EMPTY, formatRow } from './table.ts';
 
@@ -51,6 +52,8 @@ export interface DistilledDay {
   readonly lines: readonly AnnalLine[];
   /** People written down for the first time by this day, in creation order. */
   readonly people: readonly PersonRecord[];
+  /** Places written down for the first time by this day, in creation order. */
+  readonly places: readonly PlaceRecord[];
 }
 
 export interface DistilOptions {
@@ -62,10 +65,12 @@ export interface DistilOptions {
   readonly significance: SignificanceConfig;
   /** Advanced in place: new people are enrolled and handed slugs. */
   readonly people: PeopleRegister;
+  /** Advanced in place: new places are enrolled and handed slugs. */
+  readonly places: PlaceRegister;
 }
 
 export function distil(options: DistilOptions): DistilledDay {
-  const { key, events, calendar, significance, people } = options;
+  const { key, events, calendar, significance, people, places } = options;
 
   for (const event of events) {
     assert(dayKeyOf(event.tick, calendar) === key, 'an event does not belong to the day named', {
@@ -81,6 +86,7 @@ export function distil(options: DistilOptions): DistilledDay {
   // has been read. A one-pass version would write every founding villager down
   // as belonging to nobody.
   const added = enrol(events, people);
+  const built = survey(events, places);
   const lines: AnnalLine[] = [];
   for (const event of events) {
     if (!isNotable(significance, event.type)) continue;
@@ -94,11 +100,48 @@ export function distil(options: DistilOptions): DistilledDay {
       event: event.id,
     });
   }
-  return { key, lines, people: added };
+  return { key, lines, people: added, places: built };
 }
 
 export function formatAnnalLine(line: AnnalLine): string {
   return formatRow([line.date, line.time, line.type, line.who, line.detail, `#${line.event}`]);
+}
+
+/**
+ * Write down everywhere this day built.
+ *
+ * Simpler than `enrol` because a place needs no second pass: `place.created`
+ * states the name, the kind and the access all at once, whereas a person is
+ * announced before the roof they live under is.
+ *
+ * Deliberately outside the notability filter, exactly as people are. Thirty-
+ * eight lines of "somewhere exists" would drown the annals of the founding day,
+ * so `place.created` carries a weight of zero and appears in no annal — but the
+ * places file still has to know, because every annal line that follows names a
+ * place that has to resolve to something.
+ */
+function survey(events: readonly SimEvent[], places: PlaceRegister): PlaceRecord[] {
+  const built: PlaceRecord[] = [];
+  for (const event of events) {
+    if (event.type !== 'place.created') continue;
+    const data = objectData(event);
+    if (data === undefined) continue;
+    const place = asEntity(data['place']);
+    const name = asString(data['name']);
+    assert(place !== undefined && name !== undefined, 'place.created is missing its place or its name', {
+      event: event.id,
+    });
+    if (places.has(place as EntityId)) continue;
+    built.push(
+      places.add({
+        id: place as EntityId,
+        name: name as string,
+        type: asString(data['type']) ?? EMPTY,
+        access: asString(data['access']) ?? EMPTY,
+      }),
+    );
+  }
+  return built;
 }
 
 /**

@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 import { assert } from '@rpgsim/shared';
 import { ANNALS_HEADER, type DistilledDay, formatAnnalLine } from './annals.ts';
 import { PEOPLE_FILE, PEOPLE_HEADER, PeopleRegister, formatPersonLine } from './people.ts';
+import { PLACES_FILE, PLACES_HEADER, PlaceRegister, formatPlaceLine } from './places.ts';
 
 /**
  * The village's memory on disk. The only thing in this package that touches it.
@@ -10,12 +11,13 @@ import { PEOPLE_FILE, PEOPLE_HEADER, PeopleRegister, formatPersonLine } from './
  * Two kinds of file and nothing else:
  *
  *   `<root>/people.txt`        everyone who has ever existed, one line each
+ *   `<root>/places.txt`        everywhere that exists, one line each
  *   `<root>/annals/<year>.txt` everything worth remembering, one line each
  *
- * Both are append-only, and that is enforced rather than intended. A line
- * already on disk is never rewritten: the people file skips anybody it already
- * holds, and the annals refuse a day that is not later than the last day
- * written. Those two rules are what make the record trustworthy — a file that
+ * All three are append-only, and that is enforced rather than intended. A line
+ * already on disk is never rewritten: the people and places files skip anything
+ * they already hold, and the annals refuse a day that is not later than the last
+ * day written. Those two rules are what make the record trustworthy — a file that
  * can be rewritten is a file that can be *quietly* rewritten, and a memory
  * nobody can be sure of is not a memory.
  *
@@ -37,6 +39,8 @@ export class AnnalsStore {
   readonly root: string;
   /** Everyone the record already knows. Advanced as days are recorded. */
   readonly people: PeopleRegister;
+  /** Everywhere the record already knows. Advanced as days are recorded. */
+  readonly places: PlaceRegister;
 
   /** The date of the last annal line on disk, or `null` for a fresh record. */
   private latest: string | null;
@@ -45,6 +49,7 @@ export class AnnalsStore {
     this.root = resolve(options.root);
     mkdirSync(join(this.root, ANNALS_DIRECTORY), { recursive: true });
     this.people = readPeople(this.root);
+    this.places = readPlaces(this.root);
     this.latest = latestDate(this.root);
   }
 
@@ -68,10 +73,11 @@ export class AnnalsStore {
       { day: day.key, latest: this.latest },
     );
 
-    // People first. An annal line names people by slug, so a reader who catches
-    // the record mid-write finds the slug already explained rather than a
-    // handle pointing at nobody.
+    // People and places first. An annal line names both by slug, so a reader
+    // who catches the record mid-write finds the slug already explained rather
+    // than a handle pointing at nothing.
     this.appendPeople(day);
+    this.appendPlaces(day);
     this.appendLines(day);
   }
 
@@ -80,6 +86,13 @@ export class AnnalsStore {
     const path = join(this.root, PEOPLE_FILE);
     const body = day.people.map((person) => `${formatPersonLine(person)}\n`).join('');
     appendFileSync(path, existsSync(path) ? body : `${PEOPLE_HEADER}\n${body}`, 'utf8');
+  }
+
+  private appendPlaces(day: DistilledDay): void {
+    if (day.places.length === 0) return;
+    const path = join(this.root, PLACES_FILE);
+    const body = day.places.map((place) => `${formatPlaceLine(place)}\n`).join('');
+    appendFileSync(path, existsSync(path) ? body : `${PLACES_HEADER}\n${body}`, 'utf8');
   }
 
   private appendLines(day: DistilledDay): void {
@@ -108,6 +121,12 @@ export function listAnnalYears(root: string): string[] {
     .filter((name) => /^\d+\.txt$/.test(name))
     .map((name) => name.slice(0, -4))
     .sort((a, b) => Number(a) - Number(b));
+}
+
+function readPlaces(root: string): PlaceRegister {
+  const path = join(root, PLACES_FILE);
+  if (!existsSync(path)) return new PlaceRegister();
+  return PlaceRegister.parse(readFileSync(path, 'utf8'));
 }
 
 function readPeople(root: string): PeopleRegister {

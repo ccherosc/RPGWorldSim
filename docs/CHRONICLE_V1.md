@@ -307,8 +307,9 @@ timestamps and not read from the record.
   `society.parentage-recorded` it produced.
 
 That is 87% of a village day. The remainder is deliberate and is pinned by a
-test rather than left to drift: `world.generated`, `npc.created` and
-`society.household-founded` are the founding, which did not come from anywhere,
+test rather than left to drift: `world.generated`, `place.created`,
+`npc.created` and `society.household-founded` are the founding, which did not
+come from anywhere,
 and `npc.woke` and `npc.turning-in` are the clock coming round, which is not an
 event. An invented cause would be a worse record than an honest silence.
 
@@ -602,9 +603,13 @@ to quietly stop being true.
 New package. Depends on `sim-core` read-only and on the archive. Never imported
 by `sim-core`.
 
-- `cast.ts` — the cast file's schema and reader: id to display name for people
-  and places, each person's household and home. Looking up an id that is not in
-  the cast throws; the chronicle never prints `npc:47` and never guesses.
+- `places.ts` — everywhere that exists, one line each: id, name, kind and
+  whether anybody may walk in. Looking up an id that is not in the file throws;
+  the chronicle never prints `location:3` and never guesses. (Planned as
+  `cast.ts`, "id to display name for people and places". By the time it was
+  built `people.ts` already did people and `casting.ts` had taken the word
+  "cast" for the business of handing out portraits, so the file is named for
+  what it holds.)
 - `day.ts` — `ChronicleDay`: a day's events, indexed by actor, by location and
   by type, with a `presenceOf(npc)` set built from travel and rest events.
 - `score.ts` — newsworthiness, integer-only. Rarer event types score higher than
@@ -622,6 +627,41 @@ Tests: the score is a pure function of the event and the day; changing a
 template's wording does not change any score; the same day scores identically on
 two runs; rotation actually rotates over thirty days (no villager posts on more
 than a stated fraction of them); an unknown id throws rather than rendering.
+
+**Built.** `places.ts`, `day.ts`, `score.ts`, `select.ts`, with their numbers in
+`data/chronicle/scoring.json` and `data/chronicle/selection.json` per directive
+10. 77 tests across `places.test.ts`, `day.test.ts`, `score.test.ts`,
+`select.test.ts` and `apps/simulator/test/edition.test.ts`, checked against
+thirty deliberate mutations; all thirty die. Two survived the first sweep — a
+crowd-cap test that used a crowd sitting exactly *on* the cap, and a best-moment
+test where every one of the person's moments scored the same — and both were
+weak tests rather than weak code.
+
+**A simulation change was needed first.** The archive named every person and
+merely numbered every place: `npc.created` carries a name, nothing said what
+`location:3` was. The only way to find out was to count entries in
+`village.json` and hope worldgen had allocated ids in file order — an assumption
+about the order code ran in wearing the costume of a fact. `village-world.ts`
+now emits **`place.created`** for all thirty-eight places as it builds them,
+which directive 8 asked for independently of the press. It shifts every event id
+after it, so the golden hash in `apps/simulator/test/village.test.ts` was
+re-pinned in the same commit.
+
+**What the rota measures, on a real thirty-day `world-zero` run.** 59 of 86
+villagers posted; the busiest posted on 0.20 of the days; nobody posted two days
+running; a second run reproduced all thirty days exactly. Headlines came out at
+two to five a day, and two of the six slots on an ordinary day go to the same
+kind of event. That is not the filter failing — it is §7's fork budget showing
+through. Phase 1 offers roughly one real fork a day, and 27 of 86 villagers
+never cleared the floor in thirty days. The press is correctly reporting a
+boring world; the answer is more forks, not looser weights.
+
+**A known limit of the rotation penalty, measured rather than guessed.**
+Somebody whose score beats the village's by more than `cooling` posts nearly
+every day, because once everybody carries a penalty their margin outlasts it. On
+real days nobody is that far ahead, and the fix is a village where more kinds of
+thing happen rather than a bigger `cooling` — a bigger number only moves the
+threshold somebody has to clear before the same thing happens again.
 
 ### Slice 5: villager posts — depth
 

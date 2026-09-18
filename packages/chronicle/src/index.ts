@@ -23,6 +23,18 @@ export {
 } from './people.ts';
 export type { PersonRecord } from './people.ts';
 
+// Everywhere that exists
+export {
+  PLACES_FILE,
+  PLACES_HEADER,
+  PUBLIC,
+  PlaceRegister,
+  formatPlaceLine,
+  parsePlaceLine,
+  placeSlug,
+} from './places.ts';
+export type { PlaceRecord } from './places.ts';
+
 // One archived day, distilled
 export { ANNALS_COLUMNS, ANNALS_HEADER, distil, formatAnnalLine } from './annals.ts';
 export type { AnnalLine, DistilOptions, DistilledDay } from './annals.ts';
@@ -30,6 +42,25 @@ export type { AnnalLine, DistilOptions, DistilledDay } from './annals.ts';
 // The record on disk
 export { ANNALS_DIRECTORY, AnnalsStore, listAnnalYears, yearOf } from './annals-store.ts';
 export type { AnnalsStoreOptions } from './annals-store.ts';
+
+// One day of the archive, indexed the way the press reads it
+export { ChronicleDay } from './day.ts';
+export type { ChronicleDayOptions } from './day.ts';
+
+// How newsworthy a thing that happened is
+export { ScoringSchema, compareNewsworthiness, rank, scoreOf } from './score.ts';
+export type { Newsworthiness, ScoringConfig } from './score.ts';
+
+// What goes on the page, and who writes it
+export {
+  SelectionSchema,
+  lastPostedWithin,
+  rankCandidates,
+  select,
+  selectHeadlines,
+  selectPosters,
+} from './select.ts';
+export type { Candidate, Edition, PublishedDay, SelectOptions, SelectionConfig } from './select.ts';
 
 // The faces
 export {
