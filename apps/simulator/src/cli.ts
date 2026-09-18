@@ -1,11 +1,14 @@
 import { pathToFileURL } from 'node:url';
+import { AnnalsStore, distil } from '@rpgsim/chronicle';
 import {
   EventArchive,
   JsonFileSaveStore,
   TICKS_PER_DAY,
   formatTimestamp,
+  readArchiveManifest,
+  readEventDay,
 } from '@rpgsim/sim-core';
-import { loadCalendar, loadNames, loadVillage } from './data.ts';
+import { loadCalendar, loadNames, loadSignificance, loadVillage } from './data.ts';
 import { probeWorldFactory } from './probe-world.ts';
 import { villageWorldFactory } from './village-world.ts';
 import { type SimWorld, type WorldFactory, verifyDeterminism } from './verify.ts';
@@ -30,6 +33,7 @@ Usage:
   npm run sim -- run     [options]   Build a world and run it
   npm run sim -- resume  [options]   Load a save and keep running
   npm run sim -- verify  [options]   Run the determinism checks
+  npm run sim -- annals  [options]   Distil an archive into the village's memory
   npm run sim -- help                Show this message
 
 Options:
@@ -43,6 +47,7 @@ Options:
   --every <n>       Print a status line every n simulated days (default: 5, 0 = off)
   --archive <path>  Write the durable event history there, one file per day
   --rewrite         Let --archive replace days it finds already written
+  --annals <path>   Where the permanent record lives, for the annals command
 
 "village" is World Zero, built from data/world/village.json.
 "probe" is the Phase 0 kernel harness: no economy, needs, knowledge or spatial
@@ -65,6 +70,8 @@ interface Options {
   /** Where to write durable history. Undefined means do not write any. */
   archive?: string;
   rewrite: boolean;
+  /** Where the permanent record lives. Only the annals command reads it. */
+  annals?: string;
 }
 
 export function parseArgs(argv: readonly string[]): { command: string; options: Options } {
@@ -115,6 +122,10 @@ export function parseArgs(argv: readonly string[]): { command: string; options: 
         break;
       case '--archive':
         options.archive = requireValue(flag, value);
+        i++;
+        break;
+      case '--annals':
+        options.annals = requireValue(flag, value);
         i++;
         break;
       case '--save':
@@ -251,6 +262,69 @@ function commandResume(options: Options): void {
   runWorld(world, options, startDay, openArchive(world, options));
 }
 
+/**
+ * Turn an archive into the village's memory.
+ *
+ * The day archive is a cache: the seed reproduces it byte for byte, so it can
+ * be deleted and rebuilt at will. The annals are not. That asymmetry is why
+ * this is a separate command rather than something `run` does on the way past —
+ * distilling is re-runnable against a rebuilt archive, and a permanent record
+ * should be written on purpose and not as a side effect of a developer running
+ * thirty days to look at a hash.
+ *
+ * An unfinished archive is refused. Its last day may be half a day, and half a
+ * day written into a permanent record stays half a day forever; `manifest.complete`
+ * exists precisely so a publisher can tell the difference.
+ */
+function commandAnnals(options: Options): number {
+  if (options.archive === undefined || options.annals === undefined) {
+    console.error('annals needs both --archive (to read) and --annals (to write)\n');
+    console.error(USAGE);
+    return 2;
+  }
+
+  const manifest = readArchiveManifest(options.archive);
+  if (manifest === undefined) {
+    console.error(`no archive at ${options.archive}`);
+    return 1;
+  }
+  if (!manifest.complete) {
+    console.error(`the archive at ${options.archive} was never closed; its last day may be partial`);
+    return 1;
+  }
+
+  const calendar = loadCalendar();
+  const significance = loadSignificance();
+  const store = new AnnalsStore({ root: options.annals });
+  const before = store.people.size;
+
+  let days = 0;
+  let lines = 0;
+  for (const day of manifest.days) {
+    // A day that produced no notable line leaves `lastDate` where it was, so it
+    // is offered again on the next run. Distilling it a second time enrols
+    // nobody twice and writes nothing, which is the cheapest way to be correct
+    // about a village where nothing happened.
+    if (store.lastDate !== null && day.key <= store.lastDate) continue;
+    const distilled = distil({
+      key: day.key,
+      events: readEventDay(options.archive, day.key),
+      calendar,
+      significance,
+      people: store.people,
+    });
+    store.record(distilled);
+    days++;
+    lines += distilled.lines.length;
+  }
+
+  console.log(`annals at ${store.root}`);
+  console.log(`  read ${manifest.days.length} archived days, distilled ${days}`);
+  console.log(`  ${lines} lines written, ${store.people.size - before} people newly recorded`);
+  console.log(`  the record now runs to ${store.lastDate ?? 'nothing at all'}`);
+  return 0;
+}
+
 function commandVerify(options: Options): number {
   const report = verifyDeterminism({
     seed: options.seed,
@@ -284,6 +358,8 @@ export function main(argv: readonly string[]): number {
       return 0;
     case 'verify':
       return commandVerify(parsed.options);
+    case 'annals':
+      return commandAnnals(parsed.options);
     case 'help':
     case '--help':
     case '-h':

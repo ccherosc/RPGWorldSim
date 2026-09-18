@@ -12,6 +12,7 @@
     "packages/world",
     "packages/npc",
     "packages/society",
+    "packages/chronicle",
     "apps/simulator"
   ],
   "scripts": {

@@ -545,6 +545,13 @@ to learn before hunger, work, money and relationships are layered on top of it â
 and a paper generated from a bare skeleton of a village sets the baseline
 against which every later system can be judged.
 
+**Landed so far.** Slices 1 to 3 of [CHRONICLE_V1.md](CHRONICLE_V1.md) are
+built: the durable day archive (`npm run sim -- run --archive <path>`), the
+`world.generated` event and the worldgen hook that makes the founding
+observable, and the village's permanent memory (`npm run sim -- annals --archive
+<in> --annals <out>`) â€” two tab-separated text files that survive the archive
+being deleted. The paper itself is slices 4 to 7.
+
 ## 6. Risks
 
 - **Worldgen becoming a content project.** Thirty buildings and a hundred names

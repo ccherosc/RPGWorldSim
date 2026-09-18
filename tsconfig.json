@@ -7,6 +7,7 @@
     "packages/world/**/*.ts",
     "packages/npc/**/*.ts",
     "packages/society/**/*.ts",
+    "packages/chronicle/**/*.ts",
     "apps/simulator/**/*.ts",
     "vitest.config.ts"
   ],

@@ -35,7 +35,9 @@
       "@rpgsim/npc": ["packages/npc/src/index.ts"],
       "@rpgsim/npc/*": ["packages/npc/src/*"],
       "@rpgsim/society": ["packages/society/src/index.ts"],
-      "@rpgsim/society/*": ["packages/society/src/*"]
+      "@rpgsim/society/*": ["packages/society/src/*"],
+      "@rpgsim/chronicle": ["packages/chronicle/src/index.ts"],
+      "@rpgsim/chronicle/*": ["packages/chronicle/src/*"]
     }
   }
 }

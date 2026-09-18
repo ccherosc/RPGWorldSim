@@ -35,6 +35,19 @@ const SIMULATION_SOURCES = [
   join('apps', 'simulator', 'src'),
 ];
 
+/**
+ * Code that does not run inside the simulation but must still give the same
+ * answer twice.
+ *
+ * The chronicle is the first of these. Nothing it does can perturb a world --
+ * the layering test in `packages/chronicle/test` is what keeps that true -- but
+ * its whole premise is that the day archive is a cache: delete it, rebuild it
+ * from the seed, distil it again, and get byte-identical annals. A
+ * `Math.random` or a `new Date` anywhere in it would break that quietly and
+ * permanently, because the annals are the one thing here that is never rewritten.
+ */
+const REPRODUCIBLE_SOURCES = [join('packages', 'chronicle', 'src')];
+
 interface BannedPattern {
   readonly name: string;
   readonly pattern: RegExp;
@@ -119,15 +132,22 @@ function lineOf(text: string, index: number): number {
 }
 
 describe('determinism guard', () => {
-  const files = SIMULATION_SOURCES.flatMap(collectSourceFiles);
+  const files = [...SIMULATION_SOURCES, ...REPRODUCIBLE_SOURCES].flatMap(collectSourceFiles);
 
   it('finds the simulation source tree', () => {
     expect(files.length).toBeGreaterThan(10);
     expect(files.every((file) => file.endsWith('.ts'))).toBe(true);
   });
 
+  it('scans the chronicle too, not only the simulation', () => {
+    // Named explicitly because a scan that silently covers nothing is a guard
+    // that silently passes: a mistyped directory would fail no other test here.
+    const scanned = files.map((file) => relative(REPO_ROOT, file).split(sep).join('/'));
+    expect(scanned.some((file) => file.startsWith('packages/chronicle/src/'))).toBe(true);
+  });
+
   for (const banned of BANNED) {
-    it(`bans ${banned.name} in simulation code`, () => {
+    it(`bans ${banned.name} in reproducible code`, () => {
       const offences: string[] = [];
       for (const file of files) {
         const relativePath = relative(REPO_ROOT, file);

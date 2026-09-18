@@ -15,6 +15,7 @@ runs it.
 ```bash
 npm run sim -- run --days 4 --every 2      # build World Zero and run four days
 npm run sim -- verify                      # the five determinism checks
+npm run sim -- annals --archive ./history --annals ./memory   # distil a record
 npm run sim -- help
 ```
 
@@ -51,6 +52,7 @@ have reached — same hash, same events, same pending schedule.
 | `--every <n>` | print a status line every n simulated days, `0` for none |
 | `--archive <path>` | write the durable event history there, one file per simulated day |
 | `--rewrite` | let `--archive` replace days it finds already written |
+| `--annals <path>` | where the permanent record lives, for the `annals` command |
 
 ## Keeping a durable history
 
@@ -94,12 +96,43 @@ refused unless `--rewrite` says otherwise, because re-running an already
 archived world is easy to do by accident and the silent result would be a day
 whose events happened twice.
 
+## Distilling a memory
+
+An archive is exact and far too big to be a record: about 80 MB of JSONL a
+simulated year. `annals` reads one and writes the part worth keeping.
+
+```bash
+npm run sim -- run --days 3 --archive ./history
+npm run sim -- annals --archive ./history --annals ./memory
+```
+
+```
+memory/
+  people.txt         everyone who has ever existed, one line each
+  annals/1200.txt    everything worth remembering, one line each
+```
+
+Both files are tab-separated text and both are append-only. Which events earn a
+line is set by weights in `data/world/significance.json`, not by code, so an
+opinion about what is interesting can change without one.
+
+The command is re-runnable: it skips every day the record has already passed and
+writes nobody down twice. It refuses an archive whose manifest is not
+`complete`, because half a day written into a permanent record stays half a day
+forever.
+
+The archive is a **cache** and the record is the record. Deleting the archive,
+rebuilding it from the seed and re-distilling produces byte-identical annals —
+that is tested directly in `test/annals.test.ts`, and it is what makes throwing
+the archive away safe. See
+[docs/CHRONICLE_V1.md](../../docs/CHRONICLE_V1.md) slice 3.
+
 ## What is here
 
 | Module | Owns |
 | --- | --- |
-| `cli.ts` | argument parsing, the four commands, and reading `data/` |
-| `data.ts` | the loaders: calendar, village, name book — each validated |
+| `cli.ts` | argument parsing, the five commands, and reading `data/` |
+| `data.ts` | the loaders: calendar, village, name book, significance — each validated |
 | `village-schema.ts` | the shape `data/world/village.json` must have |
 | `village-world.ts` | `VillageWorld`: worldgen, and the wiring of five systems |
 | `probe-world.ts` | the Phase 0 kernel harness, still reachable and still run |

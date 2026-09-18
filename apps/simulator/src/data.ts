@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { type SignificanceConfig, SignificanceSchema } from '@rpgsim/chronicle';
 import { type NameBook, makeNameBook } from '@rpgsim/npc';
 import { type CalendarConfig, CalendarSchema } from '@rpgsim/sim-core';
 import type { ZodType } from 'zod';
@@ -50,6 +51,22 @@ export function loadCalendar(dataRoot: string = DATA_ROOT): CalendarConfig {
 
 export function loadVillage(dataRoot: string = DATA_ROOT): VillageConfig {
   return loadJson(join(dataRoot, 'world', 'village.json'), VillageSchema, 'village');
+}
+
+/**
+ * Read the weights that decide what the annals keep.
+ *
+ * Loaded here with everything else rather than inside the chronicle, for the
+ * same reason the village config is: a package that reads its own data file is
+ * a package whose output depends on the state of the filesystem. The chronicle
+ * is handed its numbers.
+ */
+export function loadSignificance(dataRoot: string = DATA_ROOT): SignificanceConfig {
+  return loadJson(
+    join(dataRoot, 'world', 'significance.json'),
+    SignificanceSchema,
+    'significance table',
+  );
 }
 
 /**

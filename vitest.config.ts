@@ -11,6 +11,7 @@ export default defineConfig({
       '@rpgsim/world': r('./packages/world/src/index.ts'),
       '@rpgsim/npc': r('./packages/npc/src/index.ts'),
       '@rpgsim/society': r('./packages/society/src/index.ts'),
+      '@rpgsim/chronicle': r('./packages/chronicle/src/index.ts'),
     },
   },
   test: {

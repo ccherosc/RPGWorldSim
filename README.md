@@ -88,7 +88,7 @@ anything never exercises cancellation.
 
 ```
 apps/
-  simulator/     headless driver: run, resume, verify
+  simulator/     headless driver: run, resume, verify, annals
   observer/      React observer UI               (Phase 8)
 packages/
   shared/        primitives: assert, heap, canonical JSON, hashing, safe math
@@ -96,6 +96,7 @@ packages/
   world/         locations, buildings, routes, occupancy
   npc/           identity now; needs, decisions, memory later
   society/       households and descent now; law and religion later
+  chronicle/     the village's permanent memory, distilled from events
   economy/       labor, production, markets, currency      (Phase 3)
   ecology/       crops, animals, seasons                   (Phase 7)
   combat/        injury, fighting, warfare                 (Phase 6+)
@@ -108,8 +109,8 @@ docs/            architecture and design documents
 
 Directories marked with a phase have no `package.json` yet: they are
 placeholders, not npm workspace members, and each has a README describing what
-it will own. The unmarked ones — `shared`, `sim-core`, `world`, `npc`, `society` and
-`apps/simulator` — are live workspaces.
+it will own. The unmarked ones — `shared`, `sim-core`, `world`, `npc`, `society`, `chronicle`
+and `apps/simulator` — are live workspaces.
 
 ## The rules that shape everything
 

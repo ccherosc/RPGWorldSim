@@ -361,7 +361,7 @@ Tests:
 - `world.generated` is the last event of the founding and its counts match the
   world that was built.
 
-### Slice 3: the annals — the village's memory
+### Slice 3: the annals — the village's memory — **built**
 
 The durable archive from slice 1 is exact, machine-readable and far too big to
 be a record. At the measured rate — 1,250 events a day for 86 villagers — a
@@ -381,10 +381,10 @@ So the permanent record is two kinds of file, and nothing else.
 and never rewritten:
 
 ```
-# slug  name  sex  born  household
-hargrave    Agnes Hargrave    f  1147-02-11  fletcher-house
-hargrave-2  Agnes Hargrave    f  1201-08-30  hargrave-house
-tomlin      Rob Tomlin        m  1142-10-03  tomlin-house
+# slug  id  name  sex  born  family
+jocelin-netherby  npc:0  Jocelin Netherby  male    1160-03-02  netherby
+matilda-netherby  npc:1  Matilda Netherby  female  1157-09-15  netherby
+adela-netherby    npc:2  Adela Netherby    female  1192-07-29  netherby
 ```
 
 Only birth facts live here, because only birth facts never change. A death, a
@@ -393,18 +393,19 @@ column would mean rewriting a line, and a line that can be rewritten is a line
 that can be quietly rewritten. Who is alive on a given day is derived: in
 `people.txt`, with no death in the annals before that day.
 
-Slugs are stable and deterministic, derived from the surname with a numeric
-suffix when taken, in entity-id order — so a second Agnes Hargrave is
-`hargrave-2` and never displaces the first.
+Slugs are stable and deterministic, derived from the whole name with a numeric
+suffix when taken, in the order the day announced people — so a second Agnes
+Hargrave is `agnes-hargrave-2` and never displaces the first.
 
 **`<root>/annals/<year>.txt`** — one line per notable event, one file per
 simulated year, appended in order and never reordered:
 
 ```
 # date  time  event  who  detail  id
-1203-07-14  06:12  drought.began     -          third dry month        #41902
-1203-09-02  11:40  harvest.failed    village    barley at 18% of normal  #44518
-1203-11-20  04:55  death.hunger      tomlin     age 71                 #48231
+1200-04-01  00:00  npc.created                 jocelin-netherby    Jocelin Netherby, aged 40, founding             #1
+1200-04-01  00:00  society.household-founded   jocelin-netherby,…  the Netherby house, 4 under the roof            #5
+1200-04-01  00:00  society.parentage-recorded  adela-netherby      child of matilda-netherby and jocelin-netherby  #14
+1200-04-02  07:11  travel.blocked              tanner-3            turned back: full (8/8)                         #2167
 ```
 
 Tab-separated, six columns, `-` where a column is empty. No braces, no repeated
@@ -433,30 +434,90 @@ stops being committed at all: it is generated, read, and thrown away.
 
 New in `packages/chronicle` — created by this slice, extended by the next:
 
-- `annals.ts` — `distil(day, cast, weights)` turns one archived day into annal
-  lines. A pure function of its inputs: no clock, no filesystem, no randomness.
+- `significance.ts` — the schema for the weights, `weightOf` and `isNotable`.
+- `table.ts` — the one formatting decision both files share. A field holding a
+  tab or a newline is refused rather than escaped: an escaping rule is a second
+  format hiding inside the first.
 - `people.ts` — slug allocation and the people file.
-- `annals-store.ts` — the only thing that touches the disk. Appends; refuses to
-  rewrite a line it did not just write.
+- `annals.ts` — `distil({ key, events, calendar, significance, people })` turns
+  one archived day into annal lines. A pure function of its inputs: no clock, no
+  filesystem, no randomness. The one thing it mutates is the people register
+  handed to it, and that mutation is itself idempotent.
+- `annals-store.ts` — the only thing that touches the disk. Appends; refuses a
+  day at or before the last one written.
+
+The chronicle is wired to the CLI as `npm run sim -- annals --archive <in>
+--annals <out>`, which distils every archived day the record has not already
+passed. It refuses an archive whose manifest is not `complete`: half a day
+written into a permanent record stays half a day forever.
+
+Two rules are enforced by tests rather than intended. **The simulation never
+knows it is being watched** — no simulation package may import the chronicle, or
+a world's behaviour could depend on whether anybody was writing it down. And
+**the chronicle reads events, not systems** — it may import only `@rpgsim/shared`,
+`@rpgsim/sim-core`, `zod` and `node:*`, so it cannot ask the travel system where
+somebody is and quietly stop Phase 1's honesty rule from being enforceable.
+
+The determinism guard now scans the chronicle too, under a second list named
+`REPRODUCIBLE_SOURCES` with its own stated reason. The chronicle does not run
+inside the simulation, so the existing justification did not cover it; the one
+that does is that the annals are never rewritten, so a `Math.random` here would
+break the rebuild quietly and permanently.
 
 **This slice changes no simulation state.** No new save module, no new field, no
 new event — so every golden hash in the project stays valid. It reads what
 slice 2 already emits and writes text. That is the whole reason it is safe to
 do now.
 
-Tests:
+**Three things shipped differently from the sketch above**, and the reasons are
+worth keeping.
 
-- Distilling a day twice produces byte-identical lines.
-- Appending day *n+1* leaves the bytes of day *n* untouched — compared as a file
-  prefix, not by re-parsing.
-- A routine event never reaches the annals; a birth always does; and moving the
-  weight in `significance.json` changes what is written with no code change.
-- A person's line is written once. A second distillation of the same day adds
-  nothing.
-- Every annal line's id resolves to an event in the archived day it names.
-- **Delete the entire day archive, rebuild it from the seed, re-distil, and get
-  byte-identical annals.** This is the test that proves the ledger is a cache,
-  and it is the one that would make throwing the archive away safe.
+*The entity id is a column.* Without it the file cannot be reopened: the annals
+name people by slug and the archive names them by id, so something has to hold
+the two together. The alternative was a sidecar index, which is a second file
+that can disagree with the first. The id is itself a birth fact — assigned at
+creation, never changed — so it breaks no rule by being there.
+
+*Slugs use the whole name, not the surname.* The surname alone was tried and
+does not survive contact with a real village: twenty-four families hold
+eighty-six people, so a household of four came out `netherby`, `netherby-2`,
+`netherby-3`, `netherby-4` — numbers standing in for exactly the names that make
+a record readable. A slug's whole job is to be recognisable at a glance a decade
+later. This was caught by reading the output, not by a test, which is the
+argument for generating real output early.
+
+*The last column of `people.txt` is the family, not the household.* Two Netherby
+houses both read `netherby`. Households become identified things when household
+events start to matter; until then the column says what a reader actually wants
+from it and nothing it cannot back up. `sex` is also written as the simulation
+states it — `male`, `female` — rather than abbreviated, because an abbreviation
+is a decoding rule a reader in ten years has to be told.
+
+Measured on a two-day archive of the `world-zero` village: 612,918 bytes of
+JSONL distilled to 22,483 bytes of memory, or 3.7% — about 330 KB a simulated
+year at the shipped weights, inside the 1–2 MB projected above.
+
+Tests cover: distilling a day twice produces byte-identical lines and adds
+nobody twice; appending day *n+1* leaves the bytes of day *n* untouched,
+compared as a file prefix rather than by re-parsing; a routine event never
+reaches the annals and moving a weight in `significance.json` changes what is
+written with no code change; an event type nobody has an opinion about yet is
+forgotten rather than kept; every annal line's id resolves to an event in the
+archived day it names, and every slug it uses is explained by `people.txt`; an
+npc the record has never heard of throws rather than rendering a placeholder,
+because a `?` in a permanent record is permanent; and the family column is
+filled from a house founded later the same day, which is what forced the
+distiller to make two passes — `npc.created` carries no household, so a one-pass
+version writes every founding villager down as belonging to nobody.
+
+And the one that decides whether the design is right: **delete the entire day
+archive, rebuild it from the seed, re-distil, and get byte-identical annals.**
+It passes. The archive can be thrown away.
+
+A sixteen-mutant sweep over the package leaves no survivors. The first pass left
+one: nothing checked that `whoOf` skips non-people actors, so a household in an
+actor list would have been looked up as a person. Two tests were added and the
+sweep re-run clean.
 
 Deferred, with a trigger rather than a vague "later": **collapsing old years.**
 Once a year file passes about 2 MB, it is rewritten once at a higher threshold

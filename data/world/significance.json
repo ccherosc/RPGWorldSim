@@ -1,0 +1,25 @@
+{
+  "threshold": 50,
+  "default": 0,
+  "weights": {
+    "world.generated": 100,
+    "npc.created": 90,
+    "npc.removed": 95,
+    "society.household-founded": 80,
+    "society.household-dissolved": 90,
+    "society.household-member-joined": 70,
+    "society.household-member-left": 70,
+    "society.household-role-changed": 60,
+    "society.household-dwelling-changed": 60,
+    "society.parentage-recorded": 60,
+    "travel.blocked": 60,
+    "npc.could-not-rest": 60,
+    "npc.household-changed": 40,
+    "npc.home-changed": 40,
+    "npc.woke": 0,
+    "npc.turning-in": 0,
+    "npc.went-to-bed": 0,
+    "travel.departed": 0,
+    "travel.arrived": 0
+  }
+}
