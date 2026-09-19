@@ -1328,6 +1328,154 @@ press-side. 1158 tests.
 
 ---
 
+### Slice 9: counted, not typed — and the age a villager speaks from — **built**
+
+Two faults that look unrelated and are the same fault. The site was stating
+things about Pennycroft that nobody had checked against Pennycroft.
+
+#### Part one: no number in the copy is typed by hand
+
+**The site said twenty-four households because somebody counted once.** Seven
+numbers were sitting in `publication.json` as English words in the middle of
+otherwise fine prose — `Twenty-four households live along the lanes` — and the
+People page printed a tally that said *families* where it meant *households*.
+Both were true on the morning they were written. Neither is a fact about the
+world; they are facts about a build, and the world advances one day per real
+day. The first birth that founds a new roof turns the About page into a page
+that quietly goes on describing last spring.
+
+**Households are not families, and the site now says both.** Twenty-four roofs,
+twenty family names, eighty-six people. A village where two Webb households
+stand on different lanes is an ordinary village, and a page that prints one
+number for both is not rounding — it is answering a different question than the
+one it asked. `households.ts` keeps a `Set` of standing households, learned
+forwards from `society.household-founded` and `society.household-dissolved` in
+the same read loop and for the same reason `Kinfolk` does: the press may not
+know on the twelfth what the village found out on the twentieth. Dissolutions
+are honoured, so the number can go down.
+
+**`counting(tally)` walks the whole config, not the four fields that hold prose
+today.** A fifth field of prose is the kind of thing somebody adds without
+thinking to come back here, and a `{households}` that silently fails to resolve
+is a word in curly brackets printed in a caption. So every string in the config
+is walked, every placeholder must be one the tally can answer, and none may
+survive — the build fails rather than ships. `{People}` and `{people}` are one
+dial, so copy can be recased without the code learning a new name.
+
+**`inWords` writes the British forms**, because the copy is written in them:
+`one hundred and six`, `one thousand, one hundred and six`. Above `9999` it
+refuses rather than guessing, which is a bound the village will not reach this
+decade and a loud failure if it ever does.
+
+**A trap, and a trap on the trap.** A test reads every line of prose in the
+config and fails on a number written as a word. It found three lines that are
+not the fault being hunted — two building capacities that come from the towne
+file rather than the people record, and `no two people wear the same one`, which
+is not a count at all. Those are in an `ALLOWED` list with a written reason
+each, per the determinism rules' own idiom. An allow-list grows until it excuses
+everything, so a second test runs the original offender — `Twenty-four
+households live along the lanes` — back through the same filter and fails if it
+now passes. The day that test goes green is the day the first one stopped being
+a test.
+
+**The determinism guard earned its keep on press code.** The config walk was
+written as `Object.entries(...).map(...)` and rule 5 refused it. Sorting the
+walk costs nothing here and the reason is worth writing down: everything in this
+config whose order a reader can see — `sections`, `body`, `images`, `footer` —
+is an array, and arrays keep their order through `map`. The objects are fixed
+named fields whose key order reaches no page.
+
+#### Part two: a ten-year-old and a seventy-year-old wake up differently
+
+**Eighty-six villagers were one person wearing eighty-six faces.** Every writer
+drew from the same six ways of saying they had woken up. The portraits already
+knew better — `casting.json` sorts faces into seven life stages — so the site
+was pairing a grey-haired picture with a voice that could have belonged to
+anybody, and the picture is the one a reader believes.
+
+**One vocabulary, not two.** The obvious move was a second set of age bands for
+wording. Instead `AGE_BANDS` and the band walk moved out of `portraits.ts` into
+`stages.ts`, and `Casting` exposes the `LifeStages` it built from the same file.
+Faces and voices are now banded on the same boundaries from the same data, so
+they cannot disagree about how old somebody is. Tightening the rule schema's
+`name` from free text to the seven known stages removed a pre-existing
+unchecked cast in `Casting.propose` on the way past.
+
+**Measured before written.** Which stages can reach which event types is a
+question about thirty days of Pennycroft, not a matter of taste, so it was
+counted. `npc.woke`, `npc.turning-in` and `npc.went-to-bed` carry 180 or more
+events for every writing stage, which is enough for a stage's phrasing to be
+read. The once-in-a-lifetime events — born into the record, moving house,
+founding a household — carry six to eighteen each across the whole village, so
+they stay unbanded.
+
+**`travel.blocked` is unbanded, and it is the interesting one.** Being turned
+away from a full building reads very differently at fourteen and at seventy, and
+it was the most inviting type on the list. In thirty days no elder in Pennycroft
+is ever turned away from anything: they have nowhere to go that fills up. An
+elder's phrasing for it would have been written, tested, shipped, and never once
+read. It is left out with the reason recorded in the file, and it is a concrete
+argument for §7 — the village needs more reasons for people to go places, not
+more personality.
+
+**Banding is an addition, never a narrowing.** Every event type keeps its
+unbanded wording, so a stage with no phrasing of its own sounds plain rather
+than going silent, and adding a band can never starve a stage. A villager whose
+only eligible wording belongs to somebody else's age writes no post at all,
+which is the safe direction: a missing line is invisible, a thirty-year-old
+remarking on his knees is a bug a reader can see.
+
+**A parent's line is banded by the child, not the parent.** `the baby would not
+settle` and `they were into everything before I had my boots on` are the same
+event at two different ages, and the mother's own age has no bearing on which is
+true. Banded by the writer, every small child in the village would be described
+as a baby — which is true of enough of them to pass a glance, and is why this
+one has a test of its own.
+
+**No age means no banded wording, rather than all of it.** The paper reads the
+same books through the same rule and speaks for the village rather than for a
+person. The opposite default would hand the parish notices every private thought
+in the file.
+
+**`stages` is required in `PostOptions`, not optional.** Optional would mean a
+caller could leave it out and get a village where every banded wording is
+silently unreachable, and nothing would fail. Required made the compiler find
+all nine call sites.
+
+**Two tests the reachability check cannot be.** `has nothing in it that no real
+event can reach` offers each wording to whoever was *present*, not to whoever
+could have *written* it — so a wording banded `infant` in the writers' book
+would pass it while being unreachable in reality, because nobody under ten is
+ever on the rota. `bands no wording to a stage that nobody in it could ever say
+it` closes that. The opposite hole is a stage quietly left out of a band set:
+six wordings for waking, a seventh stage that gets none, every villager in it
+falling back on the general phrasing forever, and nothing failing. `gives every
+stage of life in the village something of its own to say` closes that one, and
+killed a mutant that turned every `elder` band into `older`.
+
+**Twelve mutants, no survivors.** The bands read and ignored; the ageless reader
+given everything; banded wording replacing the general instead of adding to it;
+the age check dropped from the filter; a parent's line banded by the parent and
+banded by nobody; a villager's own line banded by nobody; a stage boundary off
+by one; the walk never stopping, so everybody is an elder; the ascent assertion
+neutered; a whole stage removed from the band sets; and wording banded to a
+stage nobody in it could ever write. Eleven died to the unit tests, the last to
+thirty days of the real village.
+
+**Both golden hashes were re-pinned, and both were meant to move.** Every
+poster's morning and night lines are now drawn from a different set of
+candidates, so the ordinary day moved for all of them at once. The family day
+moved for that reason and one of its own — its three mentions are banded by the
+children they are about. The count of three did not move, which is why it is
+asserted separately from the hash.
+
+**The world did not move.** `npm run verify` still reports `fc238578b5964a64`
+and 26 invariants at tick 10368000. All of this is press-side: wording is not
+simulation state, and a village that says something different about the same day
+is still the same village. 1193 tests.
+
+---
+
 ## 4. Invariants
 
 New invariants and checks, in the spirit of sim-core rule 11:

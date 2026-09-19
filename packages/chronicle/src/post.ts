@@ -6,6 +6,7 @@ import type { Kinfolk } from './kin.ts';
 import { type PersonRecord, yearsBetween } from './people.ts';
 import { type Newsworthiness, type ScoringConfig, compareNewsworthiness, scoreOf } from './score.ts';
 import type { Candidate, SelectionConfig } from './select.ts';
+import type { LifeStages } from './stages.ts';
 import type { Whereabouts } from './witness.ts';
 import {
   TemplateSchema,
@@ -159,6 +160,16 @@ export interface PostOptions {
   /** The seed the world was generated from. Makes the wording reproducible. */
   readonly worldSeed: string;
   readonly author: PersonRecord;
+  /**
+   * Where the boundaries between life stages fall.
+   *
+   * Required rather than optional, though a book with no banded wording would
+   * not miss it. Optional would mean a caller could leave it out and get a
+   * village where every banded wording is silently unreachable -- a post that
+   * still reads perfectly well, for a village that has quietly lost two thirds
+   * of its voice, with nothing anywhere saying so.
+   */
+  readonly stages: LifeStages;
   /** Absent for a blog where nobody speaks for anybody else. */
   readonly household?: HouseholdVoice;
 }
@@ -232,7 +243,7 @@ function mentionOf(options: PostOptions): PostLine | undefined {
   const rng = Rng.forStream(worldSeed, `kin:${day.key}:${author.slug}`);
   if (!rng.chance(household.chance / 100)) return undefined;
 
-  const context = aboutChild(day, found.child);
+  const context = aboutChild(day, found.child, options.stages);
   const variants = eligible(templates.family[found.moment.event.type] ?? [], found.moment.event, context);
   assert(variants.length > 0, 'a chosen mention lost its wording', {
     day: day.key,
@@ -275,7 +286,7 @@ function bestOfTheChildren(options: PostOptions, household: HouseholdVoice): Men
     if (child === undefined) continue;
     if (yearsBetween(child.born, day.key) >= household.writingAge) continue;
 
-    const context = aboutChild(day, child);
+    const context = aboutChild(day, child, options.stages);
     // `byActor` is indexed off `event.actors`, and taking part is the first
     // thing `Whereabouts.saw` accepts, so every event in this loop is one the
     // child was present for. Asking `saw` again here would read as a check and
@@ -323,11 +334,17 @@ export function writePosts(
  * wording about company cannot make somebody list themselves, and it resolves
  * to nothing at all when they were alone — which means a wording about company
  * is never offered for a solitary moment.
+ *
+ * The stage is the writer's own, taken on the day they are writing rather than
+ * once for the whole archive. A villager who has a birthday in Blossom sounds
+ * nineteen in the posts before it and twenty in the posts after, and an old post
+ * rebuilt next year still sounds the age its author was when they wrote it.
  */
 function firstPerson(options: PostOptions): WordingContext {
-  const { author, day } = options;
+  const { author, day, stages } = options;
   return {
     day,
+    band: stages.bandFor(yearsBetween(author.born, day.key)),
     words: (key, event) => {
       switch (key) {
         case 'me':
@@ -364,9 +381,10 @@ function firstPerson(options: PostOptions): WordingContext {
  * would be a word no wording could use and no test could reach. It belongs here
  * on the day the simulation gives two children something to do together.
  */
-function aboutChild(day: ChronicleDay, child: PersonRecord): WordingContext {
+function aboutChild(day: ChronicleDay, child: PersonRecord, stages: LifeStages): WordingContext {
   return {
     day,
+    band: stages.bandFor(yearsBetween(child.born, day.key)),
     words: (key, event) => {
       switch (key) {
         case 'child':

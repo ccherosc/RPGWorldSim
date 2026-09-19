@@ -73,6 +73,7 @@ export type { Template, WordingContext } from './wording.ts';
 
 // Who belongs to whom
 export { Kinfolk } from './kin.ts';
+export { Households } from './households.ts';
 
 // The villagers, in their own words
 export { TemplateBookSchema, householdVoice, writePost, writePosts } from './post.ts';
@@ -84,7 +85,6 @@ export type { Glance, Paper, PaperBook, PaperOptions, Story } from './paper.ts';
 
 // The faces
 export {
-  AGE_BANDS,
   PORTRAIT_ID,
   PORTRAIT_SEXES,
   PortraitAtlasSchema,
@@ -92,11 +92,14 @@ export {
   PortraitCellSchema,
   parsePortraitId,
 } from './portraits.ts';
-export type { AgeBand, Portrait, PortraitAtlas, PortraitCell, PortraitSex } from './portraits.ts';
+export type { Portrait, PortraitAtlas, PortraitCell, PortraitSex } from './portraits.ts';
+
+// The stages of a life, shared by the faces and the voices
+export { AGE_BANDS, AgeBandRuleSchema, LifeStages } from './stages.ts';
+export type { AgeBand, AgeBandRule } from './stages.ts';
 
 // Who wears which face
 export {
-  AgeBandRuleSchema,
   Casting,
   CastingSchema,
   CastingTakeSchema,

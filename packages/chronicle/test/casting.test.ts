@@ -5,6 +5,7 @@ import {
   PortraitCatalog,
   portraitSexOf,
   yearsBetween,
+  type AgeBandRule,
   type CastingConfig,
   type PersonRecord,
   type PortraitAtlas,
@@ -18,7 +19,7 @@ import {
  * faces which are already taken.
  */
 
-const BANDS = [
+const BANDS: AgeBandRule[] = [
   { name: 'infant', from: 0 },
   { name: 'child', from: 3 },
   { name: 'youth', from: 13 },
@@ -109,7 +110,7 @@ describe('reading the casting file', () => {
   });
 
   it('refuses age bands that do not start at zero or do not ascend', () => {
-    const withBands = (bands: { name: string; from: number }[]) => () =>
+    const withBands = (bands: AgeBandRule[]) => () =>
       new Casting({ bands, cast: {} });
     expect(withBands([{ name: 'child', from: 3 }])).toThrow(/start at zero/);
     expect(

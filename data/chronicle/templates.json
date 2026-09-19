@@ -1,7 +1,15 @@
 {
   "note": "Wording for villager posts. One entry per event type; a type absent here is a type nobody posts about. travel.departed and travel.arrived are absent on purpose -- twenty-nine thousand of a thirty-day run's thirty-five thousand events are somebody walking somewhere, and a blog made of those is a travel log. Placeholders: {me} the writer's full name, {first} their first name, {place} where the event happened, {others} the other people it names. Any other {word} is read straight out of the event's own payload, and a wording whose placeholders cannot all be filled is passed over rather than filled in with a guess. `when` restricts a wording to events carrying particular payload values, so a refusal can be phrased for its actual reason instead of printing `no-route` in the middle of a sentence.",
 
-  "coverage": "Every wording here fires at least once in thirty days of the world-zero seed, and packages/chronicle/test/post.test.ts asserts it -- so a misspelt placeholder or a wording nothing can reach fails a test instead of quietly never appearing. That cuts both ways: wording may only be added here once the simulation can actually produce it. Three real code paths are dormant and therefore have no wording yet -- npc.could-not-rest (nobody's house is ever full at bedtime, so it fires zero times in thirty days), an interrupted turn-in and its travel.blocked with reason `bedtime` (nobody is ever caught far enough from home), and npc.removed (nothing kills anybody yet). When any of those starts firing, its wording belongs here. The family section at the foot of this file is held to the same rule by the same tests: every wording in it has to fit a real moment of a real child whose parent was writing that day.",
+  "bandNote": [
+    "`bands` restricts a wording to stages of life: a ten-year-old and a seventy-year-old both woke up this morning and did not wake up thinking the same thing. The stages, and where their boundaries fall, are set once in data/chronicle/casting.json -- the same boundaries the portraits are cast on, so a villager's face and their voice cannot disagree about how old they are. The names in order are infant, child, youth, young, adult, older, elder.",
+    "A wording with no `bands` is for anybody, and every event type keeps several of those. That is deliberate: the banded wordings are an addition, so no stage can be left with nothing to say, and a villager whose stage has no phrasing of its own still sounds like somebody rather than going silent.",
+    "Bands stay off the once-in-a-lifetime events -- being born into the record, moving house, founding a household, having a parent set down. Those are the same event whoever it happens to, and a village of eighty-six produces a handful of each in a month, which is too few for a stage's phrasing to be reachable.",
+    "travel.blocked is unbanded for the same reason and it is worth naming, because it is the one that looks most inviting. Being turned away from a full building reads very differently at fourteen and at seventy -- but in thirty days no elder in Pennycroft is ever turned away from anything, so an elder's phrasing for it would be written here and never once read by anybody. It belongs here on the day elders have reason to be somewhere that fills up.",
+    "A parent's line about a small child is banded by the child, not by the parent. `the baby would not settle` and `they were into everything before I had my boots on` are the same event at two different ages, and the mother's own age has no bearing on which is true."
+  ],
+
+  "coverage": "Every wording here fires at least once in thirty days of the world-zero seed, and apps/simulator/test/posts.test.ts asserts it -- so a misspelt placeholder, a wording nothing can reach, or a wording banded to a stage the village has nobody in, fails a test instead of quietly never appearing. The same file also asserts the reverse: every stage of life the village actually contains has wording of its own, so a stage cannot be left out of a set of bands and go unnoticed. That cuts both ways: wording may only be added here once the simulation can actually produce it. Three real code paths are dormant and therefore have no wording yet -- npc.could-not-rest (nobody's house is ever full at bedtime, so it fires zero times in thirty days), an interrupted turn-in and its travel.blocked with reason `bedtime` (nobody is ever caught far enough from home), and npc.removed (nothing kills anybody yet). When any of those starts firing, its wording belongs here. The family section at the foot of this file is held to the same rule by the same tests: every wording in it has to fit a real moment of a real child whose parent was writing that day.",
 
   "maxLines": 3,
 
@@ -12,20 +20,52 @@
       { "text": "Woke early. No help for it." },
       { "text": "Another morning. {place}, same as ever." },
       { "text": "Opened my eyes at {place} and lay there a while longer than I should have." },
-      { "text": "{first} is awake. {first} is not pleased about it." }
+      { "text": "{first} is awake. {first} is not pleased about it." },
+
+      { "text": "Awake. Nobody asked whether I had finished sleeping.", "bands": ["child"] },
+      { "text": "Up, and told to be quick about it.", "bands": ["child"] },
+
+      { "text": "Awake, and I would have given a good deal for another hour.", "bands": ["youth"] },
+      { "text": "Up. There is nowhere I want to be this early.", "bands": ["youth"] },
+
+      { "text": "Awake before I was ready. The day will not wait on that.", "bands": ["young"] },
+      { "text": "Up, and there is a great deal of today to be got through.", "bands": ["young"] },
+
+      { "text": "Awake first, as usual. That is how it goes in this house.", "bands": ["adult"] },
+      { "text": "Up. There is the day to see to and nobody else to see to it.", "bands": ["adult"] },
+
+      { "text": "Awake early. It is a while since I slept through to the light.", "bands": ["older"] },
+      { "text": "Up, and the getting up takes longer than it used to.", "bands": ["older"] },
+
+      { "text": "Awake before the light. I have stopped expecting otherwise.", "bands": ["elder"] },
+      { "text": "Up. At my age a morning is not a thing to complain of.", "bands": ["elder"] }
     ],
 
     "npc.turning-in": [
       { "text": "Enough for one day. Heading back to {home}.", "when": { "interrupted": [false] } },
       { "text": "Turning in. {home} and nothing else tonight.", "when": { "interrupted": [false] } },
-      { "text": "Late. Going home." }
+      { "text": "Late. Going home." },
+
+      { "text": "Away home to {home}, and it was not my idea.", "bands": ["child"] },
+      { "text": "Back to {home}, and the evening had hardly started.", "bands": ["youth"] },
+      { "text": "Enough. {home}, and tomorrow can wait its turn.", "bands": ["young"] },
+      { "text": "Home to {home}. There will be more of it tomorrow.", "bands": ["adult"] },
+      { "text": "Away home to {home}. I have had my day out of today.", "bands": ["older"] },
+      { "text": "{home}, and glad of it. I do not keep late hours any more.", "bands": ["elder"] }
     ],
 
     "npc.went-to-bed": [
       { "text": "Bed. Finally." },
       { "text": "Abed at {place}." },
       { "text": "{place}. Warm enough. Goodnight." },
-      { "text": "Lying down. Tomorrow can argue with me tomorrow." }
+      { "text": "Lying down. Tomorrow can argue with me tomorrow." },
+
+      { "text": "Bed, and I was not ready for it.", "bands": ["child"] },
+      { "text": "Bed. Lay there a while thinking about being somewhere else.", "bands": ["youth"] },
+      { "text": "Bed at last, and up again far too soon, no doubt.", "bands": ["young"] },
+      { "text": "Bed. The house is quiet, which is the best of the day.", "bands": ["adult"] },
+      { "text": "Bed, and my back is glad to hear of it.", "bands": ["older"] },
+      { "text": "Bed. Another day accounted for, and I have had a good many.", "bands": ["elder"] }
     ],
 
     "travel.blocked": [
@@ -58,30 +98,43 @@
   "familyNote": [
     "A parent's last line about a child too young to write their own. Third person, and a different voice from the book above: these are written to be read as somebody talking about their child, not as the child talking.",
     "Placeholders: {child} the child's full name, {childFirst} their first name, {place} where it happened. {me} and {first} are not available here on purpose -- the writer is not the subject of the line -- so a first-person wording pasted into this section can never fit anything, and the coverage test will say so.",
-    "Only the four kinds of moment a small child in Pennycroft actually has. Everything else they do is walking, which nobody posts about at any age."
+    "Only the four kinds of moment a small child in Pennycroft actually has. Everything else they do is walking, which nobody posts about at any age.",
+    "`bands` here is the child's stage, not the writer's -- infant or child, since nobody older than nine is spoken for. Both stages occur in every one of these four moments, which is what makes the banded wording reachable and is the whole reason this is the section that gets banded most thoroughly."
   ],
 
   "family": {
     "npc.woke": [
       { "text": "{childFirst} was awake before the rest of us, and made sure we knew." },
       { "text": "{childFirst} woke at {place} and started the day for everybody." },
-      { "text": "Up early, on account of {childFirst} being up earlier." }
+      { "text": "Up early, on account of {childFirst} being up earlier." },
+
+      { "text": "{childFirst} is too small to know what an hour is, and woke us to prove it.", "bands": ["infant"] },
+      { "text": "{childFirst} was up and into everything before I had my boots on.", "bands": ["child"] }
     ],
 
     "npc.turning-in": [
       { "text": "Got {childFirst} started for home before the light went.", "when": { "interrupted": [false] } },
-      { "text": "{childFirst} is heading in for the night, under protest." }
+      { "text": "{childFirst} is heading in for the night, under protest." },
+
+      { "text": "Got {childFirst} in before dark. At that age there is no arguing to be done.", "bands": ["infant"] },
+      { "text": "{childFirst} is heading in, and made a fair case for staying out.", "bands": ["child"] }
     ],
 
     "npc.went-to-bed": [
       { "text": "{childFirst} is asleep at last. The house can hear itself think." },
       { "text": "{child} is down for the night. Long day for a small one." },
-      { "text": "{childFirst} asleep at {place}, and not a moment too soon." }
+      { "text": "{childFirst} asleep at {place}, and not a moment too soon." },
+
+      { "text": "{childFirst} is asleep. Whether {childFirst} stays asleep is another question.", "bands": ["infant"] },
+      { "text": "{childFirst} is down, after a good deal of negotiating about it.", "bands": ["child"] }
     ],
 
     "travel.blocked": [
       { "text": "{childFirst} walked all the way to {destination} and was turned back at the door. Not best pleased about it.", "when": { "reason": ["full"] } },
-      { "text": "No room at {destination} for {childFirst} either. Home again, then." }
+      { "text": "No room at {destination} for {childFirst} either. Home again, then." },
+
+      { "text": "{destination} was full, and {childFirst} is too young to know what a disappointment is.", "bands": ["infant"] },
+      { "text": "{childFirst} got as far as {destination} and found it full. There were opinions about that.", "bands": ["child"] }
     ]
   }
 }

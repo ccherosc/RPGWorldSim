@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { assert } from '@rpgsim/shared';
 import type { EntityId, SimEvent } from '@rpgsim/sim-core';
 import type { ChronicleDay } from './day.ts';
+import { AGE_BANDS, type AgeBand } from './stages.ts';
 
 /**
  * Turning an event into a sentence, without inventing anything.
@@ -53,6 +54,29 @@ export const TemplateSchema = z.object({
    * carry the value it was written for.
    */
   when: z.record(z.array(z.union([z.string(), z.number(), z.boolean()])).min(1)).optional(),
+  /**
+   * Life stages this wording is for: `["older", "elder"]`.
+   *
+   * What a person remarks on depends on how old they are. A nineteen-year-old
+   * and a sixty-eight-year-old both woke up this morning, and they did not wake
+   * up thinking the same thing, so a book with one wording for waking gives
+   * every villager the same inner life. Listing stages here lets the file hold
+   * several voices for one event without any of them being put in the wrong
+   * mouth.
+   *
+   * Omitted means anybody, which is the useful default: a wording that reads
+   * true at every age stays available to every age, and the banded ones are an
+   * addition rather than a replacement. That also means a stage can never be
+   * left with nothing to say by somebody banding the last general wording for
+   * an event -- there is always the unbanded pool underneath.
+   *
+   * A wording banded for a stage nobody is in is dead wording, and the shipped
+   * books are checked for it. That is a real constraint, not a formality: no
+   * elder in thirty days is ever turned away from a full building, so an
+   * elder's phrasing for that refusal could be written here and never once be
+   * read by anybody.
+   */
+  bands: z.array(z.enum(AGE_BANDS)).min(1).optional(),
 });
 
 export type Template = z.infer<typeof TemplateSchema>;
@@ -67,6 +91,20 @@ export type Template = z.infer<typeof TemplateSchema>;
 export interface WordingContext {
   readonly day: ChronicleDay;
   readonly words: (key: string, event: SimEvent) => string | undefined;
+  /**
+   * The life stage of whoever this wording speaks for, if it speaks for anybody.
+   *
+   * Not always the writer. A parent's line about a small child is banded by the
+   * *child*, because the line is about the child: `the baby would not settle`
+   * and `he was up before any of us` are the same event at two different ages,
+   * and the mother's own age has nothing to do with which one is true.
+   *
+   * Absent for anything that speaks for the village rather than for a person --
+   * the paper, chiefly. Absent makes every banded wording ineligible rather than
+   * every banded wording eligible, so a caller that forgets to supply a stage
+   * loses phrasing and never gains a sentence it had no business printing.
+   */
+  readonly band?: AgeBand;
 }
 
 /**
@@ -85,6 +123,7 @@ export function eligible(
   return variants.filter(
     (variant) =>
       matches(variant, event) &&
+      suitsAge(variant, context) &&
       placeholdersOf(variant.text).every((key) => resolve(key, event, context) !== undefined),
   );
 }
@@ -153,6 +192,17 @@ export function namesOf(ids: readonly EntityId[], day: ChronicleDay): readonly s
 /** The name of wherever this happened, or `undefined` for nowhere in particular. */
 export function placeOf(event: SimEvent, day: ChronicleDay): string | undefined {
   return event.location === undefined ? undefined : day.places.find(event.location)?.name;
+}
+
+/**
+ * Whether this wording is for somebody of this age.
+ *
+ * Unbanded wording suits everybody. Banded wording suits nobody whose stage is
+ * unknown -- see `WordingContext.band` for why that is the safe direction.
+ */
+function suitsAge(variant: Template, context: WordingContext): boolean {
+  if (variant.bands === undefined) return true;
+  return context.band !== undefined && variant.bands.includes(context.band);
 }
 
 function matches(variant: Template, event: SimEvent): boolean {

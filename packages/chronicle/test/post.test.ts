@@ -7,6 +7,10 @@ import {
   ChronicleDay,
   type HouseholdVoice,
   Kinfolk,
+  LifeStages,
+  type Template,
+  type WordingContext,
+  eligible,
   PeopleRegister,
   PlaceRegister,
   type Post,
@@ -90,7 +94,25 @@ const BOOK: TemplateBook = {
   },
 };
 
-/** Old enough on `KEY` to have been writing for years. */
+/**
+ * The shipped life stages, copied rather than loaded.
+ *
+ * The same reason the wording book here is a fixture. A test that read the
+ * casting file would change meaning the day somebody decided a fourteen-year-old
+ * reads as a child rather than a youth. These are the real numbers, so that the
+ * ages written into the village below mean what they look like they mean.
+ */
+const STAGES = new LifeStages([
+  { name: 'infant', from: 0 },
+  { name: 'child', from: 3 },
+  { name: 'youth', from: 13 },
+  { name: 'young', from: 20 },
+  { name: 'adult', from: 30 },
+  { name: 'older', from: 45 },
+  { name: 'elder', from: 60 },
+]);
+
+/** Old enough on `KEY` to have been writing for years. Thirty, so an `adult`. */
 const GROWN = '1170-03-02';
 
 let nextId = 1;
@@ -155,6 +177,7 @@ function writing(events: readonly SimEvent[], templates: TemplateBook = BOOK) {
     whereabouts: new Whereabouts(chronicle),
     scoring: SCORING,
     templates,
+    stages: STAGES,
     worldSeed: SEED,
   };
 }
@@ -472,6 +495,7 @@ describe('the same day, written twice', () => {
         whereabouts: new Whereabouts(that),
         scoring: SCORING,
         templates: BOOK,
+        stages: STAGES,
         worldSeed: SEED,
         author: author(0),
       });
@@ -629,6 +653,7 @@ describe('a parent speaking for a child', () => {
         whereabouts: new Whereabouts(that),
         scoring: SCORING,
         templates: BOOK,
+        stages: STAGES,
         worldSeed: SEED,
         household,
         author: author(0),
@@ -731,5 +756,131 @@ describe('who may be spoken for', () => {
     const post = postOf([myMorning(), herMorning()], undefined);
 
     expect(post?.lines).toHaveLength(1);
+  });
+});
+
+/**
+ * What a villager is disposed to talk about at the age they are.
+ *
+ * A village where everybody says the same things about waking up is a village
+ * with one person in it wearing eighty-six faces. Wording may be banded to a
+ * stage of life so the file can hold several voices for one event -- and the
+ * entire risk of that is one sentence in the wrong mouth. A thirty-year-old
+ * remarking on his knees reads as a bug in a way that a missing line never does,
+ * so most of what follows is about what is *not* offered.
+ *
+ * Its own book, deliberately. Banding a variant in the shared fixture would
+ * change which wording the generator picks in a dozen tests that are about
+ * something else, and their failures would say nothing about bands.
+ */
+describe('the age somebody speaks from', () => {
+  const ANYONE = 'Awake, then.';
+  const MIDDLING = 'Awake. Thirty and already behind.';
+  const AGED = 'Awake before the light, the way it goes now.';
+  const BABY = 'The baby was awake half the night.';
+  const TODDLER = 'Sibb had the whole house awake by first light.';
+
+  const BANDED: TemplateBook = {
+    maxLines: 3,
+    wording: {
+      'npc.woke': [
+        { text: ANYONE },
+        { text: MIDDLING, bands: ['adult'] },
+        { text: AGED, bands: ['older', 'elder'] },
+      ],
+    },
+    family: {
+      'npc.woke': [
+        { text: BABY, bands: ['infant'] },
+        { text: TODDLER, bands: ['child'] },
+      ],
+    },
+  };
+
+  /**
+   * Every line this post can come out as, over a long run of days.
+   *
+   * One day proves nothing: the generator picks one wording from those that fit,
+   * so a banded wording that should never appear might simply not have been
+   * chosen. Forty days is enough for every eligible variant to turn up and for
+   * an ineligible one to have had forty chances to leak.
+   */
+  const linesOver = (
+    events: readonly SimEvent[],
+    household?: HouseholdVoice,
+  ): ReadonlySet<string> => {
+    const { people, places } = village();
+    const found = new Set<string>();
+    for (let ahead = 0; ahead < 40; ahead++) {
+      const key = dayKeyOf(DAWN + ahead * TICKS_PER_DAY, DEFAULT_CALENDAR);
+      const that = new ChronicleDay({ key, events, people, places });
+      const post = writePost({
+        day: that,
+        whereabouts: new Whereabouts(that),
+        scoring: SCORING,
+        templates: BANDED,
+        stages: STAGES,
+        worldSeed: SEED,
+        ...(household === undefined ? {} : { household }),
+        author: author(0),
+      });
+      for (const line of post?.lines ?? []) found.add(line.text);
+    }
+    return found;
+  };
+
+  it('offers a villager the wording written for the age they are', () => {
+    // Winifred is thirty; `MIDDLING` is banded `adult`. Without this the whole
+    // feature could be a filter that quietly rejects everything.
+    expect([...linesOver([myMorning()])]).toContain(MIDDLING);
+  });
+
+  it('keeps an older villager’s line out of a younger villager’s mouth', () => {
+    // The fault the bands exist to prevent, and the only one a reader notices.
+    expect([...linesOver([myMorning()])]).not.toContain(AGED);
+  });
+
+  it('still offers everybody the wording written for anybody', () => {
+    // Banding is an addition, not a narrowing. If giving one variant a stage
+    // took the general ones away, a village would lose voices as it gained them,
+    // and a stage with no wording of its own would go silent instead of plain.
+    expect([...linesOver([myMorning()])]).toContain(ANYONE);
+  });
+
+  it('writes nothing at all when the only wording belongs to another age', () => {
+    // The safe failure, end to end: nothing this villager may say means no post,
+    // not a post carrying a line written for somebody twice their age.
+    const theirs: TemplateBook = {
+      maxLines: 3,
+      wording: { 'npc.woke': [{ text: AGED, bands: ['older', 'elder'] }] },
+      family: {},
+    };
+    expect(postOf([myMorning()], undefined, theirs)).toBeUndefined();
+  });
+
+  it('bands a parent’s line by the child’s age and not the parent’s', () => {
+    // The one that is easy to get backwards and reads perfectly well when it is.
+    // Sibb is three, so a `child`; her mother is an adult. Banded by the writer,
+    // every small child in the village would be described as a baby -- which is
+    // true of enough of them to pass a glance.
+    const said = [...linesOver([myMorning(), herMorning()], speaking(100, SIBB))];
+
+    expect(said).toContain(TODDLER);
+    expect(said).not.toContain(BABY);
+  });
+
+  it('offers no banded wording at all to something speaking for nobody', () => {
+    // The paper's case, which is the reason the default runs this way round. It
+    // reads the same books through the same rule and speaks for the village
+    // rather than for a person, so it has no age -- and no age must mean no
+    // banded wording rather than all of it. The opposite default would hand the
+    // parish notices every private thought in the file.
+    const day = new ChronicleDay({ key: KEY, events: [myMorning()], ...village() });
+    const ageless: WordingContext = { day, words: () => undefined };
+    const variants = BANDED.wording['npc.woke'] as readonly Template[];
+
+    expect(eligible(variants, myMorning(), ageless).map((one) => one.text)).toEqual([
+      ANYONE,
+    ]);
   });
 });

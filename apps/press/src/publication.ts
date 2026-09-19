@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { type CalendarConfig, DEFAULT_CALENDAR, daysPerYear } from '@rpgsim/sim-core';
 import { assert } from '@rpgsim/shared';
+import { capitalised, inWords } from './numbers.ts';
 
 /**
  * Everything the site says in its own voice.
@@ -188,6 +189,78 @@ export class Publication {
     if (frozen === null) return true;
     return key <= frozen;
   }
+
+  /**
+   * The same prose with the village's own counts written into it.
+   *
+   * Called once, before any page renders, so that every sentence on the site
+   * gets its numbers from the same place on the same day. The alternative --
+   * filling them in at each of the nine places a page prints a paragraph -- is
+   * the same substitution written nine times, and the one that gets forgotten
+   * is a page that quietly goes on stating last year's village.
+   *
+   * Every placeholder must be one this knows, and none may survive. A typo of
+   * `{household}` for `{households}` is otherwise a word in curly brackets
+   * printed in the middle of a caption, which is exactly the kind of fault a
+   * build should refuse rather than ship.
+   */
+  counting(tally: VillageTally): Publication {
+    const words: ReadonlyMap<string, string> = new Map([
+      ['people', inWords(tally.people)],
+      ['households', inWords(tally.households)],
+      ['families', inWords(tally.families)],
+    ]);
+
+    const filled = fill(this.config, (key) => {
+      const found = words.get(key.toLowerCase());
+      assert(found !== undefined, 'the copy asks for a count nothing can supply', { key });
+      // `{People}` opens a sentence; `{people}` sits inside one. One dial, so
+      // that copy can be recased without the code having to learn a new name.
+      return key[0] === key[0]?.toUpperCase() ? capitalised(found as string) : (found as string);
+    }) as PublicationConfig;
+
+    return new Publication(filled);
+  }
+}
+
+/** What the record can count, for the copy that wants to say it. */
+export interface VillageTally {
+  /** Everybody the record holds. */
+  readonly people: number;
+  /** Roofs standing. Not the same number as `families`, and the site says so. */
+  readonly households: number;
+  /** Distinct family names among the people. */
+  readonly families: number;
+}
+
+const PLACEHOLDER = /\{([A-Za-z]+)\}/g;
+
+/**
+ * Every string in a value, rewritten. Objects and arrays are walked into.
+ *
+ * Generic over the whole config rather than aimed at the four fields that hold
+ * prose today, because a fifth field of prose is a thing somebody adds without
+ * thinking to come back here, and a placeholder that silently does not resolve
+ * is worse than one that fails loudly.
+ */
+function fill(value: unknown, resolve: (key: string) => string): unknown {
+  if (typeof value === 'string') {
+    const done = value.replace(PLACEHOLDER, (_, key: string) => resolve(key));
+    assert(!/\{[^}]*\}/.test(done), 'a placeholder survived the count', { text: done });
+    return done;
+  }
+  if (Array.isArray(value)) return value.map((one) => fill(one, resolve));
+  if (value !== null && typeof value === 'object') {
+    // Sorted, per determinism rule 5, and sorting is free here: everything in
+    // this config whose order a reader can see is an array -- sections, body,
+    // images, footer -- and arrays keep their order through `map` above. The
+    // objects are fixed named fields, so their key order reaches no page.
+    const fields = Object.keys(value as Record<string, unknown>).sort();
+    const walked: Record<string, unknown> = {};
+    for (const key of fields) walked[key] = fill((value as Record<string, unknown>)[key], resolve);
+    return walked;
+  }
+  return value;
 }
 
 /** A village day key broken into the parts the calendar understands. */

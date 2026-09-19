@@ -5,7 +5,7 @@ import { assert } from '@rpgsim/shared';
 import { type Village, latestOf, readVillage } from './issue.ts';
 import { loadPublication } from './data.ts';
 import { villageDate } from './publication.ts';
-import type { Publication } from './publication.ts';
+import type { Publication, VillageTally } from './publication.ts';
 import { aboutPage } from './pages/about.ts';
 import { blogArchive, blogDay, blogLatest } from './pages/blog.ts';
 import { homePage } from './pages/home.ts';
@@ -82,8 +82,11 @@ export function buildSite(options: BuildSiteOptions): BuiltSite {
   });
 
   const latest = latestOf(village);
+  // The copy gets its counts here, once, from the village that was just read.
+  // Every page below this line is looking at the same numbers as every other.
+  const counted = publication.counting(tallyOf(village));
   const chrome: Chrome = {
-    publication,
+    publication: counted,
     village,
     latest,
     today: villageDate(latest.day.key, village.calendar),
@@ -114,7 +117,23 @@ export function buildSite(options: BuildSiteOptions): BuiltSite {
   // starts with one today; the file costs nothing and removes the trap.
   writeFileSync(join(options.out, '.nojekyll'), '', 'utf8');
 
-  return { pages, assets, village, publication };
+  return { pages, assets, village, publication: counted };
+}
+
+/**
+ * The three counts the prose is allowed to state.
+ *
+ * Families are counted the way the People page groups them, off
+ * `PersonRecord.family`, so the sentence and the list under it can never
+ * disagree. Somebody with no family name is nobody's family, and is left out of
+ * the count rather than gathered into an imaginary twenty-first one.
+ */
+export function tallyOf(village: Village): VillageTally {
+  const families = new Set<string>();
+  for (const person of village.people) {
+    if (person.family !== null) families.add(person.family);
+  }
+  return { people: village.people.length, households: village.households, families: families.size };
 }
 
 /** Every file under a directory, relative, with forward slashes, sorted. */

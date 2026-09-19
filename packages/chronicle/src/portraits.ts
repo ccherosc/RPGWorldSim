@@ -1,5 +1,6 @@
 import { assert } from '@rpgsim/shared';
 import { z } from 'zod';
+import { AGE_BANDS, type AgeBand } from './stages.ts';
 
 /**
  * The faces the village is drawn with.
@@ -25,18 +26,6 @@ import { z } from 'zod';
 
 /** `P04-C3`: a sheet, a lettered row, a numbered column. */
 export const PORTRAIT_ID = /^(P\d{2})-([A-H])([1-5])$/;
-
-/**
- * The seven life stages a face can read as.
- *
- * Coarse on purpose. A portrait is a drawing, not a birth certificate: nobody
- * can tell thirty-one from thirty-four in a picture, and pretending otherwise
- * would make casting fail over differences no reader could ever see. Where the
- * boundaries fall is a tunable and lives in the casting file (directive 10);
- * this list only fixes the vocabulary and its order.
- */
-export const AGE_BANDS = ['infant', 'child', 'youth', 'young', 'adult', 'older', 'elder'] as const;
-export type AgeBand = (typeof AGE_BANDS)[number];
 
 /** As drawn, not as recorded. A portrait can only be sorted by what it shows. */
 export const PORTRAIT_SEXES = ['m', 'f'] as const;

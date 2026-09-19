@@ -1,7 +1,8 @@
 import { assert } from '@rpgsim/shared';
 import { z } from 'zod';
 import { type PersonRecord, yearsBetween } from './people.ts';
-import { type AgeBand, type PortraitCatalog, type PortraitSex, PORTRAIT_ID } from './portraits.ts';
+import { type PortraitCatalog, type PortraitSex, PORTRAIT_ID } from './portraits.ts';
+import { type AgeBand, AgeBandRuleSchema, LifeStages } from './stages.ts';
 
 /**
  * Who wears which face.
@@ -39,18 +40,6 @@ const CastingEntrySchema = z.union([
   z.string().regex(PORTRAIT_ID),
   z.array(CastingTakeSchema).min(1),
 ]);
-
-/**
- * Where one life stage begins, in whole years.
- *
- * In the data rather than in code because these are exactly the kind of numbers
- * an opinion changes — whether a fourteen-year-old reads as a youth or a child
- * is a judgement about the drawings, not a fact about the simulation.
- */
-export const AgeBandRuleSchema = z.object({
-  name: z.string().min(1),
-  from: z.number().int().min(0),
-});
 
 export const CastingSchema = z.object({
   /** Ascending, starting at zero, so every age falls in exactly one band. */
@@ -101,9 +90,17 @@ export interface CastingReport {
  */
 export class Casting {
   private readonly takes = new Map<string, readonly CastingTake[]>();
+  /**
+   * The life stages this casting sorts faces into.
+   *
+   * Public because a face is not the only thing a stage decides. The wording
+   * books band on the same stages, and the press reads them off here so that
+   * the boundaries are set once, in the casting file, for both.
+   */
+  readonly stages: LifeStages;
 
-  constructor(private readonly config: CastingConfig) {
-    assertBands(config.bands);
+  constructor(config: CastingConfig) {
+    this.stages = new LifeStages(config.bands);
     // Stored in file order; `slugs()` is what promises an order to callers.
     for (const [slug, raw] of Object.entries(config.cast)) {
       const entry = raw as string | CastingTake[];
@@ -150,13 +147,8 @@ export class Casting {
   }
 
   /** Which life stage an age in whole years falls in. */
-  bandFor(age: number): string {
-    let name = this.config.bands[0]?.name as string;
-    for (const rule of this.config.bands) {
-      if (rule.from > age) break;
-      name = rule.name;
-    }
-    return name;
+  bandFor(age: number): AgeBand {
+    return this.stages.bandFor(age);
   }
 
   /**
@@ -241,7 +233,7 @@ export class Casting {
     for (const person of [...people].sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0))) {
       if (this.portraitFor(person.slug, on) !== undefined) continue;
       const sex = portraitSexOf(person.sex);
-      const band = this.bandFor(yearsBetween(person.born, on)) as AgeBand;
+      const band = this.bandFor(yearsBetween(person.born, on));
       const free = catalog.matching(sex, band).find((portrait) => !taken.has(portrait.id));
       if (free === undefined) continue;
       taken.add(free.id);
@@ -264,17 +256,6 @@ export function portraitSexOf(sex: string): PortraitSex {
   if (value === 'm' || value === 'male') return 'm';
   if (value === 'f' || value === 'female') return 'f';
   assert(false, 'the casting layer does not know that sex', { sex });
-}
-
-function assertBands(bands: readonly { name: string; from: number }[]): void {
-  assert(bands[0]?.from === 0, 'the first age band must start at zero', { bands });
-  for (let index = 1; index < bands.length; index++) {
-    assert(
-      (bands[index] as { from: number }).from > (bands[index - 1] as { from: number }).from,
-      'age bands must ascend, so that every age falls in exactly one',
-      { at: index },
-    );
-  }
 }
 
 function assertAscending(slug: string, takes: readonly CastingTake[]): void {

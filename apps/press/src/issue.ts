@@ -5,6 +5,7 @@ import {
   ChronicleDay,
   Community,
   type Edition,
+  Households,
   Kinfolk,
   type Paper,
   PersonaBook,
@@ -74,6 +75,13 @@ export interface Village {
   readonly community: Community;
   /** Everybody the record knows, oldest first. */
   readonly people: readonly PersonRecord[];
+  /**
+   * Roofs standing on the last day published.
+   *
+   * Not the same number as the count of family names, and the site says both.
+   * See `Households` for why the record can prove this one after all.
+   */
+  readonly households: number;
   /** The word the whole village was built from. Printed in every colophon. */
   readonly worldSeed: string;
 }
@@ -113,6 +121,10 @@ export function readVillage(options: ReadVillageOptions): Village {
   // the simulation's own purposes, so the paper's dateline and the site's
   // prose cannot drift apart by one of them being renamed.
   const community = new Community(root === undefined ? loadCommunity() : loadCommunity(root));
+  // Built here rather than at the foot of this function, because the posts need
+  // its life stages while they are being written and the pages need the faces
+  // afterwards. One reading of the file, so the two cannot disagree.
+  const casting = new Casting(root === undefined ? loadCasting() : loadCasting(root));
 
   const record = new AnnalsStore({ root: options.annals });
   const found = readArchiveManifest(options.archive);
@@ -139,6 +151,7 @@ export function readVillage(options: ReadVillageOptions): Village {
   // the archive knows now.
   const kin = new Kinfolk();
   const household = householdVoice(kin, selection);
+  const houses = new Households();
 
   for (const entry of entries) {
     const day = new ChronicleDay({
@@ -148,6 +161,7 @@ export function readVillage(options: ReadVillageOptions): Village {
       places: record.places,
     });
     kin.learn(day);
+    houses.learn(day);
     const edition = select({ day, scoring, selection, published });
     // The rota advances for every day the village lived, published or not.
     // Freezing the site must not change who writes when the freeze lifts.
@@ -165,6 +179,9 @@ export function readVillage(options: ReadVillageOptions): Village {
         scoring,
         templates,
         household,
+        // The same boundaries the portraits are cast on, so that a villager's
+        // face and their voice cannot disagree about how old they are.
+        stages: casting.stages,
         worldSeed: manifest.seed,
       }),
       paper: writePaper({
@@ -188,10 +205,11 @@ export function readVillage(options: ReadVillageOptions): Village {
     worldSeed: manifest.seed,
     issues,
     community,
-    casting: new Casting(root === undefined ? loadCasting() : loadCasting(root)),
+    casting,
     portraits: new PortraitCatalog(root === undefined ? loadPortraits() : loadPortraits(root)),
     personas: new PersonaBook(root === undefined ? loadPersonas() : loadPersonas(root)),
     people: record.people.records(),
+    households: houses.count,
   };
 }
 

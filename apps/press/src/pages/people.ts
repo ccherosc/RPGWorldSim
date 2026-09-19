@@ -173,7 +173,12 @@ export function peopleRoll(chrome: Chrome): Built {
       }),
       el(
         'p',
-        `${chrome.village.people.length} people in ${named.length} families, as of ${chrome.today.long}.`,
+        // Three numbers and not two, because two of them look like a
+        // contradiction on their own: there are more houses than family names,
+        // and a reader who is told only the smaller one has been told something
+        // slightly untrue about how many front doors Pennycroft has.
+        `${chrome.village.people.length} people, ${chrome.village.households} households, ` +
+          `${named.length} family names, as of ${chrome.today.long}.`,
         { class: 'tally' },
       ),
       picture({ ...chrome.publication.image('lane'), root, wide: true }),

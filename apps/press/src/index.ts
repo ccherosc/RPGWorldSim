@@ -6,6 +6,8 @@
 // three inputs give the same site twice.
 
 export { Publication, PublicationSchema, partsOf, villageDate } from './publication.ts';
+export type { VillageTally } from './publication.ts';
+export { MOST_IN_WORDS, capitalised, inWords } from './numbers.ts';
 export type {
   Page,
   PublicationConfig,
@@ -34,7 +36,7 @@ export type { NavLink, Picture, Shell } from './html.ts';
 export { latestOf, postersOf, readVillage } from './issue.ts';
 export type { Issue, ReadVillageOptions, Village } from './issue.ts';
 
-export { ASSET_ROOT, buildSite, listFiles, renderSite } from './site.ts';
+export { ASSET_ROOT, buildSite, listFiles, renderSite, tallyOf } from './site.ts';
 export type { BuildSiteOptions, BuiltSite } from './site.ts';
 
 export { WAYS, rootFor, sheet } from './pages/shell.ts';

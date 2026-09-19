@@ -35,7 +35,7 @@
       "width": 1600,
       "height": 900,
       "alt": "A muddy village lane at dusk with a basket weaver, a woman carrying carrots and two neighbours arguing over a fence",
-      "caption": "Church Lane at dusk. Twenty-four households live along the lanes, and the record knows which cottage each of them sleeps in."
+      "caption": "Church Lane at dusk. {Households} households live along the lanes, and the record knows which cottage each of them sleeps in."
     },
     {
       "name": "market",
@@ -77,12 +77,12 @@
   "pages": {
     "home": {
       "title": "Welcome to Pennycroft",
-      "lead": "Pennycroft is a village of eighty-six people that does not exist. They wake up, walk to work, and go to bed without anybody telling them to, and this is their newspaper.",
+      "lead": "Pennycroft is a village of {people} people that does not exist. They wake up, walk to work, and go to bed without anybody telling them to, and this is their newspaper.",
       "sections": [
         {
           "heading": "What this is",
           "body": [
-            "Pennycroft is a computer program pretending to be a medieval village. There are eighty-six people in it. Each one has a name, an age, a family, a house, and a job to walk to. Time moves forward one second at a time, and the program writes down everything that happens.",
+            "Pennycroft is a computer program pretending to be a medieval village. There are {people} people in it. Each one has a name, an age, a family, a house, and a job to walk to. Time moves forward one second at a time, and the program writes down everything that happens.",
             "Nobody writes the story. If Gilbert Hollis walks to the smithy and finds it full, that is because the smithy holds six people and six people got there before him. He turns around and walks home. That is the whole of it, and it gets put in the paper, because on most days it is the most interesting thing that happens."
           ],
           "image": "lane"
@@ -99,7 +99,7 @@
           "heading": "Everything here can be checked",
           "body": [
             "Every sentence on this site stands on a numbered event in the village record, and the numbers are printed next to it. Nothing is added afterwards to make a day read better. If it is not in the record, it does not go on the page.",
-            "The village is also rebuildable. Give the program the same starting word and it produces the same eighty-six people living the same days in the same order, down to the second. That is what makes the record worth keeping."
+            "The village is also rebuildable. Give the program the same starting word and it produces the same {people} people living the same days in the same order, down to the second. That is what makes the record worth keeping."
           ],
           "image": "market"
         }
@@ -129,12 +129,12 @@
 
     "people": {
       "title": "The People",
-      "lead": "Eighty-six souls in twenty-four households. Each one has a face, a family, and a life the record can account for.",
+      "lead": "{People} souls under {households} roofs, answering to {families} family names. Each one has a face and a life the record can account for.",
       "sections": [
         {
           "heading": "How they got their names",
           "body": [
-            "The families were written by hand — the Netherbys, the Hargraves, the Barrows, the Carters and the rest — and then the program handed out the children. A person's family is the roof they were first recorded under. Two houses of Hargraves both count as Hargraves, which is why this site counts family names and not households.",
+            "The families were written by hand — the Netherbys, the Hargraves, the Barrows, the Carters and the rest — and then the program handed out the children. A person's family is the roof they were first recorded under. Two houses of Hargraves both count as Hargraves, which is why there are {households} households in Pennycroft but only {families} family names, and why the list below is sorted by the name rather than by the house.",
             "The faces are drawn, and each one is assigned to a person whose age and sex actually match it. A face is checked against the record rather than trusted: nobody wears a face of the wrong sex or the wrong stage of life, and no two people wear the same one."
           ],
           "image": "quarrel"

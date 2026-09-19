@@ -4,8 +4,10 @@ import { dirname, join, posix, resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { glanceOf, yearsBetween } from '@rpgsim/chronicle';
 import { loadSelection, main as sim } from '@rpgsim/simulator';
+import { loadPublication } from '../src/data.ts';
+import { capitalised, inWords } from '../src/numbers.ts';
 import { text } from '../src/html.ts';
-import { villageDate } from '../src/publication.ts';
+import { Publication, villageDate } from '../src/publication.ts';
 import { buildSite, listFiles } from '../src/site.ts';
 import type { BuiltSite } from '../src/site.ts';
 
@@ -818,6 +820,129 @@ describe('who the site lets write', () => {
       const printed = [...pages.values()].some((body) => body.includes(text(line.text)));
       expect(printed, line.text).toBe(true);
     }
+  });
+});
+
+describe('the numbers the site states', () => {
+  /** Number words, so a count typed back into the copy can be recognised. */
+  const COUNTS =
+    'zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|' +
+    'fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|' +
+    'sixty|seventy|eighty|ninety|hundred|thousand';
+  const TYPED = new RegExp(
+    `\\b(?:\\d+|(?:${COUNTS})(?:[- ](?:${COUNTS}))*)\\s+(people|souls|households|families|family names)\\b`,
+    'i',
+  );
+
+  /** Every string in the copy, wherever it sits. */
+  const prose = (value: unknown): readonly string[] => {
+    if (typeof value === 'string') return [value];
+    if (Array.isArray(value)) return value.flatMap(prose);
+    if (value !== null && typeof value === 'object') return Object.values(value).flatMap(prose);
+    return [];
+  };
+
+  it('has more houses than family names, or none of this is worth separating', () => {
+    // The whole reason the site states both numbers. If they were ever equal
+    // the distinction would be invisible and every test below would pass
+    // without meaning anything.
+    const families = new Set(
+      site.village.people.map((person) => person.family).filter((name) => name !== null),
+    );
+    expect(site.village.households).toBeGreaterThan(families.size);
+    expect(families.size).toBeGreaterThan(0);
+  });
+
+  it('counts the same houses the record founded', () => {
+    const founded = new Set<string>();
+    for (const issue of site.village.issues) {
+      for (const event of issue.day.byType('society.household-founded')) {
+        const data = event.data as { household?: string };
+        if (data.household !== undefined) founded.add(data.household);
+      }
+    }
+    expect(site.village.households).toBe(founded.size);
+  });
+
+  it('prints the counts it was given, spelled out, in the prose', () => {
+    // The end of the pipe. A substitution that ran but wrote the wrong number,
+    // or wrote it somewhere no page renders, looks identical from inside the
+    // press; this asks the finished HTML.
+    const houses = inWords(site.village.households);
+    const souls = inWords(site.village.people.length);
+    const printed = [...pages.values()];
+
+    expect(printed.some((body) => body.includes(`${capitalised(houses)} households`))).toBe(true);
+    expect(printed.some((body) => body.includes(`village of ${souls} people`))).toBe(true);
+  });
+
+  it('agrees with itself between the prose and the tally', () => {
+    const roll = pages.get('people/index.html');
+    expect(roll).toBeDefined();
+    const body = roll as string;
+    const families = new Set(
+      site.village.people.map((person) => person.family).filter((name) => name !== null),
+    );
+
+    expect(body).toContain(
+      `${site.village.people.length} people, ${site.village.households} households, ` +
+        `${families.size} family names`,
+    );
+    expect(body).toContain(`under ${inWords(site.village.households)} roofs`);
+    expect(body).toContain(`${inWords(families.size)} family names`);
+  });
+
+  /**
+   * Counts the trap is allowed to find, each with the reason it is not the
+   * fault being hunted. The list is short on purpose: a fourth entry should
+   * have to be argued for in writing, here, where the next person will read it.
+   */
+  const ALLOWED: readonly string[] = [
+    // A building's capacity, which comes from the village file rather than from
+    // the people record, and is the subject of the sentence rather than an
+    // aside in it. Worth generating too one day -- a lane added to the file
+    // already appears in the village, and these two sentences would not follow
+    // it -- but that is the towne file's seam and not this one.
+    'The mill holds eight people',
+    'the smithy holds six people and six people got there before him',
+    // Not a count at all. `no two people` means any two, and the sentence is
+    // about faces being unique.
+    'no two people wear the same one',
+  ];
+
+  it('keeps no count typed by hand in the copy', () => {
+    // The fault this whole seam exists to remove. A caption once said
+    // `Twenty-four households` two inches above a tally saying `20 families`,
+    // and both were true, and nothing could tell. A number about the village
+    // that a person types is a number that goes on being printed after it stops
+    // being so.
+    const offenders = prose(loadPublication().config)
+      .filter((line) => TYPED.test(line))
+      .filter((line) => !ALLOWED.some((excuse) => line.includes(excuse)));
+    expect(offenders).toEqual([]);
+  });
+
+  it('has a trap that would still catch the fault it was written for', () => {
+    // An allow-list can quietly grow until it excuses everything. This is the
+    // original offender, run through the same filter: if it passes, the test
+    // above has stopped being a test.
+    const fault = 'Church Lane at dusk. Twenty-four households live along the lanes.';
+    expect(TYPED.test(fault)).toBe(true);
+    expect(ALLOWED.some((excuse) => fault.includes(excuse))).toBe(false);
+  });
+
+  it('would notice the copy asking for a count nothing can supply', () => {
+    // The trap that makes the substitution safe to use. Without it a typo of
+    // `{household}` prints a word in curly brackets in the middle of a caption.
+    expect(() =>
+      site.publication.counting({ people: 1, households: 1, families: 1 }),
+    ).not.toThrow();
+
+    const broken = new Publication({
+      ...loadPublication().config,
+      tagline: 'A village of {peoples}',
+    });
+    expect(() => broken.counting({ people: 1, households: 1, families: 1 })).toThrow();
   });
 });
 

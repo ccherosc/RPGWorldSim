@@ -7,10 +7,13 @@ import {
   ChronicleDay,
   type HouseholdVoice,
   Kinfolk,
+  LifeStages,
+  type PersonRecord,
   type Post,
   type PublishedDay,
   type Template,
   Whereabouts,
+  eligible,
   householdVoice,
   select,
   writePost,
@@ -19,7 +22,7 @@ import {
 } from '@rpgsim/chronicle';
 import { fnv1a64Hex } from '@rpgsim/shared';
 import { type EntityId, readArchiveManifest, readEventDay } from '@rpgsim/sim-core';
-import { loadScoring, loadSelection, loadTemplates } from '../src/data.ts';
+import { loadCasting, loadScoring, loadSelection, loadTemplates } from '../src/data.ts';
 import { main } from '../src/index.ts';
 
 /**
@@ -61,6 +64,9 @@ const FAMILY_DAY = '1200-04-05';
 const scoring = loadScoring();
 const selection = loadSelection();
 const templates = loadTemplates();
+// The shipped boundaries, not a fixture's. A band written for `elder` has to
+// be reachable by whoever the casting file calls an elder, and nobody else.
+const stages = new LifeStages(loadCasting().bands);
 
 interface Written {
   readonly day: ChronicleDay;
@@ -137,6 +143,7 @@ function build(root: string): Village {
       whereabouts,
       scoring,
       templates,
+      stages,
       household: voice,
       worldSeed: SEED,
     });
@@ -240,7 +247,15 @@ describe('thirty days of posts', () => {
     let silent = 0;
 
     for (const person of store.people.records()) {
-      const post = writePost({ day, whereabouts, scoring, templates, worldSeed: SEED, author: person });
+      const post = writePost({
+        day,
+        whereabouts,
+        scoring,
+        templates,
+        stages,
+        worldSeed: SEED,
+        author: person,
+      });
       const material = day.events.some(
         (event) =>
           templates.wording[event.type] !== undefined && whereabouts.saw(person.id, event),
@@ -272,6 +287,7 @@ describe('thirty days of posts', () => {
         whereabouts,
         scoring,
         templates: { maxLines: 3, wording: {}, family: {} },
+        stages,
         worldSeed: SEED,
         author: person,
       });
@@ -352,6 +368,7 @@ describe('the shipped wording, against real days', () => {
               whereabouts,
               scoring,
               templates: { maxLines: 1, wording: { [event.type]: [variant] }, family: {} },
+              stages,
               worldSeed: SEED,
               author: person,
             });
@@ -371,6 +388,111 @@ describe('the shipped wording, against real days', () => {
     // is not silent. If a change to the simulation renamed every event type,
     // the test above would still pass on an empty village and this would not.
     expect(dayOf(ORDINARY).posts.length).toBeGreaterThanOrEqual(selection.posters);
+  });
+});
+
+/**
+ * The bands, against the village they are meant to describe.
+ *
+ * `has nothing in it that no real event can reach` above already refuses a
+ * wording nothing fits, and it covers bands as a side effect. It cannot cover
+ * either of these, and both are ways of being wrong that produce a site nobody
+ * would look at twice.
+ *
+ * One: a stage of life left out of a set of bands. Six wordings for waking, one
+ * for each stage, and a seventh stage that quietly gets none -- every villager in
+ * it falls back on the general phrasing and sounds like nobody in particular,
+ * forever, and nothing fails.
+ *
+ * Two: a stage nobody in it can write. A wording banded `infant` in the writers'
+ * book is dead on arrival, because nobody under ten is ever on the rota -- and
+ * the reachability test would still pass it, since that test offers each wording
+ * to whoever was present rather than to whoever could have written it.
+ */
+describe('the bands, against the village', () => {
+  /** Which stages hold writers, and which hold children somebody speaks for. */
+  const occupied = (): { writers: Set<string>; spokenFor: Set<string> } => {
+    const writers = new Set<string>();
+    const spokenFor = new Set<string>();
+    for (const { day } of written) {
+      for (const person of store.people.records()) {
+        const age = yearsBetween(person.born, day.key);
+        const band = stages.bandFor(age);
+        if (age >= selection.writingAge) writers.add(band);
+        else spokenFor.add(band);
+      }
+    }
+    return { writers, spokenFor };
+  };
+
+  /** Every stage any wording in a book is banded to. */
+  const banded = (book: Record<string, readonly Template[]>): Set<string> => {
+    const found = new Set<string>();
+    for (const variants of Object.values(book)) {
+      for (const variant of variants) for (const band of variant.bands ?? []) found.add(band);
+    }
+    return found;
+  };
+
+  it('gives every stage of life in the village something of its own to say', () => {
+    const { writers, spokenFor } = occupied();
+    expect(writers.size).toBeGreaterThan(1);
+    expect(spokenFor.size).toBeGreaterThan(1);
+
+    expect([...writers].filter((band) => !banded(templates.wording).has(band))).toEqual([]);
+    expect([...spokenFor].filter((band) => !banded(templates.family).has(band))).toEqual([]);
+  });
+
+  it('bands no wording to a stage that nobody in it could ever say it', () => {
+    // Both halves, because the two books have different populations. The writers'
+    // book is read by anybody old enough to be on the rota; the family book is
+    // only ever about a child too young for that. A wording banded `elder` in the
+    // family book would be a sentence about a seventy-year-old toddler.
+    const { writers, spokenFor } = occupied();
+
+    expect([...banded(templates.wording)].filter((band) => !writers.has(band))).toEqual([]);
+    expect([...banded(templates.family)].filter((band) => !spokenFor.has(band))).toEqual([]);
+  });
+
+  it('says something different to a villager of seventy than to one of twelve', () => {
+    // The end of the pipe, and the only test here a reader would recognise. Two
+    // real villagers at opposite ends of the village, each given the same day,
+    // must not come out with the same set of possible lines -- otherwise the
+    // bands parse, cover the village, and change nothing that reaches the page.
+    const { day } = written[written.length - 1] as Written;
+    const people = store.people.records();
+    const ageOf = (person: PersonRecord): number => yearsBetween(person.born, day.key);
+    const grown = people.filter((person) => ageOf(person) >= selection.writingAge);
+    const eldest = grown.reduce((a, b) => (ageOf(a) >= ageOf(b) ? a : b));
+    const youngest = grown.reduce((a, b) => (ageOf(a) <= ageOf(b) ? a : b));
+    expect(stages.bandFor(ageOf(eldest))).not.toBe(stages.bandFor(ageOf(youngest)));
+
+    // Everything either of them may say about waking, over every day of the run,
+    // so the comparison does not turn on which variant a single seed chose.
+    const wokeWords = (person: PersonRecord): Set<string> => {
+      const found = new Set<string>();
+      for (const one of written) {
+        const context = {
+          day: one.day,
+          band: stages.bandFor(yearsBetween(person.born, one.day.key)),
+          words: (key: string) => (key === 'me' ? person.name : undefined),
+        };
+        for (const event of one.day.byActor(person.id)) {
+          if (event.type !== 'npc.woke') continue;
+          for (const fits of eligible(templates.wording['npc.woke'] ?? [], event, context)) {
+            found.add(fits.text);
+          }
+        }
+      }
+      return found;
+    };
+
+    const old = wokeWords(eldest);
+    const young = wokeWords(youngest);
+    expect(old.size).toBeGreaterThan(0);
+    expect(young.size).toBeGreaterThan(0);
+    expect([...old].filter((line) => !young.has(line))).not.toEqual([]);
+    expect([...young].filter((line) => !old.has(line))).not.toEqual([]);
   });
 });
 
@@ -558,6 +680,7 @@ describe('the shipped family wording, against real days', () => {
                 whereabouts,
                 scoring,
                 templates: { ...templates, family: { [event.type]: [variant] } },
+                stages,
                 worldSeed: SEED,
                 // Certainty, because this is a question about the wording and
                 // not about the roll. A coin here would make the test flaky in
@@ -621,9 +744,15 @@ describe('the same world, written twice', () => {
     // `Abed at A cottage on Bridge Row.` The article is now lowered where the
     // name sits inside a sentence, so the wording of those lines moved and this
     // moved with it. First pinned when slice 5 shipped.
+    //
+    // Re-pinned for the age bands: the wording book now holds several ways of
+    // saying the same thing, one per stage of life, and a villager is only
+    // offered the ones written for the age they are. Every poster's morning and
+    // night lines were drawn from a different set of candidates than before, so
+    // this moved for all of them at once.
     const posts = dayOf(ORDINARY).posts;
     expect(posts.length).toBeGreaterThan(0);
-    expect(fnv1a64Hex(printed(posts))).toBe('2e987b03c457370f');
+    expect(fnv1a64Hex(printed(posts))).toBe('d8d56737305fbc9b');
   });
 
   it('writes the day the children were pinned on', () => {
@@ -634,9 +763,15 @@ describe('the same world, written twice', () => {
     // family wording, to the roll, or to who counts as a child has somewhere to
     // break. Same rules as the pin above: re-pin it in the same commit as the
     // change and say why.
+    //
+    // Re-pinned for the age bands, same as the pin above, and for one more
+    // reason of its own: a parent's line about a small child is banded by the
+    // child's stage rather than the parent's, so all three of the mentions this
+    // day carries were drawn from a narrower set than before. The count of three
+    // did not move, which is the point of asserting it separately.
     const posts = dayOf(FAMILY_DAY).posts;
     const mentions = posts.flatMap((post) => post.lines).filter((line) => line.about !== undefined);
     expect(mentions).toHaveLength(3);
-    expect(fnv1a64Hex(printed(posts))).toBe('648ee2bc6bb2d0f0');
+    expect(fnv1a64Hex(printed(posts))).toBe('8adf5ccdcbf69021');
   });
 });
