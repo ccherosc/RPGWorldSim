@@ -5,8 +5,11 @@ import { describe, expect, it } from 'vitest';
 import {
   type Candidate,
   ChronicleDay,
+  type HouseholdVoice,
+  Kinfolk,
   PeopleRegister,
   PlaceRegister,
+  type Post,
   type ScoringConfig,
   type TemplateBook,
   TemplateBookSchema,
@@ -77,7 +80,18 @@ const BOOK: TemplateBook = {
     ],
     'society.household-founded': [{ text: 'The {name} household, with {others}.' }],
   },
+  // The second voice: a parent talking about a child, never a child talking.
+  family: {
+    'npc.woke': [{ text: '{childFirst} was up before any of us.' }],
+    'npc.went-to-bed': [{ text: '{child} is asleep at {place}.' }],
+    'travel.blocked': [
+      { text: '{childFirst} was turned back at {destination}.', when: { reason: ['full'] } },
+    ],
+  },
 };
+
+/** Old enough on `KEY` to have been writing for years. */
+const GROWN = '1170-03-02';
 
 let nextId = 1;
 
@@ -107,9 +121,19 @@ const arrive = (who: EntityId, where: EntityId, at: number): SimEvent =>
 function village(): { people: PeopleRegister; places: PlaceRegister } {
   const people = new PeopleRegister();
   const places = new PlaceRegister();
-  const names = ['Winifred Hargrave', 'Godric Netherby', 'Alditha Salter'];
-  names.forEach((name, index) => {
-    people.add({ id: npc(index), name, sex: 'female', born: '1170-03-02', family: null });
+  // Winifred has two. Sibb is three and cannot hold a pen, so her days reach
+  // the site through her mother or not at all; Wat is twelve and takes his own
+  // turn on the rota, which is why nobody may speak for him. The gap between
+  // those two is the whole of the rule being tested at the foot of this file.
+  const souls: readonly (readonly [string, string])[] = [
+    ['Winifred Hargrave', GROWN],
+    ['Godric Netherby', GROWN],
+    ['Alditha Salter', GROWN],
+    ['Sibb Hargrave', '1196-05-10'],
+    ['Wat Hargrave', '1188-01-09'],
+  ];
+  souls.forEach(([name, born], index) => {
+    people.add({ id: npc(index), name, sex: 'female', born, family: null });
   });
   places.add({ id: GREEN, name: 'The Green', type: 'square', access: 'public' });
   places.add({ id: COTTAGE, name: 'A cottage on Mill Lane', type: 'dwelling', access: 'private' });
@@ -174,7 +198,7 @@ describe('putting a name into a sentence', () => {
    * between a name and a sentence, and it is the seam that is tested here.
    */
   const named = (text: string, location: EntityId, actors: readonly EntityId[] = [npc(0)]): string => {
-    const book: TemplateBook = { maxLines: 1, wording: { 'npc.woke': [{ text }] } };
+    const book: TemplateBook = { maxLines: 1, wording: { 'npc.woke': [{ text }] }, family: {} };
     const woke = event('npc.woke', 100, { actors, location });
     return textOf([woke], 0, book)[0] ?? '';
   };
@@ -332,6 +356,7 @@ describe('what a post refuses to say', () => {
     const book: TemplateBook = {
       maxLines: 3,
       wording: { 'npc.woke': [{ text: 'Woke in {bed}.' }] },
+      family: {},
     };
     const woke = event('npc.woke', 100, { actors: [npc(0)], data: { bed: household(0) } });
     expect(textOf([woke], 0, book)).toEqual([]);
@@ -353,6 +378,7 @@ describe('what a post refuses to say', () => {
     const only: TemplateBook = {
       maxLines: 3,
       wording: { 'travel.blocked': [{ text: 'No room at {destination}.', when: { reason: ['full'] } }] },
+      family: {},
     };
     expect(textOf([forbidden], 0, only)).toEqual([]);
 
@@ -371,6 +397,7 @@ describe('what a post refuses to say', () => {
     const book: TemplateBook = {
       maxLines: 3,
       wording: { 'npc.turning-in': [{ text: 'Turning in, interrupted: {interrupted}.' }] },
+      family: {},
     };
     const turningIn = event('npc.turning-in', 100, {
       actors: [npc(0)],
@@ -486,5 +513,223 @@ describe('a day of posts', () => {
 
     expect(posts).toHaveLength(1);
     expect(posts[0]?.author.slug).toBe('winifred-hargrave');
+  });
+});
+
+/**
+ * A parent's last line, about a child too young to write their own.
+ *
+ * The one place in the village where anybody speaks for anybody else, so these
+ * are mostly attacks on the edges of that permission: not a child old enough to
+ * post, not a child the record has never heard of, not a post the writer had
+ * not already earned, and never in the writer's own voice.
+ */
+
+const SIBB = npc(3);
+const WAT = npc(4);
+/** In nobody's register. The press meets these when an archive outruns a record. */
+const STRANGER = npc(9);
+
+/** Learned off the record, the way the press learns it, rather than handed over. */
+function kinOf(...children: readonly EntityId[]): Kinfolk {
+  const kin = new Kinfolk();
+  kin.learn(
+    day(
+      children.map((child) =>
+        event('society.parentage-recorded', 1, {
+          actors: [child],
+          data: { child, mother: npc(0), motherAbsent: null, father: null, fatherAbsent: 'dead' },
+        }),
+      ),
+    ),
+  );
+  return kin;
+}
+
+const speaking = (chance: number, ...children: readonly EntityId[]): HouseholdVoice => ({
+  kin: kinOf(...children),
+  writingAge: 10,
+  chance,
+});
+
+/** Winifred's post, with whatever household voice the test is about. */
+const postOf = (
+  events: readonly SimEvent[],
+  household: HouseholdVoice | undefined,
+  templates = BOOK,
+): Post | undefined =>
+  writePost({
+    ...writing(events, templates),
+    ...(household === undefined ? {} : { household }),
+    author: author(0),
+  });
+
+const myMorning = (): SimEvent => event('npc.woke', 100, { actors: [npc(0)], location: COTTAGE });
+const herMorning = (): SimEvent => event('npc.woke', 200, { actors: [SIBB], location: COTTAGE });
+
+describe('a parent speaking for a child', () => {
+  it('ends the post with what the little one did, and says whose moment it was', () => {
+    nextId = 1;
+    const post = postOf([myMorning(), herMorning()], speaking(100, SIBB));
+
+    expect(post?.lines).toHaveLength(2);
+    const last = post?.lines[1];
+    expect(last?.text).toBe('Sibb was up before any of us.');
+    // The id is what makes the claim checkable. Without it the line says a
+    // parent was somewhere she was not, and no test could tell.
+    expect(last?.about).toBe(SIBB);
+    expect(last?.sources).toEqual([2]);
+    // Her own line still answers for itself.
+    expect(post?.lines[0]?.about).toBeUndefined();
+  });
+
+  it('spends none of the writer’s own allowance on it', () => {
+    // One line for herself and one for her daughter, out of a book that allows
+    // one line. A cap counting both would mean Winifred bought a sentence about
+    // Sibb by giving up one about her own day.
+    const mine = [
+      myMorning(),
+      event('npc.went-to-bed', 60_000, { actors: [npc(0)], location: COTTAGE }),
+    ];
+    const tight: TemplateBook = { ...BOOK, maxLines: 1 };
+    const alone = postOf(mine, undefined, tight);
+    const together = postOf([...mine, herMorning()], speaking(100, SIBB), tight);
+
+    expect(alone?.lines).toHaveLength(1);
+    expect(together?.lines).toHaveLength(2);
+    expect(together?.lines[1]?.about).toBe(SIBB);
+  });
+
+  it('says nothing at all when the chance is nothing', () => {
+    const post = postOf([myMorning(), herMorning()], speaking(0, SIBB));
+
+    expect(post?.lines).toHaveLength(1);
+    expect(post?.lines.some((line) => line.about !== undefined)).toBe(false);
+  });
+
+  it('rolls for it, rather than mentioning always or never', () => {
+    // Half is a coin, and a coin proves nothing in two throws. A run of days
+    // from the same village is the shape that can tell a roll from a constant:
+    // the day is the only thing that differs between them.
+    const events = [myMorning(), herMorning()];
+    const chronicle = day(events);
+    const household = speaking(50, SIBB);
+    let mentioned = 0;
+
+    for (let ahead = 0; ahead < 20; ahead++) {
+      const key = dayKeyOf(DAWN + ahead * TICKS_PER_DAY, DEFAULT_CALENDAR);
+      const that = new ChronicleDay({
+        key,
+        events,
+        people: chronicle.people,
+        places: chronicle.places,
+      });
+      const post = writePost({
+        day: that,
+        whereabouts: new Whereabouts(that),
+        scoring: SCORING,
+        templates: BOOK,
+        worldSeed: SEED,
+        household,
+        author: author(0),
+      });
+      if (post?.lines.some((line) => line.about === SIBB) === true) mentioned++;
+    }
+
+    expect(mentioned).toBeGreaterThan(0);
+    expect(mentioned).toBeLessThan(20);
+  });
+
+  it('leaves the writer’s own words exactly as they were', () => {
+    // The mention draws from a stream of its own, and this is the test that
+    // says so. Sharing one would have meant that adding this feature silently
+    // rewrote every post the site had ever published — on days about nobody’s
+    // children, in villages with no children in them.
+    const events = [myMorning(), herMorning()];
+    const alone = postOf(events, undefined);
+    const together = postOf(events, speaking(100, SIBB));
+
+    expect(alone?.lines).toHaveLength(1);
+    expect(together?.lines[0]?.text).toBe(alone?.lines[0]?.text);
+  });
+
+  it('writes the same mention twice for the same day', () => {
+    const events = [myMorning(), herMorning()];
+    expect(postOf(events, speaking(100, SIBB))).toEqual(postOf(events, speaking(100, SIBB)));
+  });
+
+  it('takes the loudest of the child’s day, not the first of it', () => {
+    nextId = 1;
+    const turned = event('travel.blocked', 300, {
+      actors: [SIBB],
+      location: GREEN,
+      data: { traveller: SIBB, destination: MILL, reason: 'full' },
+    });
+    const post = postOf([myMorning(), herMorning(), turned], speaking(100, SIBB));
+
+    expect(post?.lines[1]?.text).toBe('Sibb was turned back at the Mill.');
+    expect(post?.lines[1]?.sources).toEqual([turned.id]);
+  });
+});
+
+describe('who may be spoken for', () => {
+  it('will not speak for a child old enough to speak for himself', () => {
+    // Wat is twelve. He is on the rota in his own right, and a mother
+    // summarising a day her son already posted is a village talking over one of
+    // its own people.
+    const his = event('npc.woke', 200, { actors: [WAT], location: COTTAGE });
+    const post = postOf([myMorning(), his], speaking(100, WAT));
+
+    expect(post?.lines).toHaveLength(1);
+  });
+
+  it('will not speak for somebody the record has never heard of', () => {
+    const theirs = event('npc.woke', 200, { actors: [STRANGER], location: COTTAGE });
+    const post = postOf([myMorning(), theirs], speaking(100, STRANGER));
+
+    expect(post?.lines).toHaveLength(1);
+  });
+
+  it('says nothing about a child whose day held nothing worth a line', () => {
+    const post = postOf([myMorning()], speaking(100, SIBB));
+
+    expect(post?.lines).toHaveLength(1);
+  });
+
+  it('does not hand a post to a parent who had nothing of their own to say', () => {
+    // Sibb had a morning and Winifred did not. A page of parents reporting
+    // other people’s afternoons is not the village blog, and the rota picked
+    // Winifred for her own day in the first place.
+    const post = postOf([herMorning()], speaking(100, SIBB));
+
+    expect(post).toBeUndefined();
+  });
+
+  it('cannot reach a first-person wording from a line about somebody else', () => {
+    // `{me}` and `{first}` are unanswerable in a family line on purpose, so a
+    // wording pasted into the wrong book fits nothing rather than printing the
+    // mother’s name over the daughter’s morning.
+    const wrong: TemplateBook = {
+      ...BOOK,
+      family: { 'npc.woke': [{ text: '{first} is awake, and {me} is not pleased.' }] },
+    };
+    const post = postOf([myMorning(), herMorning()], speaking(100, SIBB), wrong);
+
+    expect(post?.lines).toHaveLength(1);
+  });
+
+  it('says nothing when the book has no family wording at all', () => {
+    // What the site published before any of this existed, and what every test
+    // on the rest of this page is still asking for.
+    const bare: TemplateBook = { ...BOOK, family: {} };
+    const post = postOf([myMorning(), herMorning()], speaking(100, SIBB), bare);
+
+    expect(post?.lines).toHaveLength(1);
+  });
+
+  it('says nothing at all when there is no household voice', () => {
+    const post = postOf([myMorning(), herMorning()], undefined);
+
+    expect(post?.lines).toHaveLength(1);
   });
 });

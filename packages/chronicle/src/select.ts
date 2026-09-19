@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { EntityId } from '@rpgsim/sim-core';
 import type { ChronicleDay } from './day.ts';
-import type { PersonRecord } from './people.ts';
+import { type PersonRecord, yearsBetween } from './people.ts';
 import {
   type Newsworthiness,
   type ScoringConfig,
@@ -41,6 +41,44 @@ export const SelectionSchema = z.object({
   floor: z.number().int().min(0),
   /** How many villagers post on an ordinary day. */
   posters: z.number().int().min(0),
+  /**
+   * The age from which somebody writes their own posts.
+   *
+   * Ten, and it is the one rule here that is not about how the page reads. A
+   * quarter of the village is under ten, they are out of doors all day, and the
+   * scoring cheerfully ranked a five-month-old the most interesting person in
+   * Pennycroft -- so Walter Webb, who cannot hold his own head up, had six posts
+   * on the site. The About page says in plain words that nobody here can read or
+   * write yet, which makes every one of them a small lie printed next to a
+   * photograph of a baby.
+   *
+   * Ten rather than a literacy flag because there is no literacy in the
+   * simulation to read, and inventing one in the press would be the press making
+   * up world state. An age is a birth fact the record already holds.
+   *
+   * It is not a silence. What a young child did still reaches the page, through
+   * `mentionsChild` below and their parent's voice, which is how it would have
+   * reached anybody in a village where nothing was written down.
+   */
+  writingAge: z.number().int().min(0),
+  /**
+   * The chance in a hundred that a parent's post ends with a line about a child
+   * too young to write.
+   *
+   * A chance and not a rule, because a parent who reported every one of their
+   * children's days every time would stop being a person and become a feed.
+   *
+   * Measured rather than guessed. At fifty, across thirty days of `world-zero`:
+   * a hundred and fifty posts, of which fifty-three were written by a parent
+   * with a young child who had done something, of which thirty ended with a line
+   * about that child. So the dial does what it says on the posts it applies to,
+   * and a fifth of the blog carries a child's day -- sixteen of the thirty days
+   * have at least one, and none of them is all nursery.
+   *
+   * Zero turns the whole thing off and is a legitimate setting: a village with
+   * no wording for it published exactly what it published before.
+   */
+  mentionsChild: z.number().int().min(0).max(100),
   /**
    * How many published days back the rota looks.
    *
@@ -144,10 +182,10 @@ export function selectHeadlines(options: SelectOptions): readonly Newsworthiness
 /**
  * The villagers who post today.
  *
- * Everybody who did anything is a candidate, represented by their single most
- * newsworthy moment rather than by a sum: a person who arrived somewhere four
- * hundred times had a dull day, and summing would make them the most
- * interesting person in the village. A day is remembered for its high point.
+ * Everybody old enough to write who did anything is a candidate, represented by
+ * their single most newsworthy moment rather than by a sum: a person who arrived
+ * somewhere four hundred times had a dull day, and summing would make them the
+ * most interesting person in the village. A day is remembered for its high point.
  */
 export function selectPosters(options: SelectOptions): readonly Candidate[] {
   return rankCandidates(options).slice(0, options.selection.posters);
@@ -164,6 +202,11 @@ export function rankCandidates(options: SelectOptions): readonly Candidate[] {
     // Actors that are not people -- a household founding names its household --
     // are not candidates to write a blog post, and are not an error either.
     if (person === undefined) continue;
+    // Nor is a child. Dropped here rather than after the sort, so that a day
+    // whose most newsworthy hour belonged to a six-year-old still fills all
+    // five places from the people who can write: filtering a finished list
+    // would publish four posts and leave a hole where the child had been.
+    if (yearsBetween(person.born, day.key) < selection.writingAge) continue;
 
     const best = bestOf(scoring, day, actor);
     if (best === undefined) continue;

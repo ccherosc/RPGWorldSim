@@ -1,7 +1,7 @@
 {
   "note": "Wording for villager posts. One entry per event type; a type absent here is a type nobody posts about. travel.departed and travel.arrived are absent on purpose -- twenty-nine thousand of a thirty-day run's thirty-five thousand events are somebody walking somewhere, and a blog made of those is a travel log. Placeholders: {me} the writer's full name, {first} their first name, {place} where the event happened, {others} the other people it names. Any other {word} is read straight out of the event's own payload, and a wording whose placeholders cannot all be filled is passed over rather than filled in with a guess. `when` restricts a wording to events carrying particular payload values, so a refusal can be phrased for its actual reason instead of printing `no-route` in the middle of a sentence.",
 
-  "coverage": "Every wording here fires at least once in thirty days of the world-zero seed, and packages/chronicle/test/post.test.ts asserts it -- so a misspelt placeholder or a wording nothing can reach fails a test instead of quietly never appearing. That cuts both ways: wording may only be added here once the simulation can actually produce it. Three real code paths are dormant and therefore have no wording yet -- npc.could-not-rest (nobody's house is ever full at bedtime, so it fires zero times in thirty days), an interrupted turn-in and its travel.blocked with reason `bedtime` (nobody is ever caught far enough from home), and npc.removed (nothing kills anybody yet). When any of those starts firing, its wording belongs here.",
+  "coverage": "Every wording here fires at least once in thirty days of the world-zero seed, and packages/chronicle/test/post.test.ts asserts it -- so a misspelt placeholder or a wording nothing can reach fails a test instead of quietly never appearing. That cuts both ways: wording may only be added here once the simulation can actually produce it. Three real code paths are dormant and therefore have no wording yet -- npc.could-not-rest (nobody's house is ever full at bedtime, so it fires zero times in thirty days), an interrupted turn-in and its travel.blocked with reason `bedtime` (nobody is ever caught far enough from home), and npc.removed (nothing kills anybody yet). When any of those starts firing, its wording belongs here. The family section at the foot of this file is held to the same rule by the same tests: every wording in it has to fit a real moment of a real child whose parent was writing that day.",
 
   "maxLines": 3,
 
@@ -52,6 +52,36 @@
     "society.parentage-recorded": [
       { "text": "{mother} is my mother. That is written down now." },
       { "text": "Set down in the record: {mother} and {father}." }
+    ]
+  },
+
+  "familyNote": [
+    "A parent's last line about a child too young to write their own. Third person, and a different voice from the book above: these are written to be read as somebody talking about their child, not as the child talking.",
+    "Placeholders: {child} the child's full name, {childFirst} their first name, {place} where it happened. {me} and {first} are not available here on purpose -- the writer is not the subject of the line -- so a first-person wording pasted into this section can never fit anything, and the coverage test will say so.",
+    "Only the four kinds of moment a small child in Pennycroft actually has. Everything else they do is walking, which nobody posts about at any age."
+  ],
+
+  "family": {
+    "npc.woke": [
+      { "text": "{childFirst} was awake before the rest of us, and made sure we knew." },
+      { "text": "{childFirst} woke at {place} and started the day for everybody." },
+      { "text": "Up early, on account of {childFirst} being up earlier." }
+    ],
+
+    "npc.turning-in": [
+      { "text": "Got {childFirst} started for home before the light went.", "when": { "interrupted": [false] } },
+      { "text": "{childFirst} is heading in for the night, under protest." }
+    ],
+
+    "npc.went-to-bed": [
+      { "text": "{childFirst} is asleep at last. The house can hear itself think." },
+      { "text": "{child} is down for the night. Long day for a small one." },
+      { "text": "{childFirst} asleep at {place}, and not a moment too soon." }
+    ],
+
+    "travel.blocked": [
+      { "text": "{childFirst} walked all the way to {destination} and was turned back at the door. Not best pleased about it.", "when": { "reason": ["full"] } },
+      { "text": "No room at {destination} for {childFirst} either. Home again, then." }
     ]
   }
 }

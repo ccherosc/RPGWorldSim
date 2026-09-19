@@ -5,6 +5,7 @@ import {
   ChronicleDay,
   Community,
   type Edition,
+  Kinfolk,
   type Paper,
   PersonaBook,
   type PersonRecord,
@@ -12,6 +13,7 @@ import {
   type Post,
   type PublishedDay,
   Whereabouts,
+  householdVoice,
   select,
   writePaper,
   writePosts,
@@ -132,6 +134,12 @@ export function readVillage(options: ReadVillageOptions): Village {
 
   const published: PublishedDay[] = [];
   const issues: Issue[] = [];
+  // Parentage accumulates as the days are read, for the same reason the rota
+  // does: a post may rest on what the village knew that morning and not on what
+  // the archive knows now.
+  const kin = new Kinfolk();
+  const household = householdVoice(kin, selection);
+
   for (const entry of entries) {
     const day = new ChronicleDay({
       key: entry.key,
@@ -139,6 +147,7 @@ export function readVillage(options: ReadVillageOptions): Village {
       people: record.people,
       places: record.places,
     });
+    kin.learn(day);
     const edition = select({ day, scoring, selection, published });
     // The rota advances for every day the village lived, published or not.
     // Freezing the site must not change who writes when the freeze lifts.
@@ -155,6 +164,7 @@ export function readVillage(options: ReadVillageOptions): Village {
         whereabouts,
         scoring,
         templates,
+        household,
         worldSeed: manifest.seed,
       }),
       paper: writePaper({

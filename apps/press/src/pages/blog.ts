@@ -12,6 +12,11 @@ import type { Issue } from '../issue.ts';
  * is invisible on the page and is the reason a post is sometimes two lines
  * long: the villager genuinely had nothing else to report.
  *
+ * A post may close with one line about a child too young to write. It is in the
+ * parent's voice and it is held to the same rule, measured against the child:
+ * the moment is one the child was an actor in, and the line carries their id so
+ * that the presence test has somebody to test.
+ *
  * Nobody is padded out and nobody is substituted. If the rota picked five
  * people and two of them had a dull day, the day shows three posts.
  */

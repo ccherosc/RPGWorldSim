@@ -4,5 +4,7 @@
   "floor": 30,
   "posters": 5,
   "memory": 30,
-  "cooling": 200
+  "cooling": 200,
+  "writingAge": 10,
+  "mentionsChild": 50
 }

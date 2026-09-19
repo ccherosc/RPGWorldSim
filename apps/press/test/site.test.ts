@@ -2,8 +2,8 @@ import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node
 import { homedir, tmpdir } from 'node:os';
 import { dirname, join, posix, resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { glanceOf } from '@rpgsim/chronicle';
-import { main as sim } from '@rpgsim/simulator';
+import { glanceOf, yearsBetween } from '@rpgsim/chronicle';
+import { loadSelection, main as sim } from '@rpgsim/simulator';
 import { text } from '../src/html.ts';
 import { villageDate } from '../src/publication.ts';
 import { buildSite, listFiles } from '../src/site.ts';
@@ -761,6 +761,63 @@ describe('how the site writes about people', () => {
     // Counted as well as scanned: a page that stopped printing the persona at
     // all would satisfy every check above without anybody noticing.
     expect(seen, 'no persona prose anywhere, so this scanned nothing').toBeGreaterThan(80);
+  });
+});
+
+describe('who the site lets write', () => {
+  const { writingAge } = loadSelection();
+  const latest = (): string => {
+    const last = site.village.issues[site.village.issues.length - 1];
+    expect(last).toBeDefined();
+    return (last as { day: { key: string } }).day.key;
+  };
+
+  it('has small children in the village, so the rest of this is not vacuous', () => {
+    const young = site.village.people.filter(
+      (person) => yearsBetween(person.born, latest()) < writingAge,
+    );
+    expect(young.length).toBeGreaterThan(5);
+  });
+
+  it('gives a byline to nobody too young to have written it', () => {
+    // The rota is tested where the rota lives. This is the other end of the
+    // pipe: a poster is not only a post, they are a name under `Who wrote
+    // today` and a byline on their own page, and this is the last place the
+    // rule can be checked before a reader sees it.
+    let bylines = 0;
+    for (const issue of site.village.issues) {
+      for (const candidate of issue.edition.posters) {
+        expect(
+          yearsBetween(candidate.person.born, issue.day.key),
+          `${candidate.person.slug} on ${issue.day.key}`,
+        ).toBeGreaterThanOrEqual(writingAge);
+      }
+      for (const post of issue.posts) {
+        expect(
+          yearsBetween(post.author.born, issue.day.key),
+          `${post.author.slug} on ${issue.day.key}`,
+        ).toBeGreaterThanOrEqual(writingAge);
+        bylines++;
+      }
+    }
+    expect(bylines).toBeGreaterThan(DAYS);
+  });
+
+  it('still gets the little ones onto a page, in a parent’s words', () => {
+    // Keeping children off the rota takes a quarter of the village out of the
+    // blog, and this is the sentence that says it did not take them out of the
+    // site. Checked against the printed markup rather than against the post,
+    // because a line that never reached a page is a line nobody reads.
+    const mentions = site.village.issues
+      .flatMap((issue) => issue.posts)
+      .flatMap((post) => post.lines)
+      .filter((line) => line.about !== undefined);
+
+    expect(mentions.length).toBeGreaterThan(0);
+    for (const line of mentions) {
+      const printed = [...pages.values()].some((body) => body.includes(text(line.text)));
+      expect(printed, line.text).toBe(true);
+    }
   });
 });
 

@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import {
   type Candidate,
   ChronicleDay,
+  Kinfolk,
   PeopleRegister,
   PlaceRegister,
   type PublishedDay,
   type ScoringConfig,
   type SelectionConfig,
   SelectionSchema,
+  householdVoice,
   lastPostedWithin,
   rankCandidates,
   select,
@@ -61,6 +63,12 @@ const SELECTION: SelectionConfig = {
   posters: 5,
   memory: 30,
   cooling: 200,
+  // Nobody in these fixtures is a child, so the age gate is set where it is on
+  // the site rather than at zero: a test village that quietly turned the rule
+  // off would agree with itself about everything except the one thing the rule
+  // is for. The tests that are about the gate set their own people's birthdays.
+  writingAge: 10,
+  mentionsChild: 50,
 };
 
 let nextId = 1;
@@ -85,8 +93,14 @@ function event(
   };
 }
 
+/** Thirty years old on `KEY`, which is everybody unless a test says otherwise. */
+const GROWN = '1170-03-02';
+
 /** A village of `souls` people, two places, one public and one not. */
-function village(souls: number): { people: PeopleRegister; places: PlaceRegister } {
+function village(
+  souls: number,
+  born: (index: number) => string = () => GROWN,
+): { people: PeopleRegister; places: PlaceRegister } {
   const people = new PeopleRegister();
   const places = new PlaceRegister();
   for (let index = 0; index < souls; index++) {
@@ -97,7 +111,7 @@ function village(souls: number): { people: PeopleRegister; places: PlaceRegister
       // two candidates apart would not be testing the tie-break.
       name: `Villager Number${String(index).padStart(2, '0')}`,
       sex: index % 2 === 0 ? 'female' : 'male',
-      born: '1170-03-02',
+      born: born(index),
       family: null,
     });
   }
@@ -106,8 +120,13 @@ function village(souls: number): { people: PeopleRegister; places: PlaceRegister
   return { people, places };
 }
 
-function day(events: readonly SimEvent[], souls = 8, key = KEY): ChronicleDay {
-  const { people, places } = village(souls);
+function day(
+  events: readonly SimEvent[],
+  souls = 8,
+  key = KEY,
+  born?: (index: number) => string,
+): ChronicleDay {
+  const { people, places } = village(souls, born);
   return new ChronicleDay({ key, events, people, places });
 }
 
@@ -371,6 +390,120 @@ describe('who posts', () => {
       'villager-number02',
       'villager-number03',
     ]);
+  });
+});
+
+describe('who is old enough to write', () => {
+  /**
+   * `KEY` is the first of Blossom, 1200, so these are ages on the day of the
+   * test. Spelled out rather than computed: an age arrived at by the same
+   * arithmetic the code uses would agree with a broken `yearsBetween` about
+   * everything.
+   */
+  const FIVE = '1195-03-02';
+  /** Ten to the day. The gate is `< writingAge`, so this one writes. */
+  const TEN = '1190-03-02';
+  /** Ten tomorrow. This one does not. */
+  const NEARLY_TEN = '1190-04-02';
+
+  /** A day in a village where the first `young` villagers are five years old. */
+  const withChildren = (events: readonly SimEvent[], young: number, souls = 8): ChronicleDay =>
+    day(events, souls, KEY, (index) => (index < young ? FIVE : GROWN));
+
+  it('leaves a child off the rota, however loud their day was', () => {
+    nextId = 1;
+    // The child gets the refusal -- the highest-scoring thing this village can
+    // produce -- and the grown-up gets a waking. On merit the child wins.
+    const chronicle = withChildren(
+      [
+        event('travel.blocked', { actors: [npc(0)], location: place(0) }),
+        event('npc.woke', { actors: [npc(1)] }),
+      ],
+      1,
+    );
+    const ranked = rankCandidates({
+      day: chronicle,
+      scoring: SCORING,
+      selection: SELECTION,
+      published: [],
+    });
+
+    expect(slugsOf(ranked)).toEqual(['villager-number01']);
+  });
+
+  it('fills the page from the grown-ups rather than leaving a hole', () => {
+    nextId = 1;
+    // Three children with the day's three best moments, five adults with the
+    // dull remainder, and five places to fill. Dropping the children after the
+    // ranking would publish two posts and call the page full; dropping them
+    // before it publishes five.
+    const loud = Array.from({ length: 3 }, (_, index) =>
+      event('travel.blocked', { actors: [npc(index)], location: place(0) }),
+    );
+    const quiet = Array.from({ length: 5 }, (_, index) =>
+      event('npc.woke', { actors: [npc(index + 3)] }),
+    );
+    const posters = selectPosters({
+      day: withChildren([...loud, ...quiet], 3),
+      scoring: SCORING,
+      selection: SELECTION,
+      published: [],
+    });
+
+    expect(slugsOf(posters)).toEqual([
+      'villager-number03',
+      'villager-number04',
+      'villager-number05',
+      'villager-number06',
+      'villager-number07',
+    ]);
+  });
+
+  it('lets somebody write on the day they come of age, and not the day before', () => {
+    nextId = 1;
+    const chronicle = day(
+      [event('npc.woke', { actors: [npc(0)] }), event('npc.woke', { actors: [npc(1)] })],
+      8,
+      KEY,
+      (index) => (index === 0 ? TEN : NEARLY_TEN),
+    );
+    const ranked = rankCandidates({
+      day: chronicle,
+      scoring: SCORING,
+      selection: SELECTION,
+      published: [],
+    });
+
+    expect(slugsOf(ranked)).toEqual(['villager-number00']);
+  });
+
+  it('hands the same two numbers to the household voice, the right way round', () => {
+    // An age of ten and a chance of fifty are both plausible as either, which
+    // is how a press that swapped them ran green: the rota reads `writingAge`
+    // from the config itself and never noticed, and the only thing downstream
+    // was an object literal written out twice. One function, and one test that
+    // can tell the two numbers apart.
+    const voice = householdVoice(new Kinfolk(), SELECTION);
+
+    expect(voice.writingAge).toBe(SELECTION.writingAge);
+    expect(voice.chance).toBe(SELECTION.mentionsChild);
+    expect(voice.writingAge).not.toBe(voice.chance);
+  });
+
+  it('lets the whole village write when the age is set to zero', () => {
+    nextId = 1;
+    // Not a setting anybody should use, but the one that proves the rule is the
+    // config's and not the code's. Without this, a hard-coded ten would pass
+    // every other test on this page.
+    const chronicle = withChildren([event('npc.woke', { actors: [npc(0)] })], 1);
+    const ranked = rankCandidates({
+      day: chronicle,
+      scoring: SCORING,
+      selection: { ...SELECTION, writingAge: 0 },
+      published: [],
+    });
+
+    expect(slugsOf(ranked)).toEqual(['villager-number00']);
   });
 });
 

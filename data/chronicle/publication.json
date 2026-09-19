@@ -90,7 +90,7 @@
         {
           "heading": "The twist",
           "body": [
-            "The village reports on itself. There is no narrator. Every day the program looks at what happened, decides what mattered, and prints a page about it. The villagers write their own short notes about their own day, and they are only allowed to mention things they were actually present for.",
+            "The village reports on itself. There is no narrator. Every day the program looks at what happened, decides what mattered, and prints a page about it. The villagers write their own short notes about their own day, and they are only allowed to mention things they were actually present for. Nobody under ten writes anything, because nobody under ten could. What one of them did still reaches the page the way it would have in a real village: a parent mentions it.",
             "So the paper can be thin. Some days genuinely are. When the paper has nothing to say it says nothing, and there is a note at the bottom of every issue listing what it cannot tell you yet and why."
           ],
           "image": "window"
@@ -157,7 +157,7 @@
 
     "blog": {
       "title": "The Villagers",
-      "lead": "Short notes from the people themselves. A villager may only write about something they were standing next to when it happened, which is why some days they have nothing to say."
+      "lead": "Short notes from the people themselves. A villager may only write about something they were standing next to when it happened, which is why some days they have nothing to say. The youngest are too small to write anything down, so when one of them turns up here it is a parent mentioning them."
     },
 
     "about": {

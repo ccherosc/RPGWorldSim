@@ -1,6 +1,6 @@
 import { assert } from '@rpgsim/shared';
 import { z } from 'zod';
-import type { PersonRecord } from './people.ts';
+import { type PersonRecord, yearsBetween } from './people.ts';
 import { type AgeBand, type PortraitCatalog, type PortraitSex, PORTRAIT_ID } from './portraits.ts';
 
 /**
@@ -249,31 +249,6 @@ export class Casting {
     }
     return proposals;
   }
-}
-
-/**
- * Whole years between two `YYYY-MM-DD` dates, by comparison rather than by
- * arithmetic on days.
- *
- * Deliberately calendar-agnostic. The village year is twelve thirty-day months
- * and that is a data file's decision, so anything here that multiplied by 360
- * would be a second copy of it — quietly wrong the first time somebody adds a
- * thirteenth month. Comparing month-and-day is right under any calendar whose
- * months are ordered.
- */
-export function yearsBetween(born: string, on: string): number {
-  const [bornYear, bornRest] = splitDate(born);
-  const [onYear, onRest] = splitDate(on);
-  const age = onYear - bornYear - (onRest < bornRest ? 1 : 0);
-  return age < 0 ? 0 : age;
-}
-
-function splitDate(date: string): [number, string] {
-  const parts = date.split('-');
-  assert(parts.length === 3, 'not a YYYY-MM-DD date', { date });
-  const year = Number(parts[0]);
-  assert(Number.isInteger(year), 'a date has a year that is not a number', { date });
-  return [year, `${parts[1] as string}-${parts[2] as string}`];
 }
 
 /**

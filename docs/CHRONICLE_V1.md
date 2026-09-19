@@ -1212,6 +1212,122 @@ written beside it.
 
 ---
 
+### Slice 8: who may write, and who is spoken for — **built**
+
+Nobody under ten writes a post. What a young child did still reaches the site,
+in a parent's words, on a roll of the dice.
+
+**The rule exists because the scoring was working.** `score.ts` ranks a day by
+how unusual it is, and a five-month-old being carried somewhere is unusual, so
+Walter Webb — who cannot hold up his own head — had six posts on the site,
+written in the first person, with a byline and a portrait. A quarter of the
+village is under ten. The About page says in plain words that nobody in
+Pennycroft can read or write yet, which made every one of those posts a small
+lie printed next to a picture of a baby.
+
+**An age, not a literacy flag.** There is no literacy in the simulation to read,
+and inventing one inside the press would be the press making up world state,
+which is the one thing §4 forbids it. An age is a birth fact the record already
+holds. Ten is in `data/chronicle/selection.json` as `writingAge`, per directive
+10, and zero is a legitimate setting that returns the site to what it published
+before.
+
+**The gate is applied before the ranking, not after.** `rankCandidates` drops a
+child while it is still building the candidate list. Filtering the finished list
+would have been the obvious place and it is the wrong one: on a day whose most
+newsworthy hour belonged to a six-year-old, a rota asked for five posts would
+have published four and left a hole. There is a test that can tell those two
+apart — three children holding the day's top three moments, five adults behind
+them, and the page has to come out with five names on it.
+
+**`Kinfolk`: parentage learned forwards, never looked up backwards.** The press
+needs to know whose child is whose, and the annals know — but reading it from
+the annals would let a post rest on something the village had not yet found out.
+So `kin.ts` accumulates as the days are read, one `society.parentage-recorded`
+event at a time, in the same loop and for the same reason the rota reads only
+days already published. A rebuild from an empty directory reproduces the same
+parentage the original build had on the same morning. Absent parents are
+skipped, pairs are deduped, and a record naming somebody their own parent
+throws rather than being quietly tolerated.
+
+**The roll comes out of a stream of its own.** Determinism rule 6, and here it
+earns its keep twice over. Drawing from the post's own generator would interleave
+two questions, so every wording chosen after the roll would shift and a village
+that gained a child would rewrite a stranger's post. Re-seeding under the post's
+*own* stream name would be subtler and no better: the roll would land on the same
+number that chose the writer's opening line, and whether a mother mentioned her
+daughter would be settled by how she happened to phrase getting out of bed.
+`kin:<day>:<slug>` is its own question.
+
+**The moment is chosen before the roll**, which is backwards — a cheap question
+after an expensive one — and deliberate. The stream is per post, so a roll taken
+unconditionally would also be taken for the childless, come out the same for
+everybody it was wasted on, and never show up as a bug. It would just quietly
+mean something narrower than what the config says.
+
+**A separate book, because a parent is not a ventriloquist.**
+`templates.json` gained a `family` section whose wording answers `{child}`,
+`{childFirst}`, `{place}` and `{destination}` and cannot answer `{me}` or
+`{first}` at all. Ten variants over four event types. A test drives every one of
+them against a real pair out of the real village and fails on any placeholder
+that comes back unfilled, which is how a first-person wording that slipped into
+the wrong book would be caught before a reader met a three-year-old narrating.
+
+**Measured, not guessed.** Thirty days of `world-zero`: 86 people, 24 of them
+under ten, 22 adults with an under-ten child. The only things those children do
+that anybody has wording for are waking (720), turning in (720), going to bed
+(720) and being turned back from somewhere full (178). At `mentionsChild: 50`
+that produces 150 posts, of which 53 were written by somebody with a young child
+who had done something, of which 30 ended with a line about that child. So a
+fifth of the blog carries a child's day, 16 of the 30 days have at least one,
+and none of them is all nursery. The rate test divides by the 53 and not the
+150, because the dial is a property of the posts it applies to; counting against
+every post would fold in how often the rota happens to pick a parent and would
+move whenever worldgen did.
+
+**The existing golden hash could not see the feature.** `posts.test.ts` pins the
+printed text of the second of Blossom, and that pin did not move when the family
+lines shipped, because on that day nobody's roll came up — an ordinary day is
+exactly the day this feature is invisible on. A second pin now sits beside it on
+the fifth of Blossom, which carries three mentions, with an assertion on that
+count so the pin cannot silently become vacuous. `printed()` also now includes
+`about:<id>`, so both hashes cover which child a line is credited to and not only
+what it says.
+
+**A check was removed for being unable to fail.** `bestOfTheChildren` asked
+`whereabouts.saw(child.id, event)` about events it had just got from
+`day.byActor(child.id)` — and `saw` returns true immediately for anybody in
+`event.actors`, which is the index `byActor` is built from. It read as a safety
+check and was a tautology. The presence claim is still made good, but by the
+line carrying `about` and by the site's honesty test putting that id through
+`saw` for real, against a real day.
+
+**One mutant survived, and the answer was structural.** Swapping the two numbers
+in the press's household object — an age of fifty and a one-in-ten chance — ran
+green across 1118 tests, because the rota reads `writingAge` straight off the
+config and never noticed, and nothing looked at the other end. An extra
+assertion would have patched the symptom. `householdVoice(kin, selection)` in
+`post.ts` removes the place where the mistake could be made: the press and the
+test that checks thirty real days now both build the object through it, and a
+unit test that can tell 10 from 50 stands behind it.
+
+**Twenty mutants, no survivors.** The age gate deleted, off by one, and moved
+after the ranking; the roll deleted, always failing, and read as a fraction
+already; `about` dropped; the child's own age gate deleted; the shared RNG
+stream; `{me}` made answerable in a family line; the child's first moment taken
+instead of their best; a full name used as a first name; the mention pushed to
+the front of the post; absent parents recorded; the dedupe removed; parentage
+read off every event type; `kin.learn` removed from the press; the two dials
+swapped; a parent filed under their child; and the mention citing the wrong
+event. Fourteen died to the unit tests, the rest to thirty days of the real
+village.
+
+**The world did not move.** `npm run verify` still reports `fc238578b5964a64`
+and 26 invariants at tick 10368000, which is the proof that all of this is
+press-side. 1158 tests.
+
+---
+
 ## 4. Invariants
 
 New invariants and checks, in the spirit of sim-core rule 11:
@@ -1222,7 +1338,8 @@ New invariants and checks, in the spirit of sim-core rule 11:
    present is listed.
 3. Every entity id printed by the chronicle appears in that day's cast.
 4. Every claim in a post traces to an event id, and that event passes the
-   author's presence test.
+   presence test of whoever the claim is about -- the author, or, for a line a
+   parent writes about a child, the child it names.
 5. Once `frozenThrough` is set, the state hash of every day at or before it is
    fixed. A build that computes a different one fails.
 6. Every annal line's id resolves to an event in the archived day it names. A
@@ -1230,6 +1347,9 @@ New invariants and checks, in the spirit of sim-core rule 11:
 7. The annals are append-only. Distilling a day again appends nothing and
    changes no byte already written. The one exception is the collapse pass,
    which rewrites a whole year once and records that it did.
+8. Nobody below the writing age carries a byline, and a line written about
+   somebody else names a child of the author's own who is below it. Checked on
+   the rota, on the finished posts, and on the published pages.
 
 ## 5. Failure cases, and what each does
 

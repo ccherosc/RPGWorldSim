@@ -20,6 +20,7 @@ export {
   formatPersonLine,
   parsePersonLine,
   slugStem,
+  yearsBetween,
 } from './people.ts';
 export type { PersonRecord } from './people.ts';
 
@@ -70,9 +71,12 @@ export type { Stay } from './witness.ts';
 export { TemplateSchema, eligible, listOf, midSentence, namesOf, placeOf, render } from './wording.ts';
 export type { Template, WordingContext } from './wording.ts';
 
+// Who belongs to whom
+export { Kinfolk } from './kin.ts';
+
 // The villagers, in their own words
-export { TemplateBookSchema, writePost, writePosts } from './post.ts';
-export type { Post, PostLine, PostOptions, TemplateBook } from './post.ts';
+export { TemplateBookSchema, householdVoice, writePost, writePosts } from './post.ts';
+export type { HouseholdVoice, Post, PostLine, PostOptions, TemplateBook } from './post.ts';
 
 // The Towne Publication
 export { PaperBookSchema, glanceOf, reviewOf, writePaper } from './paper.ts';
@@ -97,7 +101,6 @@ export {
   CastingSchema,
   CastingTakeSchema,
   portraitSexOf,
-  yearsBetween,
 } from './casting.ts';
 export type {
   CastingConfig,

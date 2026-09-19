@@ -74,6 +74,38 @@ export function familySlug(name: string): string {
   return parts.length > 0 ? (parts[parts.length - 1] as string) : 'household';
 }
 
+/**
+ * Whole years between two `YYYY-MM-DD` dates, by comparison rather than by
+ * arithmetic on days.
+ *
+ * Lives here because it reads a birth fact, and a birth fact is what this file
+ * is. Three unrelated things now ask how old somebody was on a given day -- the
+ * casting, which matches a face to an age band; the rota, which will not let a
+ * child write; and a post, which will not let a parent speak for a son old
+ * enough to speak for himself -- and none of them should have to import another
+ * one's module to find out.
+ *
+ * Deliberately calendar-agnostic. The village year is twelve thirty-day months
+ * and that is a data file's decision, so anything here that multiplied by 360
+ * would be a second copy of it — quietly wrong the first time somebody adds a
+ * thirteenth month. Comparing month-and-day is right under any calendar whose
+ * months are ordered.
+ */
+export function yearsBetween(born: string, on: string): number {
+  const [bornYear, bornRest] = splitDate(born);
+  const [onYear, onRest] = splitDate(on);
+  const age = onYear - bornYear - (onRest < bornRest ? 1 : 0);
+  return age < 0 ? 0 : age;
+}
+
+function splitDate(date: string): [number, string] {
+  const parts = date.split('-');
+  assert(parts.length === 3, 'not a YYYY-MM-DD date', { date });
+  const year = Number(parts[0]);
+  assert(Number.isInteger(year), 'a date has a year that is not a number', { date });
+  return [year, `${parts[1] as string}-${parts[2] as string}`];
+}
+
 /** A name's words, lowercased and stripped to letters and digits. */
 function words(name: string): string[] {
   return name
